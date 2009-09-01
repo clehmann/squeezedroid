@@ -1,0 +1,8 @@
+<PreferenceScreen
+   xmlns:android="http://schemas.android.com/apk/res/android">
+   <PreferenceCategory android:title="Server Settings" android:summary="Server Settings">
+      <EditTextPreference android:summary="IP Address/Hostname of the squeezecenter server" android:title="Server Address" android:defaultValue="192.168.0.x" android:key="@string/server_ip" />
+      <EditTextPreference android:summary="Port that the squeezecenter web interface runs on, typically 9000" android:title="Web Interface Port"  android:defaultValue="9000" android:key="@string/server_web_port" />
+      <EditTextPreference android:summary="Port that the squeezecenter cli interface runs on, typically 9090" android:title="CLI Port"   android:defaultValue="9090" android:key="@string/server_cli_port" />
+   </PreferenceCategory>
+</PreferenceScreen>

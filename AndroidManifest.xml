@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="net.chrislehmann.squeezedroid"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:name=".activity.SqueezeDroidApplication" >
+        <activity android:name=".activity.MainActivity"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="net.chrislehmann.squeezedroid.action.Status" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.PlayListActivity"
+                  android:label="Current Playlist">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.PlayList" />
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity> 
+        <activity android:name=".activity.BrowseRootActivity"
+                  android:label="Browse">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.Browse" />
+               <category android:name="android.intent.category.DEFAULT" />
+
+            </intent-filter>
+        </activity> 
+        <activity android:name=".activity.BrowseArtistsActivity" android:label="Browse Artist">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseArtist" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:scheme="squeeze" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.BrowseSongsActivity" android:label="Browse Songs">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseSong" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:scheme="squeeze" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.BrowseAlbumsActivity" android:label="Browse Album">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseAlbum" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:scheme="squeeze" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Geress">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:scheme="squeeze" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.EditPrefrencesActivity" android:label="Edit Preferences" >
+           <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.EditPreferences" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+         </activity>
+        <activity android:name=".activity.ConnectToServerActivity" android:label="Connecting To Server" >
+           <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.ConnectToServer" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+         </activity>
+        <activity android:name=".activity.ChoosePlayerActivity" android:label="Choose A Player" >
+           <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.ChoosePlayer" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+         </activity>
+    </application>
+    <uses-sdk android:minSdkVersion="3" />
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest> 

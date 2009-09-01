@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/status_view"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+		<LinearLayout android:id="@+id/player_controls"
+			android:orientation="horizontal" android:layout_width="fill_parent"
+			android:gravity="center_horizontal" android:layout_height="wrap_content">
+		 				<ImageButton android:src="@drawable/shuffle_off" android:layout_width="50px" android:layout_height="50px" android:id="@+id/shuffleButton"/>
+		 				<ImageButton android:src="@drawable/repeat_off" android:layout_width="50px" android:layout_height="50px" android:id="@+id/repeatButton"/>
+		 				<ImageButton android:scaleType="fitCenter" android:src="@drawable/volume_down" android:layout_width="50px" android:layout_height="50px" android:id="@+id/volDownButton"/>
+		 				<ImageButton android:scaleType="fitCenter" android:src="@drawable/volume_up" android:layout_width="50px" android:layout_height="50px" android:id="@+id/volUpButton"/>
+		</LinearLayout>
+
+	<TextView android:id="@+id/title_label" android:layout_height="27px"
+		android:textSize="15px" android:layout_width="fill_parent"
+		android:gravity="center"
+		android:padding="3px"/>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" android:layout_height="200px">
+
+		<!--Gallery android:id="@+id/cover_gallery" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" /-->
+		<ViewSwitcher android:id="@+id/cover_image"
+			android:layout_height="200px" android:layout_width="fill_parent" android:layout_gravity="center" >
+			<ImageView android:maxHeight="200px" android:maxWidth="200px" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			<ImageView android:maxHeight="200px" android:maxWidth="200px" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+		</ViewSwitcher>
+
+	</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"  android:padding="5px">
+		<ImageView android:src="@drawable/albums_25x25_f" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+		<TextView android:id="@+id/album_label" android:layout_height="20px"
+			android:textSize="12px" android:layout_width="fill_parent"
+			android:paddingLeft="5px"
+			 />
+	</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="5px">
+		<ImageView android:src="@drawable/artists" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+		<TextView android:id="@+id/artist_label"
+			android:layout_height="20px" android:textSize="12px"
+			android:layout_width="fill_parent"
+			android:paddingLeft="5px" />
+	</LinearLayout>
+	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_gravity="bottom" android:gravity="bottom" android:layout_height="fill_parent">
+		<SeekBar android:id="@+id/seekBar" android:layout_width="fill_parent" android:paddingBottom="10px" android:layout_height="wrap_content" />
+		<LinearLayout android:id="@+id/media_controls"
+			android:orientation="horizontal" android:layout_width="fill_parent"
+			android:gravity="center_horizontal" android:layout_height="wrap_content">
+						<ImageButton android:scaleType="fitCenter"  android:src="@drawable/library" android:layout_width="50px" android:layout_height="50px" android:id="@+id/libraryButton" />
+		 				<ImageButton android:src="@drawable/prev" android:layout_width="50px" android:layout_height="50px" android:id="@+id/prevButton"/>
+		 				<ImageButton android:src="@drawable/play" android:layout_width="50px" android:layout_height="50px" android:id="@+id/playButton"/>
+		 				<ImageButton android:src="@drawable/stop" android:layout_width="50px" android:layout_height="50px" android:id="@+id/stopButton"/>
+		 				<ImageButton android:src="@drawable/next" android:layout_width="50px" android:layout_height="50px" android:id="@+id/nextButton"/>
+						<ImageButton android:scaleType="fitCenter" android:src="@drawable/playlists" android:layout_width="50px" android:layout_height="50px" android:id="@+id/playlistButton" android:layout_gravity="right" />
+		</LinearLayout>
+	</LinearLayout>
+</LinearLayout>
+         
+         
+         <!-- ListView android:id="@+id/playlist_view"
+            android:layout_width="fill_parent" android:layout_height="fill_parent" /-->

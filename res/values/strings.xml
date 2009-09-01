@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, BrowseSongsActivity!</string>
+    <string name="app_name">SqueezeDroid</string>
+<string name="activity_browse">net.chrislehmann.squeezedroid.action.Browse</string>
+<string name="server_ip">server_ip</string>
+<string name="server_web_port">server_web_port</string>
+<string name="server_cli_port">server_cli_port</string>
+</resources>
