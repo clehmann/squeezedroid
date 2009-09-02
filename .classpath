@@ -5,6 +5,5 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/AndroidMiscWidgets"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
