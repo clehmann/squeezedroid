@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -96,7 +97,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		_prevButton = (ImageButton) findViewById(R.id.prevButton);
 		_playListButton = (ImageButton) findViewById(R.id.playlistButton);
 		_libraryButton = (ImageButton) findViewById(R.id.libraryButton);
-
+		
 		_prevButton.setOnClickListener(onPrevButtonPressed);
 		_playButton.setOnClickListener(onPlayButtonPressed);
 		_nextButton.setOnClickListener(onNextButtonPressed);

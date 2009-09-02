@@ -1,62 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/status_view"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical">
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent" android:layout_width="fill_parent">
+	<LinearLayout android:id="@+id/status_view"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:orientation="vertical">
+
+
 		<LinearLayout android:id="@+id/player_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"
-			android:gravity="center_horizontal" android:layout_height="wrap_content">
-		 				<ImageButton android:src="@drawable/shuffle_off" android:layout_width="50px" android:layout_height="50px" android:id="@+id/shuffleButton"/>
-		 				<ImageButton android:src="@drawable/repeat_off" android:layout_width="50px" android:layout_height="50px" android:id="@+id/repeatButton"/>
-		 				<ImageButton android:scaleType="fitCenter" android:src="@drawable/volume_down" android:layout_width="50px" android:layout_height="50px" android:id="@+id/volDownButton"/>
-		 				<ImageButton android:scaleType="fitCenter" android:src="@drawable/volume_up" android:layout_width="50px" android:layout_height="50px" android:id="@+id/volUpButton"/>
+			android:gravity="center_horizontal" android:layout_height="wrap_content"
+			android:background="@drawable/player_panel_bg"
+			>
+			<ImageButton android:src="@drawable/shuffle_off"
+				android:layout_width="50px" android:layout_height="50px"
+				android:id="@+id/shuffleButton" 
+				android:background="@drawable/empty"
+				/>
+			<ImageButton android:src="@drawable/repeat_off"
+				android:layout_width="50px" android:layout_height="50px"
+				android:id="@+id/repeatButton" 
+				android:background="@drawable/empty"
+				/>
+			<SeekBar android:id="@+id/volBar" android:layout_gravity="center_vertical" android:layout_width="150px"  android:layout_height="wrap_content" android:max="10" android:progress="5" style="?android:attr/progressBarStyleHorizontal" />
 		</LinearLayout>
 
-	<TextView android:id="@+id/title_label" android:layout_height="27px"
-		android:textSize="15px" android:layout_width="fill_parent"
-		android:gravity="center"
-		android:padding="3px"/>
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="200px">
+		<TextView android:id="@+id/title_label"
+			android:layout_height="27px" android:textSize="15px"
+			android:layout_width="fill_parent" android:gravity="center"
+			android:padding="3px" android:layout_below="@id/player_controls" />
+		<LinearLayout android:orientation="horizontal"
+			android:id="@+id/cover_image_container" android:layout_width="fill_parent"
+			android:layout_height="200px">
 
-		<!--Gallery android:id="@+id/cover_gallery" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" /-->
-		<ViewSwitcher android:id="@+id/cover_image"
-			android:layout_height="200px" android:layout_width="fill_parent" android:layout_gravity="center" >
-			<ImageView android:maxHeight="200px" android:maxWidth="200px" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			<ImageView android:maxHeight="200px" android:maxWidth="200px" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		</ViewSwitcher>
+			<!--
+				Gallery android:id="@+id/cover_gallery"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" /
+			-->
+			<ViewSwitcher android:id="@+id/cover_image"
+				android:layout_height="200px" android:layout_width="fill_parent"
+				android:layout_gravity="center">
+				<ImageView android:maxHeight="200px" android:maxWidth="200px"
+					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+				<ImageView android:maxHeight="200px" android:maxWidth="200px"
+					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			</ViewSwitcher>
+
+		</LinearLayout>
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:padding="5px">
+			<ImageView android:src="@drawable/albums_25x25_f"
+				android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			<TextView android:id="@+id/album_label"
+				android:layout_height="20px" android:textSize="12px"
+				android:layout_width="fill_parent" android:paddingLeft="5px" />
+		</LinearLayout>
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:padding="5px">
+			<ImageView android:src="@drawable/artists"
+				android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			<TextView android:id="@+id/artist_label"
+				android:layout_height="20px" android:textSize="12px"
+				android:layout_width="fill_parent" android:paddingLeft="5px" />
+		</LinearLayout>
 
 	</LinearLayout>
-	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"  android:padding="5px">
-		<ImageView android:src="@drawable/albums_25x25_f" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-		<TextView android:id="@+id/album_label" android:layout_height="20px"
-			android:textSize="12px" android:layout_width="fill_parent"
-			android:paddingLeft="5px"
-			 />
-	</LinearLayout>
-	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="5px">
-		<ImageView android:src="@drawable/artists" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-		<TextView android:id="@+id/artist_label"
-			android:layout_height="20px" android:textSize="12px"
-			android:layout_width="fill_parent"
-			android:paddingLeft="5px" />
-	</LinearLayout>
-	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_gravity="bottom" android:gravity="bottom" android:layout_height="fill_parent">
-		<SeekBar android:id="@+id/seekBar" android:layout_width="fill_parent" android:paddingBottom="10px" android:layout_height="wrap_content" />
-		<LinearLayout android:id="@+id/media_controls"
+	<LinearLayout android:layout_alignParentBottom="true"
+		android:background="@drawable/button_panel_bg" android:orientation="vertical"
+		android:layout_width="fill_parent" android:layout_gravity="bottom"
+		android:gravity="bottom" android:layout_height="wrap_content">
+		<SeekBar android:id="@+id/seekBar" android:layout_width="fill_parent"
+			android:paddingBottom="10px" android:layout_height="wrap_content" />
+		<RelativeLayout android:id="@+id/media_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"
-			android:gravity="center_horizontal" android:layout_height="wrap_content">
-						<ImageButton android:scaleType="fitCenter"  android:src="@drawable/library" android:layout_width="50px" android:layout_height="50px" android:id="@+id/libraryButton" />
-		 				<ImageButton android:src="@drawable/prev" android:layout_width="50px" android:layout_height="50px" android:id="@+id/prevButton"/>
-		 				<ImageButton android:src="@drawable/play" android:layout_width="50px" android:layout_height="50px" android:id="@+id/playButton"/>
-		 				<ImageButton android:src="@drawable/stop" android:layout_width="50px" android:layout_height="50px" android:id="@+id/stopButton"/>
-		 				<ImageButton android:src="@drawable/next" android:layout_width="50px" android:layout_height="50px" android:id="@+id/nextButton"/>
-						<ImageButton android:scaleType="fitCenter" android:src="@drawable/playlists" android:layout_width="50px" android:layout_height="50px" android:id="@+id/playlistButton" android:layout_gravity="right" />
-		</LinearLayout>
+			android:gravity="center_horizontal" android:layout_height="50px">
+			<ImageButton android:scaleType="fitCenter" android:src="@drawable/browse"
+				android:layout_width="50px" android:layout_height="50px"
+				android:layout_alignParentLeft="true"
+				android:background="@drawable/empty"
+				android:id="@+id/libraryButton" />
+			<ImageButton android:src="@drawable/play" 
+				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter"  android:id="@+id/playButton"
+				android:layout_centerInParent="true"
+				android:background="@drawable/empty" />
+			<!-- ImageButton android:src="@drawable/stop"
+				android:layout_width="50px" android:layout_height="50px" android:id="@+id/stopButton" /-->
+			<ImageButton android:src="@drawable/prev"
+				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/prevButton" 
+				android:background="@drawable/empty"
+				android:layout_toLeftOf="@id/playButton"
+				/>
+			<ImageButton android:src="@drawable/next"
+				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/nextButton" 
+				android:background="@drawable/empty"
+				android:layout_toRightOf="@id/playButton"
+				/>
+			<ImageButton android:scaleType="fitCenter" android:src="@drawable/playlist"
+				android:layout_width="50px" android:layout_height="50px"
+				android:id="@+id/playlistButton" android:layout_gravity="right" 
+				android:layout_alignParentRight="true"
+				android:background="@drawable/empty"
+				/>
+		</RelativeLayout>
 	</LinearLayout>
-</LinearLayout>
-         
-         
-         <!-- ListView android:id="@+id/playlist_view"
-            android:layout_width="fill_parent" android:layout_height="fill_parent" /-->
+</RelativeLayout>
+
+
+	<!--
+		ListView android:id="@+id/playlist_view"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		/
+	-->

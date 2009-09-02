@@ -5,11 +5,15 @@ import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
@@ -34,7 +38,6 @@ public class PlayListActivity extends BaseListActivity {
 				getListView().setSelection(status.getCurrentIndex());
 			}
 		}
-
 	}
 
 
