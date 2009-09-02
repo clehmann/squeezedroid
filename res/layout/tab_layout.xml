@@ -7,12 +7,31 @@
 		android:orientation="vertical">
 
 
+
 		<LinearLayout android:id="@+id/player_controls"
-			android:orientation="horizontal" android:layout_width="fill_parent"
+			android:orientation="vertical" android:layout_width="fill_parent"
 			android:gravity="center_horizontal" android:layout_height="wrap_content"
 			android:background="@drawable/player_panel_bg"
 			>
-			<ImageButton android:src="@drawable/shuffle_off"
+			<TextView android:id="@+id/artist_label"
+				android:layout_height="17px" android:textSize="12px"
+				android:layout_width="fill_parent" android:gravity="center"
+				android:textColor="@color/text_color"
+				 />
+			<TextView android:id="@+id/title_label"
+				android:layout_height="22px" android:textSize="15px"
+				android:layout_width="fill_parent" android:gravity="center"
+				android:padding="1px"
+				android:textColor="@color/text_color"
+				android:textStyle="bold"
+				 />
+			<TextView android:id="@+id/album_label"
+				android:layout_height="17px" android:textSize="12px"
+				android:layout_width="fill_parent" android:gravity="center"/>
+				android:textColor="@color/text_color"
+			
+			
+			<!-- ImageButton android:src="@drawable/shuffle_off"
 				android:layout_width="50px" android:layout_height="50px"
 				android:id="@+id/shuffleButton" 
 				android:background="@drawable/empty"
@@ -22,16 +41,12 @@
 				android:id="@+id/repeatButton" 
 				android:background="@drawable/empty"
 				/>
-			<SeekBar android:id="@+id/volBar" android:layout_gravity="center_vertical" android:layout_width="150px"  android:layout_height="wrap_content" android:max="10" android:progress="5" style="?android:attr/progressBarStyleHorizontal" />
+			<SeekBar android:id="@+id/volBar" android:layout_gravity="center_vertical" android:layout_width="150px"  android:layout_height="wrap_content" android:max="10" android:progress="5" style="?android:attr/progressBarStyleHorizontal" /-->
 		</LinearLayout>
 
-		<TextView android:id="@+id/title_label"
-			android:layout_height="27px" android:textSize="15px"
-			android:layout_width="fill_parent" android:gravity="center"
-			android:padding="3px" android:layout_below="@id/player_controls" />
 		<LinearLayout android:orientation="horizontal"
 			android:id="@+id/cover_image_container" android:layout_width="fill_parent"
-			android:layout_height="200px">
+			android:layout_height="310px" android:gravity="center">
 
 			<!--
 				Gallery android:id="@+id/cover_gallery"
@@ -39,39 +54,22 @@
 				android:layout_height="wrap_content" /
 			-->
 			<ViewSwitcher android:id="@+id/cover_image"
-				android:layout_height="200px" android:layout_width="fill_parent"
+				android:layout_height="310px" android:layout_width="310px"
 				android:layout_gravity="center">
-				<ImageView android:maxHeight="200px" android:maxWidth="200px"
-					android:layout_width="wrap_content" android:layout_height="wrap_content" />
-				<ImageView android:maxHeight="200px" android:maxWidth="200px"
-					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+				<ImageView 
+					android:layout_width="wrap_content" android:layout_height="fill_parent" />
+				<ImageView 
+					android:layout_width="wrap_content" android:layout_height="fill_parent" />
 			</ViewSwitcher>
 
 		</LinearLayout>
-		<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:padding="5px">
-			<ImageView android:src="@drawable/albums_25x25_f"
-				android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			<TextView android:id="@+id/album_label"
-				android:layout_height="20px" android:textSize="12px"
-				android:layout_width="fill_parent" android:paddingLeft="5px" />
-		</LinearLayout>
-		<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:padding="5px">
-			<ImageView android:src="@drawable/artists"
-				android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			<TextView android:id="@+id/artist_label"
-				android:layout_height="20px" android:textSize="12px"
-				android:layout_width="fill_parent" android:paddingLeft="5px" />
-		</LinearLayout>
-
 	</LinearLayout>
 	<LinearLayout android:layout_alignParentBottom="true"
 		android:background="@drawable/button_panel_bg" android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_gravity="bottom"
 		android:gravity="bottom" android:layout_height="wrap_content">
 		<SeekBar android:id="@+id/seekBar" android:layout_width="fill_parent"
-			android:paddingBottom="10px" android:layout_height="wrap_content" />
+			android:paddingBottom="3px" android:layout_height="wrap_content" />
 		<RelativeLayout android:id="@+id/media_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"
 			android:gravity="center_horizontal" android:layout_height="50px">
