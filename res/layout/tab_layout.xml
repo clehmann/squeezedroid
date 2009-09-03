@@ -2,34 +2,38 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent" android:layout_width="fill_parent">
-	<LinearLayout android:id="@+id/status_view"
-		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:orientation="vertical">
-
-
-
-		<LinearLayout android:id="@+id/player_controls"
+		<RelativeLayout android:id="@+id/song_info"
 			android:orientation="vertical" android:layout_width="fill_parent"
-			android:gravity="center_horizontal" android:layout_height="wrap_content"
+			android:gravity="center_horizontal" android:layout_height="60px"
 			android:background="@drawable/player_panel_bg"
+			android:layout_alignParentTop="true"
 			>
-			<TextView android:id="@+id/artist_label"
-				android:layout_height="17px" android:textSize="12px"
-				android:layout_width="fill_parent" android:gravity="center"
-				android:textColor="@color/text_color"
-				 />
-			<TextView android:id="@+id/title_label"
-				android:layout_height="22px" android:textSize="15px"
-				android:layout_width="fill_parent" android:gravity="center"
-				android:padding="1px"
-				android:textColor="@color/text_color"
-				android:textStyle="bold"
-				 />
-			<TextView android:id="@+id/album_label"
-				android:layout_height="17px" android:textSize="12px"
-				android:layout_width="fill_parent" android:gravity="center"/>
-				android:textColor="@color/text_color"
+			<LinearLayout
+				android:layout_height="wrap_content"
+				android:layout_width="320px"
+				android:orientation="vertical"
+				android:layout_alignParentTop="true"
+				android:layout_centerHorizontal="true"
+			>
 			
+				<TextView android:id="@+id/artist_label"
+					android:layout_height="17px" android:textSize="12px"
+					android:layout_width="fill_parent" android:gravity="center"
+					android:textColor="@color/text_color"
+					 />
+				<TextView android:id="@+id/title_label"
+					android:layout_height="22px" android:textSize="15px"
+					android:layout_width="fill_parent" android:gravity="center"
+					android:padding="1px"
+					android:textColor="@color/text_color"
+					android:textStyle="bold"
+					 />
+				<TextView android:id="@+id/album_label"
+					android:layout_height="17px" android:textSize="12px"
+					android:layout_width="fill_parent" android:gravity="center"
+					/>
+				
+			</LinearLayout>
 			
 			<!-- ImageButton android:src="@drawable/shuffle_off"
 				android:layout_width="50px" android:layout_height="50px"
@@ -40,19 +44,31 @@
 				android:layout_width="50px" android:layout_height="50px"
 				android:id="@+id/repeatButton" 
 				android:background="@drawable/empty"
+				/-->
+			<ImageButton android:src="@drawable/volume"
+				android:layout_width="30px" android:layout_height="30px"
+				android:padding="3px"
+				android:scaleType="fitCenter"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentBottom="true"
+				android:id="@+id/toggleVolumeButton" 
+				android:background="@drawable/empty"
 				/>
-			<SeekBar android:id="@+id/volBar" android:layout_gravity="center_vertical" android:layout_width="150px"  android:layout_height="wrap_content" android:max="10" android:progress="5" style="?android:attr/progressBarStyleHorizontal" /-->
-		</LinearLayout>
+		</RelativeLayout>
+		<SeekBar android:id="@+id/volume_seek_bar"  
+			android:layout_width="150px"  android:layout_height="wrap_content" 
+			android:layout_below="@id/song_info" android:layout_alignParentRight="true"
+			android:visibility="invisible"
+			android:max="10" android:progress="5" 
+			style="?android:attr/progressBarStyleHorizontal"
+			android:background="@color/text_color"
+			 />
 
 		<LinearLayout android:orientation="horizontal"
 			android:id="@+id/cover_image_container" android:layout_width="fill_parent"
-			android:layout_height="310px" android:gravity="center">
-
-			<!--
-				Gallery android:id="@+id/cover_gallery"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content" /
-			-->
+			android:layout_height="310px" android:gravity="center"
+			android:layout_below="@id/song_info"
+			>
 			<ViewSwitcher android:id="@+id/cover_image"
 				android:layout_height="310px" android:layout_width="310px"
 				android:layout_gravity="center">
@@ -63,7 +79,6 @@
 			</ViewSwitcher>
 
 		</LinearLayout>
-	</LinearLayout>
 	<LinearLayout android:layout_alignParentBottom="true"
 		android:background="@drawable/button_panel_bg" android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_gravity="bottom"
@@ -101,12 +116,5 @@
 				android:background="@drawable/empty"
 				/>
 		</RelativeLayout>
-	</LinearLayout>
+		</LinearLayout>
 </RelativeLayout>
-
-
-	<!--
-		ListView android:id="@+id/playlist_view"
-		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		/
-	-->

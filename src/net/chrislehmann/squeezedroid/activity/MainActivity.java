@@ -8,7 +8,6 @@ import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.SqueezeService.Event;
 import net.chrislehmann.util.ImageLoader;
 import android.app.Activity;
 import android.content.Intent;
@@ -18,9 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
-import android.view.animation.LayoutAnimationController;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
@@ -59,7 +58,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
 	};
 
 	
-	android.view.View.OnClickListener onNextButtonPressed = new android.view.View.OnClickListener() {
+	OnClickListener onNextButtonPressed = new android.view.View.OnClickListener() {
 		public void onClick(View v) {
 			SqueezeService service = ActivityUtils.getService(context);
 			if (service != null) {
@@ -67,7 +66,8 @@ public class MainActivity extends SqueezedroidActivitySupport {
 			}
 		}
 	};
-	android.view.View.OnClickListener onPrevButtonPressed = new android.view.View.OnClickListener() {
+	
+	OnClickListener onPrevButtonPressed = new android.view.View.OnClickListener() {
 		public void onClick(View v) {
 			SqueezeService service = ActivityUtils.getService(context);
 			if (service != null) {
@@ -75,7 +75,21 @@ public class MainActivity extends SqueezedroidActivitySupport {
 			}
 		}
 	};
-	private String _currentUrl;
+	
+	OnClickListener onToggleVolumeButtonPressed = new OnClickListener() {
+		public void onClick(View v) {
+			int visibility = View.VISIBLE;
+			if( _volumeSeekBar.getVisibility() == View.VISIBLE )
+			{
+				visibility = View.INVISIBLE;
+			}
+			_volumeSeekBar.setVisibility( visibility );
+			_volumeSeekBar.bringToFront();
+		}
+	};
+
+	private ImageButton _toggleVolumeButton;
+	private SeekBar _volumeSeekBar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -97,13 +111,15 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		_prevButton = (ImageButton) findViewById(R.id.prevButton);
 		_playListButton = (ImageButton) findViewById(R.id.playlistButton);
 		_libraryButton = (ImageButton) findViewById(R.id.libraryButton);
+		_toggleVolumeButton = (ImageButton) findViewById(R.id.toggleVolumeButton);
+		_volumeSeekBar = (SeekBar) findViewById(R.id.volume_seek_bar);
 		
 		_prevButton.setOnClickListener(onPrevButtonPressed);
 		_playButton.setOnClickListener(onPlayButtonPressed);
 		_nextButton.setOnClickListener(onNextButtonPressed);
 		_playListButton.setOnClickListener(onPlaylisyButtonPressed);
 		_libraryButton.setOnClickListener(onLibraryButtonPressed);
-
+		_toggleVolumeButton.setOnClickListener(onToggleVolumeButtonPressed);
 		if (!isPlayerSelected()) {
 			startChoosePlayerActivity();
 		} else {
@@ -118,6 +134,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		}
 	}
 
+	
     @Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
