@@ -93,7 +93,6 @@ public class EventThread extends Thread
    
    private CommandHandler playListHandler = new CommandHandler()
    {
-      private PlayerStatus _oldStatus;
       public void handleCommand(String data, PlayerStatusHandler handler)
       {
          String[] splitData = data.split( " " );
@@ -105,11 +104,7 @@ public class EventThread extends Thread
          
          if( "newsong".equalsIgnoreCase( action ) )
          {
-            if( _oldStatus == null || _oldStatus.getCurrentIndex() != _status.getCurrentIndex() )
-            {
-               handler.onSongChanged( _status );
-               _oldStatus = _status;
-            }
+            handler.onSongChanged( _status );
          }
          
          if( "loadtracks".equalsIgnoreCase( action ) 

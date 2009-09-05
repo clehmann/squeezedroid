@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
+
 import net.chrislehmann.squeezedroid.eventhandler.EventHandler;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Album;
@@ -65,7 +67,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) genre%3A([^ ]*) artist%3A([^ ]*) album%3A([^ ]*)" );
    private Pattern playlistResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
-   private Pattern playerStatusResponsePattern = Pattern.compile( "time%3A([^ ])* .*?playlist_cur_index%3A([0-9]*)" );
+   private Pattern playerStatusResponsePattern = Pattern.compile( " time%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
 
    /**
     * Connect to the squeezecenter server and log in if required. Will throw an
@@ -338,6 +340,9 @@ public class CliSqueezeService implements SqueezeService
       Matcher statusMatcher = playerStatusResponsePattern.matcher( result );
       if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
       {
+         Log.d( "SQUEEZE", "Time: " + statusMatcher.group( 1 ) );
+         Log.d( "SQUEEZE", "Playlist Index: " + statusMatcher.group( 2 ) );
+         
          status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 2 ) ) );
          String positionString = statusMatcher.group( 1 );
          try

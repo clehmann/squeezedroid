@@ -227,12 +227,12 @@ public class MainActivity extends SqueezedroidActivitySupport {
 			_artistLabel.setText(currentSong.getArtist());
 			_albumLabel.setText(currentSong.getAlbum());
 
-			_currentStatus = status;
 			synchronized ( _timeSeekBar )
-            {
+			{
 			   _timeSeekBar.setMax( currentSong.getDurationInSeconds() );
 			   _timeSeekBar.setProgress( status.getCurrentPosition() );
-            }
+			}
+			_currentStatus = status;
 		}
 	}
 
@@ -246,16 +246,24 @@ public class MainActivity extends SqueezedroidActivitySupport {
       
       public void onSongChanged(final PlayerStatus status)
       {
-         final BrowseResult<Song> playlist = ActivityUtils.getService(context).getCurrentPlaylist(getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2);
-         runOnUiThread(new Thread() {
-             public void run() {
-                 // Cache the next album art
-                 updateSongDisplay(status);
-                 if (playlist.getResutls().size() > 1) {
+         if( _currentStatus == null || _currentStatus.getCurrentSong().getId() != status.getCurrentSong().getId() )
+         {
+            final BrowseResult<Song> playlist = ActivityUtils.getService(context).getCurrentPlaylist(getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2);
+            runOnUiThread(new Thread() {
+               public void run() {
+                  // Cache the next album art
+                  updateSongDisplay(status);
+                  if (playlist.getResutls().size() > 1) {
                      ImageLoader.getInstance().load(null, playlist.getResutls().get(1).getImageUrl(), true);
-                 }
-             }
-         });
+                  }
+               }
+            });
+         }
+         synchronized ( _timeSeekBar )
+         {
+            _timeSeekBar.setProgress( status.getCurrentPosition() );
+         }
+         
       }
       public void onPlaylistChanged( PlayerStatus status )
       {
