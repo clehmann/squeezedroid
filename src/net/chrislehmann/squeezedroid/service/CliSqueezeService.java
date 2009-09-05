@@ -484,4 +484,9 @@ public class CliSqueezeService implements SqueezeService
       eventThread.unsubscribe( player, handler );
    }
 
+   public void seekTo(Player player, int time)
+   {
+      executeCommand( player.getId() + " time " + time);
+   }
+
 }

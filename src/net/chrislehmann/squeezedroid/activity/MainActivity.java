@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MainActivity extends SqueezedroidActivitySupport {
 	private static final int MENU_ADD_SONG = 0;
@@ -93,6 +95,27 @@ public class MainActivity extends SqueezedroidActivitySupport {
 			_volumeSeekBar.bringToFront();
 		}
 	};
+	
+	OnSeekBarChangeListener onSongTimeChanged = new OnSeekBarChangeListener()
+   {
+      public void onStopTrackingTouch(SeekBar seekBar){
+      }
+      
+      public void onStartTrackingTouch(SeekBar seekBar){}
+      
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+         if( fromUser )
+         {
+            Log.d( "MAINACTIVITY", "User changed position");
+
+            SqueezeService service = ActivityUtils.getService( context );
+            if( service != null )
+            {
+               service.seekTo( getSelectedPlayer(), progress );
+            }
+         }
+      }
+   };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -117,7 +140,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		_toggleVolumeButton = (ImageButton) findViewById(R.id.toggleVolumeButton);
 		
 		_timeSeekBar = (SeekBar) findViewById(R.id.timeSeekBar);
-		
+		_timeSeekBar.setOnSeekBarChangeListener( onSongTimeChanged );
 		_prevButton.setOnClickListener(onPrevButtonPressed);
 		_playButton.setOnClickListener(onPlayButtonPressed);
 		_nextButton.setOnClickListener(onNextButtonPressed);
@@ -336,6 +359,19 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		super.onActivityResult(requestCode, resultCode, data);
 	};
 	
+	@Override
+	protected void onResume()
+	{
+	   onPlayerChanged();
+	   super.onResume();
+	}
+	
+	@Override
+	protected void onPause()
+	{
+	   _updateSongTimeHandler.removeCallbacks( _updateSongTimeRunnable );
+	   super.onPause();
+	}
 
    private Handler _updateSongTimeHandler = new Handler();
 

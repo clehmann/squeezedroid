@@ -72,4 +72,6 @@ public interface SqueezeService {
 	public void removeAllItemsByArtist(Player player, String artistId);
 
 	public void removeAllItemsInAlbum(Player player, String albumId);
+
+   public void seekTo(Player player, int time);
 }
