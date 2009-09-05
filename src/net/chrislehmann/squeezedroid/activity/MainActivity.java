@@ -7,11 +7,13 @@ import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
+import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.util.ImageLoader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +46,10 @@ public class MainActivity extends SqueezedroidActivitySupport {
 	private ImageButton _playButton;
 	private ImageButton _playListButton;
 	private ImageButton _libraryButton;
+	private ImageButton _toggleVolumeButton;
+	
+	private SeekBar _volumeSeekBar;
+    private SeekBar _timeSeekBar;
 	
 	private PlayerStatus _currentStatus;
 
@@ -88,9 +94,6 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		}
 	};
 
-	private ImageButton _toggleVolumeButton;
-	private SeekBar _volumeSeekBar;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -112,7 +115,8 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		_playListButton = (ImageButton) findViewById(R.id.playlistButton);
 		_libraryButton = (ImageButton) findViewById(R.id.libraryButton);
 		_toggleVolumeButton = (ImageButton) findViewById(R.id.toggleVolumeButton);
-		_volumeSeekBar = (SeekBar) findViewById(R.id.volume_seek_bar);
+		
+		_timeSeekBar = (SeekBar) findViewById(R.id.timeSeekBar);
 		
 		_prevButton.setOnClickListener(onPrevButtonPressed);
 		_playButton.setOnClickListener(onPlayButtonPressed);
@@ -141,10 +145,11 @@ public class MainActivity extends SqueezedroidActivitySupport {
 	   SqueezeService service = ActivityUtils.getService(context, false);
 	   if( service != null )
 	   {
-		   service.unsubscribe(SqueezeService.Event.DISCONNECT, null, serverDisconnectedHandler);
+		   //service.unsubscribe(SqueezeService.Event.DISCONNECT, null, serverDisconnectedHandler);
 		   if( getSelectedPlayer() != null )
 		   {
-			   service.unsubscribe(SqueezeService.Event.NEWSONG, getSelectedPlayer().getId() , onSongChanged);
+		      //todo - unsubscribe from service
+			   //service.unsubscribe(SqueezeService.Event.NEWSONG, getSelectedPlayer().getId() , onPlayerStatusChanged );
 		   }
 	   }
 	   super.onDestroy();
@@ -223,41 +228,59 @@ public class MainActivity extends SqueezedroidActivitySupport {
 			_albumLabel.setText(currentSong.getAlbum());
 
 			_currentStatus = status;
+			synchronized ( _timeSeekBar )
+            {
+			   _timeSeekBar.setMax( currentSong.getDurationInSeconds() );
+			   _timeSeekBar.setProgress( status.getCurrentPosition() );
+            }
 		}
 	}
 
+	
+	private PlayerStatusHandler onPlayerStatusChanged = new PlayerStatusHandler()
+   {
+      public void onTimeChanged(int newPosition)
+      {
+         _timeSeekBar.setProgress( newPosition );
+      }
+      
+      public void onSongChanged(final PlayerStatus status)
+      {
+         final BrowseResult<Song> playlist = ActivityUtils.getService(context).getCurrentPlaylist(getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2);
+         runOnUiThread(new Thread() {
+             public void run() {
+                 // Cache the next album art
+                 updateSongDisplay(status);
+                 if (playlist.getResutls().size() > 1) {
+                     ImageLoader.getInstance().load(null, playlist.getResutls().get(1).getImageUrl(), true);
+                 }
+             }
+         });
+      }
+      public void onPlaylistChanged( PlayerStatus status )
+      {
+      }
+   };
+	
 	private void onPlayerChanged() {
 		if (getSqueezeDroidApplication().getSelectedPlayer() != null) {
-			SqueezeService service = ActivityUtils.getService(this);
+		   //todo = unsubscribe from old player
+		   SqueezeService service = ActivityUtils.getService(this);
 			if (service != null) {
-				service.unsubscribeAll(SqueezeService.Event.NEWSONG);
-				service.subscribe(SqueezeService.Event.NEWSONG, getSqueezeDroidApplication().getSelectedPlayer().getId(), onSongChanged);
-
+				//service.unsubscribeAll(SqueezeService.Event.NEWSONG);
+				//service.subscribe(SqueezeService.Event.NEWSONG, getSqueezeDroidApplication().getSelectedPlayer().getId(), onSongChanged);
+				service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
+				
+				_updateSongTimeHandler.removeCallbacks( _updateSongTimeRunnable );
 				_playlistListAdapter = new PlayListAdapter(service, this, getSqueezeDroidApplication().getSelectedPlayer());
 				_playlistListAdapter.setPlayer(getSqueezeDroidApplication().getSelectedPlayer());
 				
 				PlayerStatus status = ActivityUtils.getService(this).getPlayerStatus(getSqueezeDroidApplication().getSelectedPlayer());
 				updateSongDisplay(status);
+				_updateSongTimeHandler.postDelayed( _updateSongTimeRunnable, 1000 );
 			}
 		}
 	}
-
-	EventHandler onSongChanged = new EventHandler() {
-		public void onEvent(String result) {
-			final PlayerStatus status = ActivityUtils.getService(context).getPlayerStatus(getSqueezeDroidApplication().getSelectedPlayer());
-			runOnUiThread(new Thread() {
-				public void run() {
-					// Cache the next album art
-					updateSongDisplay(status);
-					BrowseResult<Song> playlist = ActivityUtils.getService(context).getCurrentPlaylist(getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2);
-					if (playlist.getResutls().size() > 1) {
-						ImageLoader.getInstance().load(null, playlist.getResutls().get(1).getImageUrl(), true);
-					}
-				}
-
-			});
-		}
-	};
 
 	EventHandler serverDisconnectedHandler = new EventHandler() {
 		public void onEvent(String result) {
@@ -304,5 +327,27 @@ public class MainActivity extends SqueezedroidActivitySupport {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	};
+	
+
+   private Handler _updateSongTimeHandler = new Handler();
+
+   private Runnable _updateSongTimeRunnable = new Runnable()
+   {
+      public void run()
+      {
+         //TODO - calculate based on absolute time using postAtTime instead of postDelayed
+         synchronized ( _timeSeekBar )
+         {
+            int progress = _timeSeekBar.getProgress();
+            if ( progress < _timeSeekBar.getMax() )
+            {
+               _timeSeekBar.setProgress( progress + 1 );
+            }
+
+            _updateSongTimeHandler.postDelayed( this, 1000 );
+
+         }
+      }
+   };
 
 }

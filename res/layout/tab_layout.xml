@@ -83,7 +83,7 @@
 		android:background="@drawable/button_panel_bg" android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_gravity="bottom"
 		android:gravity="bottom" android:layout_height="wrap_content">
-		<SeekBar android:id="@+id/seekBar" android:layout_width="fill_parent"
+		<SeekBar android:id="@+id/timeSeekBar" android:layout_width="fill_parent"
 			android:paddingBottom="3px" android:layout_height="wrap_content" />
 		<RelativeLayout android:id="@+id/media_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"

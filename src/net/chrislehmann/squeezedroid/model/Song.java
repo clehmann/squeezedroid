@@ -5,6 +5,7 @@ public class Song extends Item {
 	private String artistId;
 	private String album;
 	private String albumId;
+	private int durationInSeconds = 480;
 
 	public String getArtist() {
 		return artist;
@@ -47,4 +48,14 @@ public class Song extends Item {
 	public void setAlbumId(String albumId) {
 		this.albumId = albumId;
 	}
+
+   public int getDurationInSeconds()
+   {
+      return durationInSeconds;
+   }
+
+   public void setDurationInSeconds(int durationInSeconds)
+   {
+      this.durationInSeconds = durationInSeconds;
+   }
 }

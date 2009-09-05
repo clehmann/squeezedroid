@@ -6,8 +6,20 @@ package net.chrislehmann.squeezedroid.model;
  */
 public class Player
 {
+   
    private String id;
    private String name;
+
+   public Player()
+   {
+      super();
+   }
+
+   public Player(String id)
+   {
+      super();
+      this.id = id;
+   }
 
    public String getId()
    {

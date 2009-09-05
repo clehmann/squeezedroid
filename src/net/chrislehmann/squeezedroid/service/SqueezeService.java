@@ -50,7 +50,11 @@ public interface SqueezeService {
 
 	public boolean isConnected();
 
-	public void subscribe(Event event, String playerId, EventHandler handler);
+	public void subscribe( Player player, PlayerStatusHandler handler );
+
+	public void unsubscribe(  Player player, PlayerStatusHandler handler );
+
+//	public void subscribe(Event event, String playerId, EventHandler handler);
 
 	enum Event {
 		NEWSONG, OPEN, PREFSET, DISCONNECT, REPEAT, LOADTRACKS, ADDTRACKS, JUMP, DELETE, DELETETRACKS
@@ -59,9 +63,9 @@ public interface SqueezeService {
 		TITLE, NEW
 	}
 
-	public void unsubscribe(Event event, String id, EventHandler handler);
-
-	public void unsubscribeAll(Event event);
+//	public void unsubscribe(Event event, String id, EventHandler handler);
+//
+//	public void unsubscribeAll(Event event);
 
 	public void removeItem(Player selectedPlayer, int playlistIndex);
 

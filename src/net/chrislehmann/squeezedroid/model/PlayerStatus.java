@@ -5,6 +5,7 @@ public class PlayerStatus {
 	private Song currentSong;
 	private int currentIndex;
 	private String status;
+	private int currentPosition;
 
 	public int getCurrentIndex() {
 		return currentIndex;
@@ -29,5 +30,15 @@ public class PlayerStatus {
 	public void setCurrentSong(Song currentSong) {
 		this.currentSong = currentSong;
 	}
+
+   public int getCurrentPosition()
+   {
+      return currentPosition;
+   }
+
+   public void setCurrentPosition(int currentPosition)
+   {
+      this.currentPosition = currentPosition;
+   }
 
 }
