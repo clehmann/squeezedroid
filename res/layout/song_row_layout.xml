@@ -10,11 +10,24 @@
 		android:layout_height="wrap_content"
 		android:src="@drawable/cover_50x50_p"
 		/>
+   <LinearLayout android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingLeft="10px">
 	<TextView android:id="@+id/song_name_text"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:padding="10px">
-
+		android:padding="2px"
+        android:textSize="17px"
+        android:textStyle="bold"
+      >
 	</TextView>
+   <TextView android:id="@+id/song_artist_name_text"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+      android:paddingLeft="6px"
+      android:paddingTop="2px"
+      android:paddingBottom="2px"
+      android:paddingRight="2px"
+      android:textSize="12px" >
+   </TextView>
+   </LinearLayout>
+
 </LinearLayout>
 
 

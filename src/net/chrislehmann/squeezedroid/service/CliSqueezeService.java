@@ -35,6 +35,7 @@ import net.chrislehmann.util.SerializationUtils.Unserializer;
 public class CliSqueezeService implements SqueezeService
 {
 
+   private static final String SONG_TAGS = "asleJpPd";
    /**
     * Host to connect to
     */
@@ -64,11 +65,32 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
-   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) genre%3A([^ ]*) artist%3A([^ ]*) album%3A([^ ]*)" );
-   private Pattern playlistResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
+   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " time%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
 
+   private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
+   {
+      public Song unserialize(Matcher matcher)
+      {
+         Song song = new Song();
+         song.setId( matcher.group( 1 ) );
+         song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
+         song.setArtist( SerializationUtils.decode( matcher.group( 3 ) ) );
+         song.setArtistId( SerializationUtils.decode( matcher.group( 4 ) ) );
+         song.setAlbum( SerializationUtils.decode( matcher.group( 5 ) ) );
+         song.setAlbumId( SerializationUtils.decode( matcher.group( 6 ) ) );
+         song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
+         song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
+         try
+         {
+            Float duration = Float.parseFloat( matcher.group( 7 ) );
+            song.setDurationInSeconds( duration.intValue() );
+         } catch (NumberFormatException e) {}
+         return song;
+      }
+   };
+   
    /**
     * Connect to the squeezecenter server and log in if required. Will throw an
     * {@link ApplicationException} if the connection fails.
@@ -240,7 +262,7 @@ public class CliSqueezeService implements SqueezeService
 
    public BrowseResult<Song> browseSongs(Item parent, int start, int numberOfItems)
    {
-      String command = "titles " + start + " " + numberOfItems;
+      String command = "titles " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
 
       BrowseResult<Song> browseResult = new BrowseResult<Song>();
 
@@ -255,20 +277,9 @@ public class CliSqueezeService implements SqueezeService
 
       String result = executeCommand( command );
 
-      List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, new SerializationUtils.Unserializer<Song>()
-      {
-         public Song unserialize(Matcher matcher)
-         {
-            Song song = new Song();
-            song.setId( matcher.group( 1 ) );
-            song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
-            return song;
-         }
-      } );
+      List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
 
-      browseResult.setTotalItems( unserializeCount( result ) );
+      browseResult.setTotalItems( unserializeCount( result ) ); 
       browseResult.setResutls( songs );
       return browseResult;
    }
@@ -309,34 +320,13 @@ public class CliSqueezeService implements SqueezeService
 
    public PlayerStatus getPlayerStatus(Player player)
    {
-      String command = new String( player.getId() + " status - 1 tags:asleJpPd" );
+      String command = new String( player.getId() + " status - 1 tags:" + SONG_TAGS );
       String result = executeCommand( command );
 
-      PlayerStatus status = SerializationUtils.unserialize( playlistResponsePattern, result, new SerializationUtils.Unserializer<PlayerStatus>()
-      {
-         public PlayerStatus unserialize(Matcher matcher)
-         {
-            PlayerStatus status = new PlayerStatus();
-
-            Song song = new Song();
-            song.setId( matcher.group( 1 ) );
-            song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-            song.setArtist( SerializationUtils.decode( matcher.group( 3 ) ) );
-            song.setArtistId( SerializationUtils.decode( matcher.group( 4 ) ) );
-            song.setAlbum( SerializationUtils.decode( matcher.group( 5 ) ) );
-            song.setAlbumId( SerializationUtils.decode( matcher.group( 6 ) ) );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
-            try
-            {
-               Float duration = Float.parseFloat( matcher.group( 7 ) );
-               song.setDurationInSeconds( duration.intValue() );
-            } catch (NumberFormatException e) {}
-            status.setCurrentSong( song );
-            return status;
-         }
-      } );
-
+      PlayerStatus status = new PlayerStatus();
+      Song song = SerializationUtils.unserialize( songsResponsePattern, result, songUnserializer );
+      status.setCurrentSong( song );
+      
       Matcher statusMatcher = playerStatusResponsePattern.matcher( result );
       if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
       {
@@ -360,31 +350,11 @@ public class CliSqueezeService implements SqueezeService
 
    public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems)
    {
-      String command = player.getId() + " status " + start + " " + numberOfItems + " tags:asleJpP";
+      String command = player.getId() + " status " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
       String result = executeCommand( command );
 
       BrowseResult<Song> browseResult = new BrowseResult<Song>();
-      List<Song> songs = SerializationUtils.unserializeList( playlistResponsePattern, result, new SerializationUtils.Unserializer<Song>()
-      {
-         public Song unserialize(Matcher matcher)
-         {
-            Song song = new Song();
-            song.setId( matcher.group( 1 ) );
-            song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-            song.setArtist( SerializationUtils.decode( matcher.group( 3 ) ) );
-            song.setArtistId( SerializationUtils.decode( matcher.group( 4 ) ) );
-            song.setAlbum( SerializationUtils.decode( matcher.group( 5 ) ) );
-            song.setAlbumId( SerializationUtils.decode( matcher.group( 6 ) ) );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
-            try
-            {
-               Float duration = Float.parseFloat( matcher.group( 7 ) );
-               song.setDurationInSeconds( duration.intValue() );
-            } catch (NumberFormatException e) {}
-            return song;
-         }
-      } );
+      List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
       browseResult.setResutls( songs );
 
       Matcher countMatcher = playlistCountPattern.matcher( result );

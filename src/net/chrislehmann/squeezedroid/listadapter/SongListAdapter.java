@@ -49,6 +49,8 @@ public class SongListAdapter extends PagableAdapter {
 
 			if (item != null) {
 				TextView nameText = (TextView) view.findViewById(R.id.song_name_text);
+				TextView artistAlbumText = (TextView) view.findViewById( R.id.song_artist_name_text );
+				
 				ImageView coverImage = (ImageView) view.findViewById(R.id.song_thumbnail);
 
 				if (item.getImageThumbnailUrl() != null) {
@@ -60,6 +62,7 @@ public class SongListAdapter extends PagableAdapter {
 					}
 				}
 				nameText.setText(item.getName());
+				artistAlbumText.setText( item.getArtist() + " - " + item.getAlbum()  );
 			}
 
 		}
