@@ -129,7 +129,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       _libraryButton = (ImageButton) findViewById( R.id.libraryButton );
       _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
       _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
-      
+      _volumeSeekBar = (SeekBar) findViewById( R.id.volume_seek_bar );
       
       _timeSeekBar.setOnSeekBarChangeListener( onTimeUpdatedByUser );
       _prevButton.setOnClickListener( onPrevButtonPressed );
