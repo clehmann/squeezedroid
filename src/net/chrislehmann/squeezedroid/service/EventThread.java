@@ -201,6 +201,19 @@ public class EventThread extends Thread
       }
    }
 
+   
+   public void unsubscribe(PlayerStatusHandler handler)
+   {
+      synchronized ( _handlers )
+      {
+         for ( List<PlayerStatusHandler> handlerList : _handlers.values() )
+         {
+            handlerList.remove( handler );
+         }
+      }
+      
+   }
+
    public CommandHandler getTimeChangeHandler()
    {
       return timeChangeHandler;
