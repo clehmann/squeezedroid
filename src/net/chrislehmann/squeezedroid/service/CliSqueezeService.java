@@ -178,7 +178,6 @@ public class CliSqueezeService implements SqueezeService
    {
 
       String command = "genres " + start + " " + numberOfItems;
-      String result = executeCommand( command );
       Unserializer<Genre> unserializer = new Unserializer<Genre>()
       {
 
@@ -190,6 +189,7 @@ public class CliSqueezeService implements SqueezeService
             return genre;
          }
       };
+      String result = executeCommand( command );
       List<Genre> genres = SerializationUtils.unserializeList( genresResponsePattern, result, unserializer );
       BrowseResult<Genre> browseResult = new BrowseResult<Genre>();
       browseResult.setResutls( genres );
@@ -209,6 +209,11 @@ public class CliSqueezeService implements SqueezeService
       if ( parent instanceof Artist )
       {
          command += " artist_id:" + parent.getId();
+      }
+      
+      if ( parent instanceof Genre )
+      {
+         command += " genre_id:" + parent.getId();
       }
       if ( sort != Sort.TITLE )
       {
@@ -241,8 +246,13 @@ public class CliSqueezeService implements SqueezeService
    public BrowseResult<Artist> browseArtists(Item parent, int start, int numberOfItems)
    {
       String command = "artists " + start + " " + numberOfItems;
+      if( parent instanceof Genre)
+      {
+         command += " genre_id:" + parent.getId();
+      }
+      
       String result = executeCommand( command );
-
+      
       Matcher matcher = artistsResponsePattern.matcher( result );
 
       List<Artist> artists = new ArrayList<Artist>();
