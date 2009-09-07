@@ -14,6 +14,7 @@ public class UpdatingSeekBar
    private Boolean _started = false;
    
    private OnSeekBarChangeListener _userOnSeekBarChangeListener;
+   private Handler _updateSongTimeHandler = new Handler();
 
    public void setOnSeekBarChangeListener(OnSeekBarChangeListener listener)
    {
@@ -110,7 +111,6 @@ public class UpdatingSeekBar
       }
    }
 
-   private Handler _updateSongTimeHandler = new Handler();
 
    private Runnable _updateSongTimeRunnable = new Runnable()
    {

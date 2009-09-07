@@ -474,5 +474,10 @@ public class CliSqueezeService implements SqueezeService
       executeCommand( player.getId() + " time " + time);
    }
 
+   public void changeVolume(Player player, int volumeLevel)
+   {
+      executeCommand( player.getId() + " mixer volume " + volumeLevel );
+   }
+
 
 }

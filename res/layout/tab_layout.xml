@@ -55,14 +55,29 @@
 				android:background="@drawable/empty"
 				/>
 		</RelativeLayout>
-		<SeekBar android:id="@+id/volume_seek_bar"  
-			android:layout_width="150px"  android:layout_height="wrap_content" 
-			android:layout_below="@id/song_info" android:layout_alignParentRight="true"
-			android:visibility="invisible"
-			android:max="10" android:progress="5" 
-			style="?android:attr/progressBarStyleHorizontal"
-			android:background="@color/text_color"
-			 />
+
+         <net.chrislehmann.squeezedroid.view.TransparentPanel
+            android:id="@+id/volume_panel" 
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/song_info"
+            android:layout_width="fill_parent" android:layout_height="wrap_content"
+            android:paddingTop="5px" android:paddingLeft="5px"
+            android:paddingBottom="5px" android:paddingRight="5px"
+            android:visibility="invisible"
+         >
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+               <TextView android:id="@+id/player_name"
+                  android:layout_width="fill_parent" android:layout_height="15px"
+                  android:textSize="12px" android:layout_alignParentTop="true"
+                  android:layout_centerHorizontal="true" />
+               <SeekBar android:id="@+id/volume_seek_bar"
+                  android:layout_below="@id/player_name"
+                  android:layout_width="250px" android:layout_height="wrap_content"
+                  android:max="100" android:progress="5"
+                  style="?android:attr/progressBarStyleHorizontal"
+                />
+            </RelativeLayout>
+         </net.chrislehmann.squeezedroid.view.TransparentPanel>
 
 		<LinearLayout android:orientation="horizontal"
 			android:id="@+id/cover_image_container" android:layout_width="fill_parent"

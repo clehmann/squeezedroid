@@ -8,6 +8,7 @@ import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
 import net.chrislehmann.util.ImageLoader;
 import android.app.Activity;
@@ -42,6 +43,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    private TextView _songLabel;
    private TextView _artistLabel;
    private TextView _albumLabel;
+   private TextView _playerNameLabel;
 
    private Activity context = this;
 
@@ -52,8 +54,9 @@ public class MainActivity extends SqueezedroidActivitySupport
    private ImageButton _libraryButton;
    private ImageButton _toggleVolumeButton;
 
-   private SeekBar _volumeSeekBar;
+   private TransparentPanel _volumePanel;
    private UpdatingSeekBar _timeSeekBar;
+   private SeekBar _volumeSeekBar;
 
    private PlayerStatus _currentStatus;
 
@@ -70,6 +73,25 @@ public class MainActivity extends SqueezedroidActivitySupport
    };
 
 
+   OnSeekBarChangeListener onVolumeChanged = new OnSeekBarChangeListener()
+   {
+      
+      public void onStopTrackingTouch(SeekBar seekBar){}
+      
+      public void onStartTrackingTouch(SeekBar seekBar){}
+      
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      {
+         if( fromUser )
+         {
+            SqueezeService service = ActivityUtils.getService( context );
+            if( service != null )
+            {
+               service.changeVolume( getSelectedPlayer(), progress );
+            }
+         }
+      }
+   };
    OnClickListener onNextButtonPressed = new android.view.View.OnClickListener()
    {
       public void onClick(View v)
@@ -99,14 +121,15 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          int visibility = View.VISIBLE;
-         if ( _volumeSeekBar.getVisibility() == View.VISIBLE )
+         if ( _volumePanel.getVisibility() == View.VISIBLE )
          {
             visibility = View.INVISIBLE;
          }
-         _volumeSeekBar.setVisibility( visibility );
-         _volumeSeekBar.bringToFront();
+         _volumePanel.setVisibility( visibility );
+         _volumePanel.bringToFront();
       }
    };
+
 
    @Override
    public void onCreate(Bundle savedInstanceState)
@@ -121,7 +144,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       _artistLabel = (TextView) findViewById( R.id.artist_label );
       _albumLabel = (TextView) findViewById( R.id.album_label );
       _songLabel = (TextView) findViewById( R.id.title_label );
-
+      _playerNameLabel = (TextView) findViewById( R.id.player_name );
+      
       _playButton = (ImageButton) findViewById( R.id.playButton );
       _nextButton = (ImageButton) findViewById( R.id.nextButton );
       _prevButton = (ImageButton) findViewById( R.id.prevButton );
@@ -130,7 +154,9 @@ public class MainActivity extends SqueezedroidActivitySupport
       _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
       _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
       _volumeSeekBar = (SeekBar) findViewById( R.id.volume_seek_bar );
+      _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
       
+      _volumeSeekBar.setOnSeekBarChangeListener( onVolumeChanged );
       _timeSeekBar.setOnSeekBarChangeListener( onTimeUpdatedByUser );
       _prevButton.setOnClickListener( onPrevButtonPressed );
       _playButton.setOnClickListener( onPlayButtonPressed );
@@ -138,6 +164,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       _playListButton.setOnClickListener( onPlaylisyButtonPressed );
       _libraryButton.setOnClickListener( onLibraryButtonPressed );
       _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
+      
+      
       if ( !isPlayerSelected() )
       {
          startChoosePlayerActivity();
@@ -306,7 +334,7 @@ public class MainActivity extends SqueezedroidActivitySupport
 
             _playlistListAdapter = new PlayListAdapter( service, this, getSqueezeDroidApplication().getSelectedPlayer() );
             _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
-
+            _playerNameLabel.setText( getSelectedPlayer().getName() );
             PlayerStatus status = ActivityUtils.getService( this ).getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
             updateSongDisplay( status );
             _timeSeekBar.start();
