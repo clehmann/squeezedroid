@@ -9,47 +9,49 @@ public class UpdatingSeekBar
 {
    private static final String LOGTAG = "UpdatingSeekBar";
    
-   private SeekBar seekBar;
-   private boolean isUserSeeking = false;
-   private OnSeekBarChangeListener userOnSeekBarChangeListener;
+   private SeekBar _seekBar;
+   private boolean _isUserSeeking = false;
+   private Boolean _started = false;
+   
+   private OnSeekBarChangeListener _userOnSeekBarChangeListener;
 
    public void setOnSeekBarChangeListener(OnSeekBarChangeListener listener)
    {
-      userOnSeekBarChangeListener = listener;
+      _userOnSeekBarChangeListener = listener;
    }
 
    public OnSeekBarChangeListener getOnSeekBarChangeListener()
    {
-      return userOnSeekBarChangeListener;
+      return _userOnSeekBarChangeListener;
    }
 
    private OnSeekBarChangeListener onSeekBarChanged = new OnSeekBarChangeListener()
    {
       public void onStopTrackingTouch(SeekBar seekBar)
       {
-         isUserSeeking = false;
+         _isUserSeeking = false;
          Log.v( LOGTAG, "User finished drag" );
-         if ( userOnSeekBarChangeListener != null )
+         if ( _userOnSeekBarChangeListener != null )
          {
-            userOnSeekBarChangeListener.onStopTrackingTouch( seekBar );
+            _userOnSeekBarChangeListener.onStopTrackingTouch( seekBar );
          }
       }
 
       public void onStartTrackingTouch(SeekBar seekBar)
       {
-         isUserSeeking = true;
+         _isUserSeeking = true;
          Log.v( LOGTAG, "User starting drag" );
-         if ( userOnSeekBarChangeListener != null )
+         if ( _userOnSeekBarChangeListener != null )
          {
-            userOnSeekBarChangeListener.onStartTrackingTouch( seekBar );
+            _userOnSeekBarChangeListener.onStartTrackingTouch( seekBar );
          }
       }
 
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
-         if ( userOnSeekBarChangeListener != null )
+         if ( _userOnSeekBarChangeListener != null )
          {
-            userOnSeekBarChangeListener.onProgressChanged( seekBar, progress, fromUser );
+            _userOnSeekBarChangeListener.onProgressChanged( seekBar, progress, fromUser );
          }
       }
    };
@@ -57,38 +59,53 @@ public class UpdatingSeekBar
 
    public UpdatingSeekBar(SeekBar seekBar)
    {
-      this.seekBar = seekBar;
+      this._seekBar = seekBar;
       seekBar.setOnSeekBarChangeListener( onSeekBarChanged );
    }
 
    public void setMax(int max)
    {
-      synchronized ( seekBar )
+      synchronized ( _seekBar )
       {
          Log.d( LOGTAG, "Max set to " + max );
-         this.seekBar.setMax( max );
+         this._seekBar.setMax( max );
       }
    }
 
    public void start()
    {
-      Log.d( LOGTAG, "UpdatingSeekbar started" );
-      this._updateSongTimeHandler.postDelayed( _updateSongTimeRunnable, 1000 );
+      synchronized ( _started )
+      {
+         if( !_started )
+         {
+            Log.d( LOGTAG, "UpdatingSeekbar started" );
+            this._updateSongTimeHandler.postDelayed( _updateSongTimeRunnable, 1000 );
+            _started = true;
+         }
+         else
+         {
+            Log.d( LOGTAG, "UpdatingSeekbar already started, not starting a second time" );
+         }
+      }
    }
 
    public void pause()
    {
-      this._updateSongTimeHandler.removeCallbacks( _updateSongTimeRunnable );
+      synchronized ( _started )
+      {
+         this._updateSongTimeHandler.removeCallbacks( _updateSongTimeRunnable );
+         _started = false;
+      }
    }
 
    public void setProgress(int progress)
    {
-      if( !isUserSeeking )
+      if( !_isUserSeeking )
       {
-         synchronized ( seekBar )
+         synchronized ( _seekBar )
          {
             Log.d( LOGTAG, "Progress set to " + progress );
-            this.seekBar.setProgress( progress );
+            this._seekBar.setProgress( progress );
          }
       }
    }
@@ -100,14 +117,14 @@ public class UpdatingSeekBar
       public void run()
       {
          //TODO - calculate based on absolute time using postAtTime instead of postDelayed
-         if( !isUserSeeking )
+         if( !_isUserSeeking )
          {
-            synchronized ( seekBar )
+            synchronized ( _seekBar )
             {
-               int progress = seekBar.getProgress();
-               if ( progress < seekBar.getMax() )
+               int progress = _seekBar.getProgress();
+               if ( progress < _seekBar.getMax() )
                {
-                  seekBar.setProgress( progress + 1 );
+                  _seekBar.setProgress( progress + 1 );
                }
             }
          }
