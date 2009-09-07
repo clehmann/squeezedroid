@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.chrislehmann.squeezedroid.model.Item;
+import android.R;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +84,7 @@ public abstract class PagableAdapter extends BaseAdapter
       {
          TextView tv = new TextView( parent.getContext() );
          tv.setText( item.getName() );
+         tv.setTextSize( 19 );
          view = tv;
       }
       else

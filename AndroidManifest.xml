@@ -30,7 +30,7 @@
 
             </intent-filter>
         </activity> 
-        <activity android:name=".activity.BrowseArtistsActivity" android:label="Browse Artist">
+        <activity android:name=".activity.BrowseArtistsActivity" android:label="Browse Artists">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseArtist" />
                <category android:name="android.intent.category.DEFAULT" />
@@ -51,7 +51,7 @@
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Geress">
+        <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Genres">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />
                <category android:name="android.intent.category.DEFAULT" />
