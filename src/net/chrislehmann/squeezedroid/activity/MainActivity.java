@@ -1,5 +1,7 @@
 package net.chrislehmann.squeezedroid.activity;
 
+import java.util.Currency;
+
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
@@ -256,7 +258,7 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    private synchronized void updateSongDisplay(final PlayerStatus status)
    {
-      if ( status != null )
+      if ( status != null && status.getCurrentSong() != null )
       {
          Song currentSong = status.getCurrentSong();
 
@@ -286,6 +288,19 @@ public class MainActivity extends SqueezedroidActivitySupport
 
          _timeSeekBar.setMax( currentSong.getDurationInSeconds() );
          _currentStatus = status;
+         _timeSeekBar.start();
+      }
+      else
+      {
+         ImageView nextView = (ImageView) _coverArtImageView.getNextView();
+         nextView.setImageBitmap( null );
+         _coverArtImageView.showNext();
+         
+         _songLabel.setText( "" );
+         _artistLabel.setText( "" );
+         _albumLabel.setText( "" );
+         _timeSeekBar.pause();
+         _timeSeekBar.setProgress( 0 );
       }
    }
 
@@ -342,7 +357,6 @@ public class MainActivity extends SqueezedroidActivitySupport
             _playerNameLabel.setText( getSelectedPlayer().getName() );
             PlayerStatus status = ActivityUtils.getService( this ).getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
             updateSongDisplay( status );
-            _timeSeekBar.start();
             
             _volumeSeekBar.setProgress( status.getVolume() );
 
