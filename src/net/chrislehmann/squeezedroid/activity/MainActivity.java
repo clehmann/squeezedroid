@@ -343,6 +343,8 @@ public class MainActivity extends SqueezedroidActivitySupport
             PlayerStatus status = ActivityUtils.getService( this ).getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
             updateSongDisplay( status );
             _timeSeekBar.start();
+            
+            _volumeSeekBar.setProgress( status.getVolume() );
 
          }
       }

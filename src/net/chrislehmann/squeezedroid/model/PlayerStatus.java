@@ -6,6 +6,7 @@ public class PlayerStatus {
 	private int currentIndex;
 	private String status;
 	private int currentPosition;
+	private int volume;
 
 	public int getCurrentIndex() {
 		return currentIndex;
@@ -39,6 +40,16 @@ public class PlayerStatus {
    public void setCurrentPosition(int currentPosition)
    {
       this.currentPosition = currentPosition;
+   }
+
+   public int getVolume()
+   {
+      return volume;
+   }
+
+   public void setVolume(int volume)
+   {
+      this.volume = volume;
    }
 
 }

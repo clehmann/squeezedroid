@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.util.Log;
-
-import net.chrislehmann.squeezedroid.eventhandler.EventHandler;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
@@ -25,6 +22,7 @@ import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
+import android.util.Log;
 
 /**
  * Implementation of {@link SqueezeService} that uses the SqueezeCenter command
@@ -35,6 +33,7 @@ import net.chrislehmann.util.SerializationUtils.Unserializer;
 public class CliSqueezeService implements SqueezeService
 {
 
+   private static final String LOGTAG = "SQUEEZE";
    private static final String SONG_TAGS = "asleJpPd";
    /**
     * Host to connect to
@@ -67,7 +66,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
    private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
-   private Pattern playerStatusResponsePattern = Pattern.compile( " time%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
+   private Pattern playerStatusResponsePattern = Pattern.compile( " time%3A([^ ]*) .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
    {
@@ -337,22 +336,26 @@ public class CliSqueezeService implements SqueezeService
       Song song = SerializationUtils.unserialize( songsResponsePattern, result, songUnserializer );
       status.setCurrentSong( song );
       
+      
       Matcher statusMatcher = playerStatusResponsePattern.matcher( result );
       if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
       {
-         Log.d( "SQUEEZE", "Time: " + statusMatcher.group( 1 ) );
-         Log.d( "SQUEEZE", "Playlist Index: " + statusMatcher.group( 2 ) );
+         Log.d( LOGTAG, "Time: " + statusMatcher.group( 1 ) );
+         Log.d( LOGTAG, "Volume: " + statusMatcher.group( 2 ) );
+         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 3 ) );
          
-         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 2 ) ) );
+         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 3 ) ) );
          String positionString = statusMatcher.group( 1 );
          try
          {
             Double d = Double.parseDouble( positionString );
             status.setCurrentPosition( d.intValue() );
-         } catch (NumberFormatException nfd) {
-            //Invalid, don't set position.
-         }
-         
+         } catch (NumberFormatException nfd) {/* Invalid, don't set position. */}
+         try
+         {
+            Double d = Double.parseDouble( statusMatcher.group( 2 ) );
+            status.setVolume( d.intValue() );
+         } catch (NumberFormatException nfd) {/* Invalid, don't set volume. */}
       }
       return status;
 
