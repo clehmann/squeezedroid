@@ -11,4 +11,6 @@ public interface PlayerStatusHandler
    
    public void onTimeChanged( int newPosition );
 
+   public void onVolumeChanged( int newVolume );
+
 }

@@ -320,6 +320,11 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
 
       public void onPlaylistChanged(PlayerStatus status){}
+
+      public void onVolumeChanged(int newVolume)
+      {
+         _volumeSeekBar.setProgress( newVolume );
+      }
    };
 
    private void onPlayerChanged()

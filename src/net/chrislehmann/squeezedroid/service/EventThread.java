@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.os.Handler;
-
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
@@ -129,11 +127,32 @@ public class EventThread extends Thread
       }
    };
    
+   private CommandHandler mixerChangeHandler = new CommandHandler()
+   {
+      public void handleCommand(String data, PlayerStatusHandler handler)
+      {
+         String[] parts = data.split(" ");
+         if( parts.length >= 2 && "volume".equals( parts[0] ) )
+         {
+               
+            try
+            {
+               Integer newVolume = Integer.parseInt( parts[1] );
+               handler.onVolumeChanged( newVolume );
+               
+            } catch (NumberFormatException e) {/* Invalid time, do not notify */}
+         }
+      }
+   };
+   
+   
    private Map<String, CommandHandler> _commandHandlers = new HashMap<String, CommandHandler>();
    {
       _commandHandlers.put( "playlist", playListHandler );
       _commandHandlers.put( "time", timeChangeHandler );
-}
+      _commandHandlers.put( "mixer", mixerChangeHandler );
+
+   }
    
    private void notify(String event, String playerId, String data)
    {
@@ -169,7 +188,7 @@ public class EventThread extends Thread
 
          _eventWriter.write( "listen 1\n" );
          _eventWriter.flush();
-         _eventWriter.write( "subscribe playlist,time\n" );
+         _eventWriter.write( "subscribe playlist,time,mixer\n" );
          _eventWriter.flush();
       }
       catch ( Exception e )

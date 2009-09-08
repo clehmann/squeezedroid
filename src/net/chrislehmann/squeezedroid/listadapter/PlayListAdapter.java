@@ -38,6 +38,8 @@ public class PlayListAdapter extends SongListAdapter
          numItems = 1;
          resetPages();
       }
+
+      public void onVolumeChanged(int newVolume){}
    };
 
    public void setPlayer(Player player)
