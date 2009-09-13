@@ -355,6 +355,12 @@ public class CliSqueezeService implements SqueezeService
       return players;
    }
 
+   public Player getPlayer(String playerId)
+   {
+      List<Player> players = getPlayers();
+      return (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( playerId ) );
+   }
+   
    private class PlayerIdEqualsPredicate implements Predicate
    {
       private String playerId;

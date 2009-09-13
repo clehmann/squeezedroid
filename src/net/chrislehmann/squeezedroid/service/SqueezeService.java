@@ -33,6 +33,8 @@ public interface SqueezeService
 
    public List<Player> getPlayers();
 
+   public Player getPlayer(String playerId);
+
    public void addItem(Player player, Item item);
 
    public void playItem(Player player, Item item);
@@ -68,4 +70,5 @@ public interface SqueezeService
    public void seekTo(Player player, int time);
 
    public void changeVolume(Player player, int volumeLevel);
+
 }

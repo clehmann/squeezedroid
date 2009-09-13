@@ -7,6 +7,7 @@ import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
+import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
@@ -272,12 +273,8 @@ public class MainActivity extends SqueezedroidActivitySupport
    }
 
 
-   private PlayerStatusHandler onPlayerStatusChanged = new PlayerStatusHandler()
+   private PlayerStatusHandler onPlayerStatusChanged = new SimplePlayerStatusHandler()
    {
-      public void onTimeChanged(int newPosition)
-      {
-      //   _timeSeekBar.setProgress( newPosition );
-      }
 
       public void onSongChanged(final PlayerStatus status)
       {
@@ -300,13 +297,6 @@ public class MainActivity extends SqueezedroidActivitySupport
          _timeSeekBar.setProgress( status.getCurrentPosition() );
 
       }
-
-      public void onPlaylistChanged(PlayerStatus status){}
-
-      public void onVolumeChanged(int newVolume)
-      {
-//         _volumeSeekBar.setProgress( newVolume );
-      }
    };
 
    private void onPlayerChanged()
@@ -317,7 +307,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          if ( service != null )
          {
             _volumePanel.removeAllViews();
-            _syncPanel = new PlayerSyncPanel( this, service );
+            _syncPanel = new PlayerSyncPanel( this, service, this );
             _syncPanel.setPlayer( getSelectedPlayer() );
             _volumePanel.addView( _syncPanel );
             

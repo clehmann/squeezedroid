@@ -8,6 +8,7 @@ import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
+import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import android.app.Activity;
 import android.graphics.Color;
@@ -19,12 +20,8 @@ public class PlayListAdapter extends SongListAdapter
    private Player _player;
    private PlayerStatus _currentStatus;
 
-   private PlayerStatusHandler onPlayerStatusChanged = new PlayerStatusHandler()
+   private PlayerStatusHandler onPlayerStatusChanged = new SimplePlayerStatusHandler()
    {
-
-      public void onTimeChanged(int newPosition)
-      {
-      }
 
       public void onSongChanged(PlayerStatus status)
       {
@@ -39,7 +36,6 @@ public class PlayListAdapter extends SongListAdapter
          resetPages();
       }
 
-      public void onVolumeChanged(int newVolume){}
    };
 
    public void setPlayer(Player player)
