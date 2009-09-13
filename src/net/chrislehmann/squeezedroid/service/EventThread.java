@@ -96,7 +96,6 @@ public class EventThread extends Thread
                   // and it might be associated to a player we are not subscribed too.
                   //
                   //As a hack, just 'fake' a second sync command, swapping the playerid and data.
-
                   if( "sync".equals( eventType ) )
                   {
                      notify( eventType, SerializationUtils.decode( data ), playerId );

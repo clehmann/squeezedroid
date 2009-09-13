@@ -3,6 +3,8 @@ package net.chrislehmann.squeezedroid.view;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.Buffer;
+
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
@@ -14,6 +16,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -30,16 +33,18 @@ public class PlayerSyncPanel extends LinearLayout
          this.volumeHandler = volumeHandler;
          this.syncHandler = syncHandler;
       }
+
       public View view;
       public PlayerStatusHandler volumeHandler;
       public PlayerStatusHandler syncHandler;
    }
-   
+
    private Map<String, Syncronization> syncronizations = new HashMap<String, Syncronization>();
    private Player player;
    private SqueezeService service;
    
    private Activity parent;
+   
    
    public PlayerSyncPanel(Context context, SqueezeService service, Activity parent)
    {
@@ -106,6 +111,9 @@ public class PlayerSyncPanel extends LinearLayout
       volumeSeekBar.setProgress( status.getVolume() );
       volumeSeekBar.setOnSeekBarChangeListener( new OnVolumeChangedListener( player ) );
       
+      ImageButton unsyncButton = (ImageButton) view.findViewById( R.id.unsync_button );
+      unsyncButton.setOnClickListener( new OnUnsyncButtonPressedListener( player ) );
+      
       PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler( volumeSeekBar );
       service.subscribe( player, volumeHandler );
 
@@ -116,7 +124,7 @@ public class PlayerSyncPanel extends LinearLayout
       }
       syncronizations.put( player.getId(), new Syncronization( view, volumeHandler, syncHandler ) );
       service.subscribe( player, syncHandler );
-
+      
       TextView playerNameLabel = (TextView) view.findViewById( R.id.player_name_text );
       playerNameLabel.setText( player.getName() );
       this.addView( view );
@@ -127,6 +135,19 @@ public class PlayerSyncPanel extends LinearLayout
       return service;
    }
 
+   private class OnUnsyncButtonPressedListener implements OnClickListener
+   {
+      private Player player;
+      public OnUnsyncButtonPressedListener(Player player)
+      {
+         this.player = player;
+      }
+      public void onClick(View v)
+      {
+         service.unsynchronize( player );
+      }
+   }
+   
    public void setService(SqueezeService service)
    {
       this.service = service;

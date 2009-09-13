@@ -534,5 +534,14 @@ public class CliSqueezeService implements SqueezeService
       executeCommand( player.getId() + " mixer volume " + volumeLevel );
    }
 
+   public void synchronize(Player player, Player playerToSyncTo)
+   {
+      executeCommand( player.getId() + " sync " + playerToSyncTo.getId() );
+   }
+
+   public void unsynchronize(Player player)
+   {
+      executeCommand( player.getId() + " sync -" );
+   }
 
 }

@@ -71,4 +71,8 @@ public interface SqueezeService
 
    public void changeVolume(Player player, int volumeLevel);
 
+   public void unsynchronize( Player player );
+
+   public void synchronize( Player player, Player playerToSyncTo );
+
 }
