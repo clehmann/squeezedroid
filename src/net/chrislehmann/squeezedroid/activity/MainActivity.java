@@ -1,7 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import java.util.Currency;
-
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
@@ -10,6 +8,7 @@ import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
 import net.chrislehmann.util.ImageLoader;
@@ -45,7 +44,6 @@ public class MainActivity extends SqueezedroidActivitySupport
    private TextView _songLabel;
    private TextView _artistLabel;
    private TextView _albumLabel;
-   private TextView _playerNameLabel;
 
    private Activity context = this;
 
@@ -56,9 +54,9 @@ public class MainActivity extends SqueezedroidActivitySupport
    private ImageButton _libraryButton;
    private ImageButton _toggleVolumeButton;
 
+   private PlayerSyncPanel _syncPanel;
    private TransparentPanel _volumePanel;
    private UpdatingSeekBar _timeSeekBar;
-   private SeekBar _volumeSeekBar;
 
    private PlayerStatus _currentStatus;
 
@@ -75,25 +73,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    };
 
 
-   OnSeekBarChangeListener onVolumeChanged = new OnSeekBarChangeListener()
-   {
-      
-      public void onStopTrackingTouch(SeekBar seekBar){}
-      
-      public void onStartTrackingTouch(SeekBar seekBar){}
-      
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-      {
-         if( fromUser )
-         {
-            SqueezeService service = ActivityUtils.getService( context );
-            if( service != null )
-            {
-               service.changeVolume( getSelectedPlayer(), progress );
-            }
-         }
-      }
-   };
+  
    OnClickListener onNextButtonPressed = new android.view.View.OnClickListener()
    {
       public void onClick(View v)
@@ -146,7 +126,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       _artistLabel = (TextView) findViewById( R.id.artist_label );
       _albumLabel = (TextView) findViewById( R.id.album_label );
       _songLabel = (TextView) findViewById( R.id.title_label );
-      _playerNameLabel = (TextView) findViewById( R.id.player_name );
       
       _playButton = (ImageButton) findViewById( R.id.playButton );
       _nextButton = (ImageButton) findViewById( R.id.nextButton );
@@ -155,10 +134,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       _libraryButton = (ImageButton) findViewById( R.id.libraryButton );
       _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
       _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
-      _volumeSeekBar = (SeekBar) findViewById( R.id.volume_seek_bar );
       _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
       
-      _volumeSeekBar.setOnSeekBarChangeListener( onVolumeChanged );
       _timeSeekBar.setOnSeekBarChangeListener( onTimeUpdatedByUser );
       _prevButton.setOnClickListener( onPrevButtonPressed );
       _playButton.setOnClickListener( onPlayButtonPressed );
@@ -167,26 +144,16 @@ public class MainActivity extends SqueezedroidActivitySupport
       _libraryButton.setOnClickListener( onLibraryButtonPressed );
       _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
       
-      
       if ( !isPlayerSelected() )
       {
          startChoosePlayerActivity();
       }
       else
       {
-         onServiceConnected();
          onPlayerChanged();
       }
    }
 
-   private void onServiceConnected()
-   {
-      SqueezeService service = ActivityUtils.getService( context );
-      if ( service != null )
-      {
-
-      }
-   }
 
 
    @Override
@@ -338,7 +305,7 @@ public class MainActivity extends SqueezedroidActivitySupport
 
       public void onVolumeChanged(int newVolume)
       {
-         _volumeSeekBar.setProgress( newVolume );
+//         _volumeSeekBar.setProgress( newVolume );
       }
    };
 
@@ -349,18 +316,19 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = ActivityUtils.getService( this );
          if ( service != null )
          {
+            _volumePanel.removeAllViews();
+            _syncPanel = new PlayerSyncPanel( this, service );
+            _syncPanel.setPlayer( getSelectedPlayer() );
+            _volumePanel.addView( _syncPanel );
+            
             service.unsubscribeAll( onPlayerStatusChanged );
             service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
 
             _playlistListAdapter = new PlayListAdapter( service, this, getSqueezeDroidApplication().getSelectedPlayer() );
             _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
-            _playerNameLabel.setText( getSelectedPlayer().getName() );
             PlayerStatus status = ActivityUtils.getService( this ).getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
             updateSongDisplay( status );
-            
-            _volumeSeekBar.setProgress( status.getVolume() );
-
-         }
+         }  
       }
    }
 
@@ -394,11 +362,9 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
       switch ( requestCode )
       {
-         case SqueezeDroidConstants.RequestCodes.REQUEST_CONNECT :
-            Toast.makeText( getApplicationContext(), "Player selected", Toast.LENGTH_SHORT ).show();
-            onPlayerChanged();
-            break;
+
          case SqueezeDroidConstants.RequestCodes.REQUEST_CHOOSE_PLAYER :
+            Toast.makeText( getApplicationContext(), "Player selected", Toast.LENGTH_SHORT ).show();
             onPlayerChanged();
             break;
          case SqueezeDroidConstants.RequestCodes.REQUEST_SHOW_SETTINGS :
