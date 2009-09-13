@@ -1,5 +1,8 @@
 package net.chrislehmann.squeezedroid.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author lehmanc
  *
@@ -9,6 +12,7 @@ public class Player
    
    private String id;
    private String name;
+   private List<Player> syncronizedPlayers = new ArrayList<Player>();
 
    public Player()
    {
@@ -39,6 +43,16 @@ public class Player
    public void setName(String name)
    {
       this.name = name;
+   }
+
+   public List<Player> getSyncronizedPlayers()
+   {
+      return syncronizedPlayers;
+   }
+
+   public void setSyncronizedPlayers(List<Player> syncronizedPlayers)
+   {
+      this.syncronizedPlayers = syncronizedPlayers;
    }
 
 }

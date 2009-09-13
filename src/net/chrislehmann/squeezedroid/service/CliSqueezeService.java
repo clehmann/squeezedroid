@@ -22,6 +22,10 @@ import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+
 import android.util.Log;
 
 /**
@@ -67,6 +71,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " time%3A([^ ]*) .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
+   private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
    {
@@ -315,7 +320,7 @@ public class CliSqueezeService implements SqueezeService
       String command = new String( "players 0 1000" );
       String result = executeCommand( command );
 
-      return SerializationUtils.unserializeList( playersResponsePattern, result, new SerializationUtils.Unserializer<Player>()
+      List<Player> players = SerializationUtils.unserializeList( playersResponsePattern, result, new SerializationUtils.Unserializer<Player>()
       {
          public Player unserialize(Matcher matcher)
          {
@@ -325,8 +330,49 @@ public class CliSqueezeService implements SqueezeService
             return player;
          }
       } );
+      
+      
+      for ( Player player : players )
+      {
+         command = player.getId() + " sync ?";
+         String playerSyncResult = executeCommand( command );
+         Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
+         if( matcher.find() )
+         {
+            String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
+            String[] syncedPlayersArray = syncedPlayersString.split( "," );
+            for ( int i = 0; i < syncedPlayersArray.length; i++ )
+            {
+               String syncedPlayerId = syncedPlayersArray[i];
+               Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId )  );
+               if( syncedPlayer != null )
+               {
+                  player.getSyncronizedPlayers().add( syncedPlayer );
+               }
+            }
+         }
+      }
+      return players;
    }
 
+   private class PlayerIdEqualsPredicate implements Predicate
+   {
+      private String playerId;
+      public PlayerIdEqualsPredicate( String playerId )
+      {
+         this.playerId = playerId;
+      }
+      public boolean evaluate(Object arg0)
+      {
+         boolean matches = false;
+         if ( arg0 instanceof Player )
+         {
+            Player rhs = (Player) arg0;
+            matches = playerId.equals( rhs.getId() );
+         }
+         return matches;
+      }
+   }
    public PlayerStatus getPlayerStatus(Player player)
    {
       String command = new String( player.getId() + " status - 1 tags:" + SONG_TAGS );

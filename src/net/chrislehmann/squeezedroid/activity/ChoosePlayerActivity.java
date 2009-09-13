@@ -36,7 +36,7 @@ public class ChoosePlayerActivity extends ListActivity
          players = service.getPlayers();
       }
       
-      ArrayAdapter<Player> playersAdapter = new PlayerListAdapter( this, players );
+      ArrayAdapter<Player> playersAdapter = new PlayerListAdapter( this, players, this );
       setListAdapter( playersAdapter );
       playersAdapter.notifyDataSetChanged();
    }
