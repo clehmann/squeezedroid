@@ -9,6 +9,7 @@ import net.chrislehmann.squeezedroid.service.SqueezeService;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -46,8 +47,10 @@ public class ChoosePlayerActivity extends ListActivity
    {
       super.onListItemClick( l, v, position, id );
       Player player = (Player) l.getItemAtPosition( position );
-      ActivityUtils.getSqueezeDroidApplication( context ).setSelectedPlayer( player );
-      setResult( RESULT_OK );
+      Intent intent = new Intent();
+      intent.setData( Uri.parse( "squeeze://players/" + player.getId() ) );
+      intent.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER, player );
+      setResult( RESULT_OK, intent );
       finish();
    }
    

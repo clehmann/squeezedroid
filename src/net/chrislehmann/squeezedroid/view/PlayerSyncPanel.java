@@ -3,8 +3,6 @@ package net.chrislehmann.squeezedroid.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.collections.Buffer;
-
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
@@ -14,16 +12,20 @@ import net.chrislehmann.squeezedroid.service.SqueezeService;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class PlayerSyncPanel extends LinearLayout
 {
+
+   private static final String LOGTAG = "PlayerSyncPanel";
 
    private class Syncronization
    {
@@ -120,7 +122,7 @@ public class PlayerSyncPanel extends LinearLayout
       PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
       if( !isPrimary )
       {
-         syncHandler = new SyncronizedPlayerOnSyncHandler( player.getId() );
+         syncHandler = new MainPlayerOnSyncHandler( );
       }
       syncronizations.put( player.getId(), new Syncronization( view, volumeHandler, syncHandler ) );
       service.subscribe( player, syncHandler );
@@ -138,12 +140,15 @@ public class PlayerSyncPanel extends LinearLayout
    private class OnUnsyncButtonPressedListener implements OnClickListener
    {
       private Player player;
+
       public OnUnsyncButtonPressedListener(Player player)
       {
          this.player = player;
       }
+
       public void onClick(View v)
       {
+         Toast.makeText( getContext(), player.getName() + " unsynchronized.", Toast.LENGTH_LONG );
          service.unsynchronize( player );
       }
    }
@@ -192,54 +197,32 @@ public class PlayerSyncPanel extends LinearLayout
    
    private class MainPlayerOnSyncHandler extends SimplePlayerStatusHandler
    {
+
       @Override
-      public void onPlayerSynchronized(final Player player, String newPlayerId)
+      public void onPlayerSynchronized(final Player mainPlayer, String newPlayerId)
       {
+         Log.d( LOGTAG, "Got player sync event mainPlayer: " +  mainPlayer.getId() + ", new player: " + newPlayerId);
          parent.runOnUiThread( new Runnable()
          {
             public void run()
             {
-               setPlayer( player );
+               setPlayer( mainPlayer );
             }
          });
+
       }
       
       @Override
       public void onPlayerUnsynchronized()
       {
-         player.getSyncronizedPlayers().clear();
+         final Player updatedPlayer = service.getPlayer( player.getId() );
          parent.runOnUiThread( new Runnable()
          {
             public void run()
             {
-               setPlayer( player );
+               setPlayer( updatedPlayer );
             }
          });
-      }
-   }
-
-   private class SyncronizedPlayerOnSyncHandler extends SimplePlayerStatusHandler
-   {
-      private String playerId;
-      
-      public SyncronizedPlayerOnSyncHandler(String playerId)
-      {
-         this.playerId = playerId;
-      }
-
-      @Override
-      public void onPlayerSynchronized(Player player, String newPlayerId)
-      {
-         if( !syncronizations.containsKey( newPlayerId ) )
-         {
-            removeSyncronization( playerId );
-         }
-      }
-      
-      @Override
-      public void onPlayerUnsynchronized()
-      {
-         removeSyncronization( playerId );
       }
    }
 }

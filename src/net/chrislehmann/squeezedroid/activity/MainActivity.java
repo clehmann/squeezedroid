@@ -14,7 +14,6 @@ import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
 import net.chrislehmann.util.ImageLoader;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -26,7 +25,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -35,9 +33,10 @@ public class MainActivity extends SqueezedroidActivitySupport
    private static final String LOGTAG = "MainActivity";
    
    private static final int MENU_ADD_SONG = 0;
-   private static final int MENU_ADD_TO_FAVORITES = 1;
    private static final int MENU_SETTINGS = 2;
    private static final int MENU_CHOOSE_PLAYER = 3;
+   private static final int MENU_SYNC_PLAYER = 4;
+   private static final int MENU_ADD_PLAYER = 5;
 
    private PlayListAdapter _playlistListAdapter;
    private ViewSwitcher _coverArtImageView;
@@ -72,8 +71,6 @@ public class MainActivity extends SqueezedroidActivitySupport
          }
       }
    };
-
-
   
    OnClickListener onNextButtonPressed = new android.view.View.OnClickListener()
    {
@@ -120,7 +117,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       super.onCreate( savedInstanceState );
 
       requestWindowFeature( Window.FEATURE_NO_TITLE );
-      this.setContentView( R.layout.tab_layout );
+      this.setContentView( R.layout.main_layout );
 
       _coverArtImageView = (ViewSwitcher) findViewById( R.id.cover_image );
 
@@ -147,7 +144,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       
       if ( !isPlayerSelected() )
       {
-         startChoosePlayerActivity();
+         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
       }
       else
       {
@@ -156,7 +153,53 @@ public class MainActivity extends SqueezedroidActivitySupport
    }
 
 
+   private IntentResultCallback choosePlayerIntentCallback = new IntentResultCallback()
+   {
+      public void resultOk(String resultString, Bundle resultMap)
+      {
+            Player selectedPlayer = (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER );
+            getSqueezeDroidApplication().setSelectedPlayer( selectedPlayer );
+            onPlayerChanged();
+      }
+      
+      public void resultCancel(String resultString, Bundle resultMap)
+      {
+         if( getSqueezeDroidApplication().getSelectedPlayer() == null )
+         {
+            finish();
+         }
+      }
+   };
 
+   private IntentResultCallback choosePlayerForSyncCallback = new IntentResultCallback()
+   {
+      public void resultOk(String resultString, Bundle resultMap)
+      {
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            service.synchronize( (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER), getSelectedPlayer() );         
+         }
+      }
+      
+      public void resultCancel(String resultString, Bundle resultMap){}
+   };
+   
+   private IntentResultCallback choosePlayerForAddCallback = new IntentResultCallback()
+   {
+      public void resultOk(String resultString, Bundle resultMap)
+      {
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            //service.unsynchronize( getSelectedPlayer() );
+            service.synchronize( getSelectedPlayer(), (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER ) );         
+         }
+      }
+      
+      public void resultCancel(String resultString, Bundle resultMap){}
+   };
+   
    @Override
    protected void onDestroy()
    {
@@ -168,26 +211,14 @@ public class MainActivity extends SqueezedroidActivitySupport
       super.onDestroy();
    }
 
-   private void startChoosePlayerActivity()
-   {
-      Intent intent = new Intent();
-      intent.setAction( SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER );
-      this.startActivityForResult( intent, SqueezeDroidConstants.RequestCodes.REQUEST_CHOOSE_PLAYER );
-   }
-
-   private void startSettingsActivity()
-   {
-      Intent intent = new Intent();
-      intent.setAction( "net.chrislehmann.squeezedroid.action.EditPreferences" );
-      this.startActivityForResult( intent, SqueezeDroidConstants.RequestCodes.REQUEST_SHOW_SETTINGS );
-   }
-
    public boolean onCreateOptionsMenu(Menu menu)
    {
+      menu.add( 0, MENU_ADD_PLAYER, 0, "Add player" );
+      menu.add( 0, MENU_SYNC_PLAYER, 0, "Sync to player" );
       menu.add( 0, MENU_SETTINGS, 0, "Settings" );
-      menu.add( 0, MENU_ADD_TO_FAVORITES, 0, "Add To Favorites" );
       menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
-      menu.add( 0, MENU_ADD_SONG, 0, "Add Music" );
+      menu.add( 0, MENU_ADD_SONG, 0, "Repeat Song" );
+
       return true;
    }
 
@@ -202,24 +233,24 @@ public class MainActivity extends SqueezedroidActivitySupport
    }
    
 
-   /* Handles item selections */
    public boolean onOptionsItemSelected(MenuItem item)
    {
-      Intent i = new Intent();
       switch ( item.getItemId() )
       {
          case MENU_ADD_SONG :
-            i.setAction( "net.chrislehmann.squeezedroid.action.Browse" );
-            this.startActivity( i );
+            launchSubActivity( BrowseRootActivity.class, null );
             return true;
          case MENU_SETTINGS :
-            startSettingsActivity();
-            return true;
-         case MENU_ADD_TO_FAVORITES :
+            launchSubActivity( EditPrefrencesActivity.class, null );
             return true;
          case MENU_CHOOSE_PLAYER :
-            startChoosePlayerActivity();
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
             return true;
+         case MENU_SYNC_PLAYER:
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForSyncCallback );
+            return true;
+         case MENU_ADD_PLAYER:
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForAddCallback );
       }
       return false;
    }
@@ -326,9 +357,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onClick(View v)
       {
-         Intent i = new Intent();
-         i.setAction( "net.chrislehmann.squeezedroid.action.Browse" );
-         startActivity( i );
+         launchSubActivity( BrowseRootActivity.class, null );
       }
    };
 
@@ -336,34 +365,8 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onClick(View v)
       {
-         Intent i = new Intent();
-         i.setAction( "net.chrislehmann.squeezedroid.action.PlayList" );
-         startActivity( i );
+         launchSubActivity( PlayListActivity.class, null );
       }
-   };
-
-   @Override
-   protected void onActivityResult(int requestCode, int resultCode, Intent data)
-   {
-      if ( resultCode == RESULT_CANCELED )
-      {
-         finish();
-         return;
-      }
-      switch ( requestCode )
-      {
-
-         case SqueezeDroidConstants.RequestCodes.REQUEST_CHOOSE_PLAYER :
-            Toast.makeText( getApplicationContext(), "Player selected", Toast.LENGTH_SHORT ).show();
-            onPlayerChanged();
-            break;
-         case SqueezeDroidConstants.RequestCodes.REQUEST_SHOW_SETTINGS :
-            onPlayerChanged();
-            break;
-         default :
-            break;
-      }
-      super.onActivityResult( requestCode, resultCode, data );
    };
 
    @Override

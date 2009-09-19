@@ -96,7 +96,7 @@ public class EventThread extends Thread
                   // and it might be associated to a player we are not subscribed too.
                   //
                   //As a hack, just 'fake' a second sync command, swapping the playerid and data.
-                  if( "sync".equals( eventType ) )
+                  if( "sync".equals( eventType ) && !data.equals(  "-" ) )
                   {
                      notify( eventType, SerializationUtils.decode( data ), playerId );
                   }
@@ -179,7 +179,7 @@ public class EventThread extends Thread
          else
          {
             Player updatedPlayer = _service.getPlayer( playerId );
-            handler.onPlayerSynchronized( updatedPlayer, data );
+            handler.onPlayerSynchronized( updatedPlayer, SerializationUtils.decode( data ) );
          }
       }
    };

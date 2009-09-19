@@ -121,7 +121,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
             break;
       }
       
-      super.onActivityResult( requestCode, resultCode, data );
+      //super.onActivityResult( requestCode, resultCode, data );
    }
    
    @Override

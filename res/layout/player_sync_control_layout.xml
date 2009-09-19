@@ -11,7 +11,7 @@
       style="?android:attr/progressBarStyleHorizontal"
     />
    <ImageButton android:src="@drawable/unsync"
-         android:layout_width="30px" android:layout_height="30px"
+         android:layout_width="40px" android:layout_height="40px"
          android:padding="3px"
          android:scaleType="fitCenter"
          android:layout_alignParentRight="true"

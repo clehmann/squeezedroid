@@ -8,6 +8,8 @@ import java.io.Writer;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +56,23 @@ public class CliSqueezeService implements SqueezeService
    private BufferedReader clientReader;
 
    private EventThread eventThread;
+   private BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
+   private Thread commandThread = new Thread()
+   {
+      public void run() {
+         try
+         {
+            while( !interrupted() )
+            {
+               Runnable r = commandQueue.take();
+               r.run();
+            }
+         } catch (InterruptedException e) {
+            //just finish...
+         }
+         
+      };
+   };
 
    public CliSqueezeService(String host, int cliPort, int httpPort)
    {
@@ -115,6 +134,8 @@ public class CliSqueezeService implements SqueezeService
       eventThread = new EventThread( host, cliPort );
       eventThread.setService( this );
       eventThread.start();
+      
+      commandThread.start();
    }
 
    /**
@@ -138,8 +159,8 @@ public class CliSqueezeService implements SqueezeService
          clientSocket = null;
       }
 
-      eventThread.stop();
-
+      eventThread.interrupt();
+      commandThread.interrupt();
    }
 
    public boolean isConnected()
@@ -152,6 +173,19 @@ public class CliSqueezeService implements SqueezeService
       writeCommand( command );
       return readResponse();
    }
+   
+   private void executeAsyncCommand(final String commandString)
+   {
+      Runnable command = new Runnable()
+      {
+         public void run()
+         {
+            executeCommand( commandString );
+         }
+      };
+      commandQueue.add( command );
+   }
+
 
    private String readResponse()
    {
@@ -330,29 +364,37 @@ public class CliSqueezeService implements SqueezeService
             return player;
          }
       } );
-      
-      
+
+      List<Player> groupedPlayers = new ArrayList<Player>();
+      List<String> handledPlayerIds = new ArrayList<String>();
+
       for ( Player player : players )
       {
-         command = player.getId() + " sync ?";
-         String playerSyncResult = executeCommand( command );
-         Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
-         if( matcher.find() )
+         if( !handledPlayerIds.contains( player.getId() ) )
          {
-            String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
-            String[] syncedPlayersArray = syncedPlayersString.split( "," );
-            for ( int i = 0; i < syncedPlayersArray.length; i++ )
+            handledPlayerIds.add( player.getId() );
+            command = player.getId() + " sync ?";
+            String playerSyncResult = executeCommand( command );
+            Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
+            if ( matcher.find() )
             {
-               String syncedPlayerId = syncedPlayersArray[i];
-               Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId )  );
-               if( syncedPlayer != null )
+               String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
+               String[] syncedPlayersArray = syncedPlayersString.split( "," );
+               for ( int i = 0; i < syncedPlayersArray.length; i++ )
                {
-                  player.getSyncronizedPlayers().add( syncedPlayer );
+                  String syncedPlayerId = syncedPlayersArray[i];
+                  Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId ) );
+                  if ( syncedPlayer != null )
+                  {
+                     player.getSyncronizedPlayers().add( syncedPlayer );
+                     handledPlayerIds.add( syncedPlayer.getId() );
+                  }
                }
             }
+            groupedPlayers.add( player );
          }
       }
-      return players;
+      return groupedPlayers;
    }
 
    public Player getPlayer(String playerId)
@@ -375,6 +417,11 @@ public class CliSqueezeService implements SqueezeService
          {
             Player rhs = (Player) arg0;
             matches = playerId.equals( rhs.getId() );
+            if( !matches )
+            {
+               Player syncedPlayer = (Player) CollectionUtils.find( rhs.getSyncronizedPlayers(), new PlayerIdEqualsPredicate( playerId ) );
+               matches = syncedPlayer != null;
+            }
          }
          return matches;
       }
@@ -440,7 +487,7 @@ public class CliSqueezeService implements SqueezeService
       String extraParams = getParamName( item );
 
       String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
-      executeCommand( command );
+      executeAsyncCommand( command );
    }
 
    public void playItem(Player player, Item item)
@@ -448,7 +495,7 @@ public class CliSqueezeService implements SqueezeService
       String extraParams = getParamName( item );
 
       String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
-      executeCommand( command );
+      executeAsyncCommand( command );
    }
 
    private String getParamName(Item item)
@@ -471,42 +518,42 @@ public class CliSqueezeService implements SqueezeService
 
    public void jump(Player player, String position)
    {
-      executeCommand( player.getId() + " playlist index " + position );
+      executeAsyncCommand( player.getId() + " playlist index " + position );
    }
 
    public void togglePause(Player player)
    {
-      executeCommand( player.getId() + " pause" );
+      executeAsyncCommand( player.getId() + " pause" );
    }
 
    public void pause(Player player)
    {
-      executeCommand( player.getId() + " pause 1" );
+      executeAsyncCommand( player.getId() + " pause 1" );
    }
 
    public void play(Player player)
    {
-      executeCommand( player.getId() + " play" );
+      executeAsyncCommand( player.getId() + " play" );
    }
 
    public void stop(Player player)
    {
-      executeCommand( player.getId() + " stop" );
+      executeAsyncCommand( player.getId() + " stop" );
    }
 
    public void removeAllItemsByArtist(Player player, String artistId)
    {
-      executeCommand( player.getId() + " playlistcontrol cmd:delete artist_id:" + artistId );
+      executeAsyncCommand( player.getId() + " playlistcontrol cmd:delete artist_id:" + artistId );
    }
 
    public void removeAllItemsInAlbum(Player player, String albumId)
    {
-      executeCommand( player.getId() + " playlistcontrol cmd:delete album_id:" + albumId );
+      executeAsyncCommand( player.getId() + " playlistcontrol cmd:delete album_id:" + albumId );
    }
 
    public void removeItem(Player player, int playlistIndex)
    {
-      executeCommand( player.getId() + " playlist delete " + playlistIndex );
+      executeAsyncCommand( player.getId() + " playlist delete " + playlistIndex );
    }
 
    public void subscribe(Player player, PlayerStatusHandler handler)
@@ -526,22 +573,23 @@ public class CliSqueezeService implements SqueezeService
 
    public void seekTo(Player player, int time)
    {
-      executeCommand( player.getId() + " time " + time);
+      executeAsyncCommand( player.getId() + " time " + time);
    }
 
    public void changeVolume(Player player, int volumeLevel)
    {
-      executeCommand( player.getId() + " mixer volume " + volumeLevel );
+      executeAsyncCommand( player.getId() + " mixer volume " + volumeLevel );
    }
 
    public void synchronize(Player player, Player playerToSyncTo)
    {
-      executeCommand( player.getId() + " sync " + playerToSyncTo.getId() );
+      executeAsyncCommand( player.getId() + " sync " +  playerToSyncTo.getId());
    }
 
    public void unsynchronize(Player player)
    {
-      executeCommand( player.getId() + " sync -" );
+      executeAsyncCommand( player.getId() + " sync -" );
    }
+
 
 }

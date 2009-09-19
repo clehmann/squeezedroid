@@ -9,6 +9,12 @@ public class SqueezeDroidConstants
       public static final int REQUEST_CHOOSE_PLAYER = 112;
    }
    
+   public static class IntentDataKeys
+   {
+
+      protected static final String KEY_SELECTED_PLAYER = "keySelectedPlayer";
+      
+   }
    public static class Actions
    {
       public static final String ACTION_CHOOSE_PLAYER = "net.chrislehmann.squeezedroid.action.ChoosePlayer";

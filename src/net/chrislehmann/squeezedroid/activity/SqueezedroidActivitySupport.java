@@ -1,11 +1,8 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import android.app.Activity;
-import android.content.Intent;
 
 
-public class SqueezedroidActivitySupport extends Activity
+public class SqueezedroidActivitySupport extends ActivitySupport
 {
    protected SqueezeDroidApplication getSqueezeDroidApplication()
    {
