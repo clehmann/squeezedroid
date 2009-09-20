@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="text_color">#000000</color>
+    <color name="selected">#FF8E00</color>
+    <color name="pressed">#FFC700</color>
 </resources>

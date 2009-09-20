@@ -38,12 +38,12 @@
 			<!-- ImageButton android:src="@drawable/shuffle_off"
 				android:layout_width="50px" android:layout_height="50px"
 				android:id="@+id/shuffleButton" 
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				/>
 			<ImageButton android:src="@drawable/repeat_off"
 				android:layout_width="50px" android:layout_height="50px"
 				android:id="@+id/repeatButton" 
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				/-->
 			<ImageButton android:src="@drawable/volume"
 				android:layout_width="40px" android:layout_height="40px"
@@ -52,7 +52,7 @@
 				android:layout_alignParentRight="true"
 				android:layout_alignParentBottom="true"
 				android:id="@+id/toggleVolumeButton" 
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				/>
 		</RelativeLayout>
 
@@ -94,29 +94,29 @@
 			<ImageButton android:scaleType="fitCenter" android:src="@drawable/browse"
 				android:layout_width="50px" android:layout_height="50px"
 				android:layout_alignParentLeft="true"
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				android:id="@+id/libraryButton" />
 			<ImageButton android:src="@drawable/play" 
 				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter"  android:id="@+id/playButton"
 				android:layout_centerInParent="true"
-				android:background="@drawable/empty" />
+				android:background="@drawable/button_background" />
 			<!-- ImageButton android:src="@drawable/stop"
 				android:layout_width="50px" android:layout_height="50px" android:id="@+id/stopButton" /-->
 			<ImageButton android:src="@drawable/prev"
 				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/prevButton" 
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				android:layout_toLeftOf="@id/playButton"
 				/>
 			<ImageButton android:src="@drawable/next"
 				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/nextButton" 
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				android:layout_toRightOf="@id/playButton"
 				/>
 			<ImageButton android:scaleType="fitCenter" android:src="@drawable/playlist"
 				android:layout_width="50px" android:layout_height="50px"
 				android:id="@+id/playlistButton" android:layout_gravity="right" 
 				android:layout_alignParentRight="true"
-				android:background="@drawable/empty"
+				android:background="@drawable/button_background"
 				/>
 		</RelativeLayout>
 		</LinearLayout>

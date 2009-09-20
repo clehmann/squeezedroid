@@ -162,9 +162,7 @@ public class EventThread extends Thread
             handler.onTimeChanged( newTime );
 
          }
-         catch ( NumberFormatException e )
-         {/* Invalid time, do not notify */
-         }
+         catch ( NumberFormatException e ){/* Invalid time, do not notify */}
       }
    };
 

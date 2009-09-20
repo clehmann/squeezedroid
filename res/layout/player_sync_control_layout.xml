@@ -17,6 +17,6 @@
          android:layout_alignParentRight="true"
          android:layout_alignBottom="@id/volume_seek_bar"
          android:id="@+id/unsync_button" 
-         android:background="@drawable/empty"
+         android:background="@drawable/button_background"
          />
 </RelativeLayout>
