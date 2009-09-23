@@ -18,4 +18,10 @@ public class SimplePlayerStatusHandler implements PlayerStatusHandler
 
    public void onPlayerUnsynchronized(){}
 
+   public void onPause(){}
+
+   public void onPlay(){}
+
+   public void onStop(){}
+
 }

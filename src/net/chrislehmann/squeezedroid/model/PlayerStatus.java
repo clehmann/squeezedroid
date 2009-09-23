@@ -1,36 +1,62 @@
 package net.chrislehmann.squeezedroid.model;
 
 
-public class PlayerStatus {
-	private Song currentSong;
-	private int currentIndex;
-	private String status;
-	private int currentPosition;
-	private int volume;
+public class PlayerStatus
+{
+   private static final Object STATUS_PAUSED = "pause";
+   private static final Object STATUS_PLAYING = "play";
+   private static final String STATUS_STOPPED = "stop";
+   
+   private Song currentSong;
+   private int currentIndex;
+   private String status;
+   private int currentPosition;
+   private int volume;
 
-	public int getCurrentIndex() {
-		return currentIndex;
-	}
+   public int getCurrentIndex()
+   {
+      return currentIndex;
+   }
 
-	public void setCurrentIndex(int currentIndex) {
-		this.currentIndex = currentIndex;
-	}
+   public void setCurrentIndex(int currentIndex)
+   {
+      this.currentIndex = currentIndex;
+   }
 
-	public String getStatus() {
-		return status;
-	}
+   public String getStatus()
+   {
+      return status;
+   }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+   public boolean isPlaying()
+   {
+      return STATUS_PLAYING.equals( status );
+   }
 
-	public Song getCurrentSong() {
-		return currentSong;
-	}
+   public boolean isPaused()
+   {
+      return STATUS_PAUSED.equals( status );
+   }
 
-	public void setCurrentSong(Song currentSong) {
-		this.currentSong = currentSong;
-	}
+   public boolean isStopped()
+   {
+      return STATUS_STOPPED.equals( status );
+   }
+
+   public void setStatus(String status)
+   {
+      this.status = status;
+   }
+
+   public Song getCurrentSong()
+   {
+      return currentSong;
+   }
+
+   public void setCurrentSong(Song currentSong)
+   {
+      this.currentSong = currentSong;
+   }
 
    public int getCurrentPosition()
    {

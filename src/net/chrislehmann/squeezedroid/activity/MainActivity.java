@@ -214,11 +214,10 @@ public class MainActivity extends SqueezedroidActivitySupport
    public boolean onCreateOptionsMenu(Menu menu)
    {
       menu.add( 0, MENU_ADD_PLAYER, 0, "Add player" );
-      menu.add( 0, MENU_SYNC_PLAYER, 0, "Sync to player" );
-      menu.add( 0, MENU_SETTINGS, 0, "Settings" );
       menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
       menu.add( 0, MENU_ADD_SONG, 0, "Repeat Song" );
-
+      menu.add( 0, MENU_ADD_SONG, 0, "Shuffle Album" );
+      menu.add( 0, MENU_SETTINGS, 0, "Settings" );
       return true;
    }
 
@@ -246,11 +245,9 @@ public class MainActivity extends SqueezedroidActivitySupport
          case MENU_CHOOSE_PLAYER :
             launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
             return true;
-         case MENU_SYNC_PLAYER:
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForSyncCallback );
-            return true;
          case MENU_ADD_PLAYER:
             launchSubActivity( ChoosePlayerActivity.class, choosePlayerForAddCallback );
+            return true;
       }
       return false;
    }
@@ -284,10 +281,23 @@ public class MainActivity extends SqueezedroidActivitySupport
          _songLabel.setText( currentSong.getName() );
          _artistLabel.setText( currentSong.getArtist() );
          _albumLabel.setText( currentSong.getAlbum() );
+         
+         if(status.isPlaying())
+         {
+            _playButton.setImageResource( R.drawable.pause );
+         }
+         else
+         {
+            _playButton.setImageResource( R.drawable.play );
+         }
 
          _timeSeekBar.setMax( currentSong.getDurationInSeconds() );
+         if( status.isPlaying() )
+         {
+            _timeSeekBar.start();
+         }
+
          _currentStatus = status;
-         _timeSeekBar.start();
       }
       else
       {
@@ -328,6 +338,30 @@ public class MainActivity extends SqueezedroidActivitySupport
          _timeSeekBar.setProgress( status.getCurrentPosition() );
 
       }
+      
+      public void onPlay() { 
+         runOnUiThread( new Runnable()
+         {
+            public void run()
+            {
+               _playButton.setImageResource( R.drawable.pause ); 
+               _timeSeekBar.start();
+            }
+         });
+      }
+      
+      public void onPause() { 
+         runOnUiThread( new Runnable()
+         {
+            public void run()
+            {
+               _playButton.setImageResource( R.drawable.play );
+               _timeSeekBar.pause();
+            }
+         });
+      }
+      
+      public void onStop() { onPause();}
    };
 
    private void onPlayerChanged()

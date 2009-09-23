@@ -166,6 +166,17 @@ public class EventThread extends Thread
       }
    };
 
+   private CommandHandler playPauseStopHandler = new CommandHandler()
+   {
+      public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
+      {
+         if( _status.isPaused() ){ handler.onPause(); }
+         if( _status.isPlaying() ){ handler.onPlay(); }
+         if( _status.isStopped() ){ handler.onStop(); }
+      }
+   };
+
+   
    private CommandHandler playerSyncStatusHandler = new CommandHandler()
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
@@ -210,6 +221,9 @@ public class EventThread extends Thread
       _commandHandlers.put( "time", timeChangeHandler );
       _commandHandlers.put( "mixer", mixerChangeHandler );
       _commandHandlers.put( "sync", playerSyncStatusHandler );
+      _commandHandlers.put( "play", playPauseStopHandler );
+      _commandHandlers.put( "pause", playPauseStopHandler );
+      _commandHandlers.put( "stop", playPauseStopHandler );
 
    }
 
@@ -256,7 +270,7 @@ public class EventThread extends Thread
 
          _eventWriter.write( "listen 1\n" );
          _eventWriter.flush();
-         _eventWriter.write( "subscribe playlist,time,mixer,sync\n" );
+         _eventWriter.write( "subscribe playlist,time,mixer,sync,play,pause,stop\n" );
          _eventWriter.flush();
          Log.v( LOGTAG, "subscribed to events" );
 

@@ -14,6 +14,12 @@ public interface PlayerStatusHandler
 
    public void onVolumeChanged( int newVolume );
    
+   public void onPause();
+
+   public void onPlay();
+
+   public void onStop();
+
    public void onPlayerSynchronized( Player player, String syncronizedPlayerId );
 
    public void onPlayerUnsynchronized();
