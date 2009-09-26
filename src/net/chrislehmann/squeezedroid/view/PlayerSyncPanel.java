@@ -128,10 +128,6 @@ public class PlayerSyncPanel extends LinearLayout
       service.subscribe( player, volumeHandler );
 
       PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
-      if( !isPrimary )
-      {
-         syncHandler = new MainPlayerOnSyncHandler( );
-      }
       syncronizations.put( player.getId(), new Syncronization( view, volumeHandler, syncHandler ) );
       service.subscribe( player, syncHandler );
       
@@ -220,9 +216,20 @@ public class PlayerSyncPanel extends LinearLayout
          });
 
       }
-      
+
       @Override
       public void onPlayerUnsynchronized()
+      {
+         updatePlayer();
+      }
+      
+      @Override
+      public void onDisconnect()
+      {
+         updatePlayer();
+      }
+
+      private void updatePlayer()
       {
          final Player updatedPlayer = service.getPlayer( player.getId() );
          parent.runOnUiThread( new Runnable()
@@ -233,5 +240,6 @@ public class PlayerSyncPanel extends LinearLayout
             }
          });
       }
+      
    }
 }

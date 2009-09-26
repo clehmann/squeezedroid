@@ -35,8 +35,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    private static final int MENU_ADD_SONG = 0;
    private static final int MENU_SETTINGS = 2;
    private static final int MENU_CHOOSE_PLAYER = 3;
-   private static final int MENU_SYNC_PLAYER = 4;
-   private static final int MENU_ADD_PLAYER = 5;
+   private static final int MENU_ADD_PLAYER = 4;
 
    private PlayListAdapter _playlistListAdapter;
    private ViewSwitcher _coverArtImageView;
@@ -60,7 +59,7 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    private PlayerStatus _currentStatus;
 
-   android.view.View.OnClickListener onPlayButtonPressed = new android.view.View.OnClickListener()
+   OnClickListener onPlayButtonPressed = new android.view.View.OnClickListener()
    {
       public void onClick(View v)
       {
@@ -171,20 +170,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-   private IntentResultCallback choosePlayerForSyncCallback = new IntentResultCallback()
-   {
-      public void resultOk(String resultString, Bundle resultMap)
-      {
-         SqueezeService service = getSqueezeDroidApplication().getService();
-         if( service != null )
-         {
-            service.synchronize( (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER), getSelectedPlayer() );         
-         }
-      }
-      
-      public void resultCancel(String resultString, Bundle resultMap){}
-   };
-   
    private IntentResultCallback choosePlayerForAddCallback = new IntentResultCallback()
    {
       public void resultOk(String resultString, Bundle resultMap)
@@ -319,6 +304,7 @@ public class MainActivity extends SqueezedroidActivitySupport
 
       public void onSongChanged(final PlayerStatus status)
       {
+               
          if ( _currentStatus == null || _currentStatus.getCurrentSong().getId() != status.getCurrentSong().getId() )
          {
             final BrowseResult<Song> playlist = ActivityUtils.getService( context ).getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
@@ -362,6 +348,12 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
       
       public void onStop() { onPause();}
+      
+      public void onDisconnect() 
+      {
+         getSqueezeDroidApplication().setSelectedPlayer( null );
+         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+      };
    };
 
    private void onPlayerChanged()

@@ -24,4 +24,6 @@ public class SimplePlayerStatusHandler implements PlayerStatusHandler
 
    public void onStop(){}
 
+   public void onDisconnect() {}
+
 }

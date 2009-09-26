@@ -24,4 +24,6 @@ public interface PlayerStatusHandler
 
    public void onPlayerUnsynchronized();
 
+   public void onDisconnect();
+
 }

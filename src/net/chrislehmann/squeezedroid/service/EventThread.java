@@ -11,10 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,6 +175,17 @@ public class EventThread extends Thread
    };
 
    
+   private CommandHandler clientHandler = new CommandHandler()
+   {
+      public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
+      {
+         if ( "forget".equals( data ) )
+         {
+            handler.onDisconnect();
+         }
+      }
+   };
+
    private CommandHandler playerSyncStatusHandler = new CommandHandler()
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
@@ -193,6 +202,7 @@ public class EventThread extends Thread
       }
    };
 
+   
    private CommandHandler mixerChangeHandler = new CommandHandler()
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
@@ -224,6 +234,7 @@ public class EventThread extends Thread
       _commandHandlers.put( "play", playPauseStopHandler );
       _commandHandlers.put( "pause", playPauseStopHandler );
       _commandHandlers.put( "stop", playPauseStopHandler );
+      _commandHandlers.put( "client", clientHandler );
 
    }
 
@@ -270,7 +281,7 @@ public class EventThread extends Thread
 
          _eventWriter.write( "listen 1\n" );
          _eventWriter.flush();
-         _eventWriter.write( "subscribe playlist,time,mixer,sync,play,pause,stop\n" );
+         _eventWriter.write( "subscribe playlist,time,mixer,sync,play,pause,stop,client\n" );
          _eventWriter.flush();
          Log.v( LOGTAG, "subscribed to events" );
 
