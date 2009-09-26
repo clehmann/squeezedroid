@@ -87,9 +87,9 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
-   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) title%3A([^ ]*) artist%3A([^ ]*) artist_id%3A([^ ]*) album%3A([^ ]*) album_id%3A([^ ]*) .*?duration%3A([^ ]*)" );
+   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?album%3A([^ ]*) .*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*)" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
-   private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?time%3A([^ ]*) .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
+   private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
@@ -100,14 +100,20 @@ public class CliSqueezeService implements SqueezeService
          song.setId( matcher.group( 1 ) );
          song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
          song.setArtist( SerializationUtils.decode( matcher.group( 3 ) ) );
-         song.setArtistId( SerializationUtils.decode( matcher.group( 4 ) ) );
-         song.setAlbum( SerializationUtils.decode( matcher.group( 5 ) ) );
-         song.setAlbumId( SerializationUtils.decode( matcher.group( 6 ) ) );
+         if( matcher.group( 5 ) != null )
+         {
+            song.setArtistId( SerializationUtils.decode( matcher.group( 5 ) ) );
+         }
+         song.setAlbum( SerializationUtils.decode( matcher.group( 6 ) ) );
+         if( matcher.group( 8 ) != null )
+         {
+            song.setAlbumId( SerializationUtils.decode( matcher.group( 8 ) ) );
+         }
          song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
          song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
          try
          {
-            Float duration = Float.parseFloat( matcher.group( 7 ) );
+            Float duration = Float.parseFloat( matcher.group( 9 ) );
             song.setDurationInSeconds( duration.intValue() );
          } catch (NumberFormatException e) {}
          return song;
@@ -440,23 +446,26 @@ public class CliSqueezeService implements SqueezeService
       if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
       {
          Log.d( LOGTAG, "Status: " + statusMatcher.group( 1 ) );
-         Log.d( LOGTAG, "Time: " + statusMatcher.group( 2 ) );
-         Log.d( LOGTAG, "Volume: " + statusMatcher.group( 3 ) );
-         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 4 ) );
+         Log.d( LOGTAG, "Time: " + statusMatcher.group( 3 ) );
+         Log.d( LOGTAG, "Volume: " + statusMatcher.group( 4 ) );
+         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 5 ) );
          
          status.setStatus( statusMatcher.group(1) );
          
-         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 4 ) ) );
-         String positionString = statusMatcher.group( 2 );
+         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 5 ) ) );
+         String positionString = statusMatcher.group( 3 );
          try
          {
-            Double d = Double.parseDouble( positionString );
-            status.setCurrentPosition( d.intValue() );
-         } catch (NumberFormatException nfd) {/* Invalid, don't set position. */}
-         try
-         {
-            Double d = Double.parseDouble( statusMatcher.group( 3 ) );
-            status.setVolume( d.intValue() );
+            if( positionString != null )
+            {
+               Double d = Double.parseDouble( positionString );
+               status.setCurrentPosition( d.intValue() );
+            }
+            if( statusMatcher.group( 4 ) != null  )
+            {
+               Double d = Double.parseDouble( statusMatcher.group( 4 ) );
+               status.setVolume( d.intValue() );
+            }
          } catch (NumberFormatException nfd) {/* Invalid, don't set volume. */}
       }
       return status;
