@@ -76,9 +76,9 @@
 				android:layout_height="310px" android:layout_width="310px"
 				android:layout_gravity="center">
 				<ImageView 
-					android:layout_width="wrap_content" android:layout_height="fill_parent" />
+					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310px" android:minWidth="310px"/>
 				<ImageView 
-					android:layout_width="wrap_content" android:layout_height="fill_parent" />
+					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310px" android:minWidth="310px"/>
 			</ViewSwitcher>
 
 		</LinearLayout>

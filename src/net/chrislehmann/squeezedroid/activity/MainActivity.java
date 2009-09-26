@@ -246,7 +246,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          //Update the image if it has changed...
          if ( _currentStatus == null || !_currentStatus.getCurrentSong().getImageUrl().equals( status.getCurrentSong().getImageUrl() ) )
          {
-            if ( _currentStatus != null && _currentStatus.getCurrentIndex() < status.getCurrentIndex() )
+            if ( _currentStatus != null && _currentStatus.getCurrentIndex() <= status.getCurrentIndex() )
             {
                _coverArtImageView.setOutAnimation( this, R.anim.slide_out_left );
                _coverArtImageView.setInAnimation( this, R.anim.slide_in_right );

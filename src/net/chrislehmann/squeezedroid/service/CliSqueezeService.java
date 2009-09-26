@@ -40,7 +40,7 @@ public class CliSqueezeService implements SqueezeService
 {
 
    private static final String LOGTAG = "SQUEEZE";
-   private static final String SONG_TAGS = "asleJpPd";
+   private static final String SONG_TAGS = "asleJpPdxK";
    /**
     * Host to connect to
     */
@@ -87,7 +87,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
-   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?album%3A([^ ]*) .*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*)" );
+   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
@@ -104,16 +104,32 @@ public class CliSqueezeService implements SqueezeService
          {
             song.setArtistId( SerializationUtils.decode( matcher.group( 5 ) ) );
          }
-         song.setAlbum( SerializationUtils.decode( matcher.group( 6 ) ) );
-         if( matcher.group( 8 ) != null )
+         song.setAlbum( SerializationUtils.decode( matcher.group( 7 ) ) );
+         if( matcher.group( 9 ) != null )
          {
-            song.setAlbumId( SerializationUtils.decode( matcher.group( 8 ) ) );
+            song.setAlbumId( SerializationUtils.decode( matcher.group( 10 ) ) );
          }
-         song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
-         song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
+         
+         
+         if( matcher.group( 11 ) != null && "1".equals( matcher.group( 12 )  ) )
+         {
+            song.setRadioStation( true );
+         }
+         
+
+         if( matcher.group( 14 ) != null )
+         {
+            song.setImageUrl( SerializationUtils.decode(matcher.group( 14 )) );
+         }
+         else
+         {
+            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
+            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
+         }
+         
          try
          {
-            Float duration = Float.parseFloat( matcher.group( 9 ) );
+            Float duration = Float.parseFloat( matcher.group( 10 ) );
             song.setDurationInSeconds( duration.intValue() );
          } catch (NumberFormatException e) {}
          return song;

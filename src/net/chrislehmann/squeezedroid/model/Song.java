@@ -5,7 +5,9 @@ public class Song extends Item {
 	private String artistId;
 	private String album;
 	private String albumId;
-	private int durationInSeconds = 480;
+	private int durationInSeconds;
+	private boolean isRadioStation;
+	
 
 	public String getArtist() {
 		return artist;
@@ -57,5 +59,15 @@ public class Song extends Item {
    public void setDurationInSeconds(int durationInSeconds)
    {
       this.durationInSeconds = durationInSeconds;
+   }
+
+   public boolean isRadioStation()
+   {
+      return isRadioStation;
+   }
+
+   public void setRadioStation(boolean isRadioStation)
+   {
+      this.isRadioStation = isRadioStation;
    }
 }

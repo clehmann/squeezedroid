@@ -6,6 +6,7 @@
 		android:id="@+id/song_thumbnail" 
 		android:minHeight="50px" android:maxHeight="50px" 
 		android:minWidth="50px" android:maxWidth="50px" 
+        android:scaleType="fitCenter"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:src="@drawable/cover_50x50_p"

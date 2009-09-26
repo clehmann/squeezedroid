@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+
 public class SerializationUtils
 {
    public static <T> List<T> unserializeList( Pattern pattern, String input, Unserializer<T> unserializer )
@@ -36,20 +38,23 @@ public class SerializationUtils
 
    public static String decode(String string)
    {
-      String decodedString;
-      decodedString = string.replace( "%20", " " );
-      decodedString = decodedString.replace( "%2C", "," );
-      decodedString = decodedString.replace( "%26", "&" );
-      decodedString = decodedString.replace( "%3A", ":" );
-      decodedString = decodedString.replace( "%24", "$" );
-      decodedString = decodedString.replace( "%26", "&" );
-      decodedString = decodedString.replace( "%2B", "+" );
-      decodedString = decodedString.replace( "%2F", "/" );
-      decodedString = decodedString.replace( "%3A", ":" );
-      decodedString = decodedString.replace( "%3B", ";" );
-      decodedString = decodedString.replace( "%3F", "?" );
-      decodedString = decodedString.replace( "%40", "@" );
       
+      String decodedString = null;
+      if( string != null  )
+      {
+         decodedString = string.replace( "%20", " " );
+         decodedString = decodedString.replace( "%2C", "," );
+         decodedString = decodedString.replace( "%26", "&" );
+         decodedString = decodedString.replace( "%3A", ":" );
+         decodedString = decodedString.replace( "%24", "$" );
+         decodedString = decodedString.replace( "%26", "&" );
+         decodedString = decodedString.replace( "%2B", "+" );
+         decodedString = decodedString.replace( "%2F", "/" );
+         decodedString = decodedString.replace( "%3A", ":" );
+         decodedString = decodedString.replace( "%3B", ";" );
+         decodedString = decodedString.replace( "%3F", "?" );
+         decodedString = decodedString.replace( "%40", "@" );
+      }
       return decodedString;
    }
 
