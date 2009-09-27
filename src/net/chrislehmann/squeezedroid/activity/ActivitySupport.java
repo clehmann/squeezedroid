@@ -17,10 +17,21 @@ public class ActivitySupport extends Activity
    private static final String LOGTAG = "ActivitySupport";
    protected HashMap<Integer, IntentResultCallback> _callbackMap = new HashMap<Integer, IntentResultCallback>();
 
+
    /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
-   public void launchSubActivity(Class subActivityClass, IntentResultCallback callback)
+   protected void launchSubActivity(Class subActivityClass, IntentResultCallback callback )
+   {
+      launchSubActivity( subActivityClass, callback, false );
+   }
+
+   /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
+   protected void launchSubActivity(Class subActivityClass, IntentResultCallback callback, boolean startNewTask )
    {
       Intent i = new Intent( this, subActivityClass );
+      if( startNewTask )
+      {
+         i.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK  );
+      }
 
       Random rand = new Random();
       int correlationId = Math.abs( rand.nextInt() );

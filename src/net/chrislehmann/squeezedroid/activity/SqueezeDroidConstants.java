@@ -7,6 +7,11 @@ public class SqueezeDroidConstants
       public static final int REQUEST_SHOW_SETTINGS = 110;
       public static final int REQUEST_CONNECT = 111;
       public static final int REQUEST_CHOOSE_PLAYER = 112;
+      public static final int REQUEST_BROWSE = 113;
+   }
+   public static class ResultCodes
+   {
+      public static final int RESULT_DONE = 999;
    }
    
    public static class IntentDataKeys

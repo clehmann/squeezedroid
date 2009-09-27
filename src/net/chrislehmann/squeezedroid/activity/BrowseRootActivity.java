@@ -31,7 +31,6 @@ public class BrowseRootActivity extends ListActivity {
       String item = (String) getListAdapter().getItem( position );
       
       Intent intent = new Intent();
-      
       if( item.equals( "Artists" ))
       {
          intent.setAction( "net.chrislehmann.squeezedroid.action.BrowseArtist" );
@@ -52,8 +51,7 @@ public class BrowseRootActivity extends ListActivity {
          intent.setAction( "net.chrislehmann.squeezedroid.action.BrowseAlbum" );
          intent.setData( Uri.parse( "squeeze:///?sort=new" ));
       }         
-      this.startActivity( intent );
-      
+      this.startActivityForResult( intent, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
       super.onListItemClick( l, v, position, id );
    }
 
@@ -89,6 +87,15 @@ public class BrowseRootActivity extends ListActivity {
          }
 
          return (row);
+      }
+      
+   }
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data)
+   {
+      if( resultCode == SqueezeDroidConstants.ResultCodes.RESULT_DONE )
+      {
+         finish();
       }
    }
 }

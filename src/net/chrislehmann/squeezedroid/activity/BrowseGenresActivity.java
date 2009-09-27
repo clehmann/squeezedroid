@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-public class BrowseGenresActivity extends ListActivity {
+public class BrowseGenresActivity extends ItemListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -24,9 +24,15 @@ public class BrowseGenresActivity extends ListActivity {
 		Intent i = new Intent();
 		i.setAction("net.chrislehmann.squeezedroid.action.BrowseArtist");
 		i.setData(Uri.parse("squeeze:///genre/" + item.getId()));
-		startActivity(i);
+		startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE);
 
 		super.onListItemClick(l, v, position, id);
+	}
+
+	@Override
+	protected Item getParentItem()
+	{
+	   return null;
 	}
 
 }

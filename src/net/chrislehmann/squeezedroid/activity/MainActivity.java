@@ -439,7 +439,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    }
 
-   @SuppressWarnings("serial")
    OnClickListener onShuffleButtonPressed = new OnClickListener()
    {
       private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>(){{
