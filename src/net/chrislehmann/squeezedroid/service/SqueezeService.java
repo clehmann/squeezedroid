@@ -1,6 +1,8 @@
 package net.chrislehmann.squeezedroid.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
@@ -14,7 +16,38 @@ import net.chrislehmann.squeezedroid.model.Song;
 public interface SqueezeService
 {
    enum Sort {
-      TITLE, NEW
+      TITLE( ), NEW
+   }
+   @SuppressWarnings("serial")
+   enum ShuffleMode {
+      NONE(0), SONG(1), ALBUM(2);
+      int id;
+      private ShuffleMode( int id )
+      {
+         this.id = id;
+      };
+      
+      public static Map<String, ShuffleMode> intToShuffleModeMap = new HashMap<String, ShuffleMode>(){{
+         put( "0", ShuffleMode.NONE );
+         put( "1", ShuffleMode.SONG );
+         put( "2", ShuffleMode.ALBUM );
+      }};
+   }
+
+   @SuppressWarnings("serial")
+   enum RepeatMode {
+      NONE(0), SONG(1), ALL(2);
+      int id;
+      private RepeatMode( int id )
+      {
+         this.id = id;
+      };
+
+      public static Map<String, RepeatMode> intToRepeatModeMap = new HashMap<String, RepeatMode>(){{
+         put( "0", RepeatMode.NONE );
+         put( "1", RepeatMode.SONG );
+         put( "2", RepeatMode.ALL );
+      }};
    }
 
    public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems);
@@ -75,4 +108,7 @@ public interface SqueezeService
 
    public void synchronize( Player player, Player playerToSyncTo );
 
+   public void setShuffleMode( Player player, ShuffleMode mode );
+   
+   public void setRepeatMode( Player player, RepeatMode mode );
 }

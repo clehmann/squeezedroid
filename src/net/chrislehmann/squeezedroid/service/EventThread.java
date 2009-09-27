@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
+import net.chrislehmann.squeezedroid.service.SqueezeService.ShuffleMode;
 import net.chrislehmann.util.SerializationUtils;
 import android.util.Log;
 
@@ -146,6 +148,16 @@ public class EventThread extends Thread
          if ( "loadtracks".equalsIgnoreCase( action ) || "delete".equalsIgnoreCase( action ) || "deletetracks".equalsIgnoreCase( action ) )
          {
             handler.onPlaylistChanged( _status );
+         }
+         if( "shuffle".equalsIgnoreCase( action ) )
+         {
+            ShuffleMode mode = ShuffleMode.intToShuffleModeMap.get( splitData[1] );
+            handler.onShuffleModeChanged( mode );
+         }
+         if( "repeat".equalsIgnoreCase( action ) )
+         {
+            RepeatMode mode = RepeatMode.intToRepeatModeMap.get( splitData[1] );
+            handler.onRepeatModeChanged( mode );
          }
       }
    };

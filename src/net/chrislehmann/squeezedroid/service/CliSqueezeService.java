@@ -7,7 +7,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
@@ -36,6 +38,7 @@ import android.util.Log;
  * 
  * @author lehmanc
  */
+@SuppressWarnings("serial")
 public class CliSqueezeService implements SqueezeService
 {
 
@@ -89,7 +92,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
    private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
-   private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
+   private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
@@ -448,6 +451,7 @@ public class CliSqueezeService implements SqueezeService
          return matches;
       }
    }
+   
    public PlayerStatus getPlayerStatus(Player player)
    {
       String command = new String( player.getId() + " status - 1 tags:" + SONG_TAGS );
@@ -464,11 +468,12 @@ public class CliSqueezeService implements SqueezeService
          Log.d( LOGTAG, "Status: " + statusMatcher.group( 1 ) );
          Log.d( LOGTAG, "Time: " + statusMatcher.group( 3 ) );
          Log.d( LOGTAG, "Volume: " + statusMatcher.group( 4 ) );
-         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 5 ) );
+         Log.d( LOGTAG, "Repeat: " + statusMatcher.group( 5 ) );
+         Log.d( LOGTAG, "Shuffle: " + statusMatcher.group( 6 ) );
+         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 7 ) );
          
          status.setStatus( statusMatcher.group(1) );
-         
-         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 5 ) ) );
+         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 7 ) ) );
          String positionString = statusMatcher.group( 3 );
          try
          {
@@ -483,6 +488,10 @@ public class CliSqueezeService implements SqueezeService
                status.setVolume( d.intValue() );
             }
          } catch (NumberFormatException nfd) {/* Invalid, don't set volume. */}
+         
+         status.setRepeatMode( RepeatMode.intToRepeatModeMap.get( statusMatcher.group(5) ) );
+         status.setShuffleMode( ShuffleMode.intToShuffleModeMap.get( statusMatcher.group(6) ) );
+
       }
       return status;
 
@@ -619,5 +628,13 @@ public class CliSqueezeService implements SqueezeService
       executeAsyncCommand( player.getId() + " sync -" );
    }
 
-
+   public void setShuffleMode( Player player, ShuffleMode mode )
+   {
+      executeAsyncCommand( player.getId() + " playlist shuffle " + mode.id );
+   }
+   
+   public void setRepeatMode( Player player, RepeatMode mode )
+   {
+      executeAsyncCommand( player.getId() + " playlist repeat " + mode.id );
+   }
 }

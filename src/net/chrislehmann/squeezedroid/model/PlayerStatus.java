@@ -1,5 +1,7 @@
 package net.chrislehmann.squeezedroid.model;
 
+import net.chrislehmann.squeezedroid.service.SqueezeService;
+
 
 public class PlayerStatus
 {
@@ -12,6 +14,9 @@ public class PlayerStatus
    private String status;
    private int currentPosition;
    private int volume;
+   
+   private SqueezeService.ShuffleMode shuffleMode;
+   private SqueezeService.RepeatMode repeatMode;
 
    public int getCurrentIndex()
    {
@@ -76,6 +81,26 @@ public class PlayerStatus
    public void setVolume(int volume)
    {
       this.volume = volume;
+   }
+
+   public SqueezeService.ShuffleMode getShuffleMode()
+   {
+      return shuffleMode;
+   }
+
+   public void setShuffleMode(SqueezeService.ShuffleMode shuffleMode)
+   {
+      this.shuffleMode = shuffleMode;
+   }
+
+   public SqueezeService.RepeatMode getRepeatMode()
+   {
+      return repeatMode;
+   }
+
+   public void setRepeatMode(SqueezeService.RepeatMode repeatMode)
+   {
+      this.repeatMode = repeatMode;
    }
 
 }

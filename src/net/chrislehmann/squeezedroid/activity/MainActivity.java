@@ -1,5 +1,8 @@
 package net.chrislehmann.squeezedroid.activity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
@@ -9,6 +12,7 @@ import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
@@ -28,14 +32,16 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+@SuppressWarnings("serial")
 public class MainActivity extends SqueezedroidActivitySupport
 {
    private static final String LOGTAG = "MainActivity";
    
-   private static final int MENU_ADD_SONG = 0;
-   private static final int MENU_SETTINGS = 2;
-   private static final int MENU_CHOOSE_PLAYER = 3;
-   private static final int MENU_ADD_PLAYER = 4;
+   private static final int MENU_SETTINGS = 1;
+   private static final int MENU_CHOOSE_PLAYER = 2;
+   private static final int MENU_ADD_PLAYER = 3;
+   private static final int MENU_PLAYLIST = 4;
+   private static final int MENU_LIBRARY = 5;
 
    private PlayListAdapter _playlistListAdapter;
    private ViewSwitcher _coverArtImageView;
@@ -49,8 +55,8 @@ public class MainActivity extends SqueezedroidActivitySupport
    private ImageButton _prevButton;
    private ImageButton _nextButton;
    private ImageButton _playButton;
-   private ImageButton _playListButton;
-   private ImageButton _libraryButton;
+   private ImageButton _shuffleButton;
+   private ImageButton _repeatButton;
    private ImageButton _toggleVolumeButton;
 
    private PlayerSyncPanel _syncPanel;
@@ -58,7 +64,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    private UpdatingSeekBar _timeSeekBar;
 
    private PlayerStatus _currentStatus;
-
+   
    OnClickListener onPlayButtonPressed = new android.view.View.OnClickListener()
    {
       public void onClick(View v)
@@ -127,8 +133,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       _playButton = (ImageButton) findViewById( R.id.playButton );
       _nextButton = (ImageButton) findViewById( R.id.nextButton );
       _prevButton = (ImageButton) findViewById( R.id.prevButton );
-      _playListButton = (ImageButton) findViewById( R.id.playlistButton );
-      _libraryButton = (ImageButton) findViewById( R.id.libraryButton );
+      _shuffleButton = (ImageButton) findViewById( R.id.shuffleButton );
+      _repeatButton = (ImageButton) findViewById( R.id.repeatButton );
       _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
       _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
       _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
@@ -137,8 +143,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       _prevButton.setOnClickListener( onPrevButtonPressed );
       _playButton.setOnClickListener( onPlayButtonPressed );
       _nextButton.setOnClickListener( onNextButtonPressed );
-      _playListButton.setOnClickListener( onPlaylisyButtonPressed );
-      _libraryButton.setOnClickListener( onLibraryButtonPressed );
+      _shuffleButton.setOnClickListener( onShuffleButtonPressed );
+      _repeatButton.setOnClickListener( onRepeatButtonPressed );
       _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
       
       if ( !isPlayerSelected() )
@@ -170,6 +176,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
+   
    private IntentResultCallback choosePlayerForAddCallback = new IntentResultCallback()
    {
       public void resultOk(String resultString, Bundle resultMap)
@@ -184,7 +191,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       
       public void resultCancel(String resultString, Bundle resultMap){}
    };
-   
+
    @Override
    protected void onDestroy()
    {
@@ -198,14 +205,14 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    public boolean onCreateOptionsMenu(Menu menu)
    {
-      menu.add( 0, MENU_ADD_PLAYER, 0, "Add player" );
-      menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
-      menu.add( 0, MENU_ADD_SONG, 0, "Repeat Song" );
-      menu.add( 0, MENU_ADD_SONG, 0, "Shuffle Album" );
+      menu.add( 0, MENU_LIBRARY, 0, "Library" );
+      menu.add( 0, MENU_PLAYLIST, 0, "Playlist" );
       menu.add( 0, MENU_SETTINGS, 0, "Settings" );
+      menu.add( 0, MENU_ADD_PLAYER, 0, "Sync Player" );
+      menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
       return true;
    }
-
+   
    private Player getSelectedPlayer()
    {
       return ActivityUtils.getSqueezeDroidApplication( context ).getSelectedPlayer();
@@ -221,8 +228,11 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       switch ( item.getItemId() )
       {
-         case MENU_ADD_SONG :
+         case MENU_LIBRARY :
             launchSubActivity( BrowseRootActivity.class, null );
+            return true;
+         case MENU_PLAYLIST :
+            launchSubActivity( PlayListActivity.class, null );
             return true;
          case MENU_SETTINGS :
             launchSubActivity( EditPrefrencesActivity.class, null );
@@ -283,6 +293,8 @@ public class MainActivity extends SqueezedroidActivitySupport
          }
 
          _currentStatus = status;
+         updateRepeatMode( status.getRepeatMode() );
+         updateShuffleMode( status.getShuffleMode() );
       }
       else
       {
@@ -354,8 +366,56 @@ public class MainActivity extends SqueezedroidActivitySupport
          getSqueezeDroidApplication().setSelectedPlayer( null );
          launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
       };
+
+      public void onRepeatModeChanged(SqueezeService.RepeatMode newMode) {
+         updateRepeatMode( newMode );
+      };
+      
+      public void onShuffleModeChanged(SqueezeService.ShuffleMode newMode) {
+         updateShuffleMode( newMode );
+      };
    };
 
+   private Map<SqueezeService.ShuffleMode, Integer> shuffleModeToIconMap = new HashMap<SqueezeService.ShuffleMode, Integer>()
+   {{
+      put( SqueezeService.ShuffleMode.ALBUM, R.drawable.shuffle_album );
+      put( SqueezeService.ShuffleMode.NONE, R.drawable.shuffle_off );
+      put( SqueezeService.ShuffleMode.SONG, R.drawable.shuffle_all );
+
+   }};
+
+   private void updateShuffleMode( final SqueezeService.ShuffleMode newMode)
+   {
+      _currentStatus.setShuffleMode( newMode );
+      runOnUiThread( new Runnable()
+      {
+         public void run()
+         {
+            _shuffleButton.setImageResource( shuffleModeToIconMap.get( newMode ) );
+         }
+      });
+   }
+   
+   private Map<SqueezeService.RepeatMode, Integer> repeatModeToIconMap = new HashMap<SqueezeService.RepeatMode, Integer>()
+   {{
+      put( SqueezeService.RepeatMode.ALL, R.drawable.repeat_all );
+      put( SqueezeService.RepeatMode.NONE, R.drawable.repeat_off );
+      put( SqueezeService.RepeatMode.SONG, R.drawable.repeat_song );
+
+   }};
+
+   private void updateRepeatMode( final SqueezeService.RepeatMode newMode)
+   {
+      _currentStatus.setRepeatMode( newMode );
+      runOnUiThread( new Runnable()
+      {
+         public void run()
+         {
+            _repeatButton.setImageResource( repeatModeToIconMap.get( newMode ) );
+         }
+      });
+   }
+   
    private void onPlayerChanged()
    {
       if ( getSqueezeDroidApplication().getSelectedPlayer() != null )
@@ -379,19 +439,50 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    }
 
-   OnClickListener onLibraryButtonPressed = new OnClickListener()
+   @SuppressWarnings("serial")
+   OnClickListener onShuffleButtonPressed = new OnClickListener()
    {
+      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>(){{
+         put( SqueezeService.ShuffleMode.NONE, SqueezeService.ShuffleMode.SONG );
+         put( SqueezeService.ShuffleMode.SONG, SqueezeService.ShuffleMode.ALBUM );
+         put( SqueezeService.ShuffleMode.ALBUM, SqueezeService.ShuffleMode.NONE );
+      }};
+      
       public void onClick(View v)
       {
-         launchSubActivity( BrowseRootActivity.class, null );
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
+            if( nextMode != null )
+            {
+               service.setShuffleMode( getSelectedPlayer(), nextMode);
+            }
+         }
       }
    };
 
-   OnClickListener onPlaylisyButtonPressed = new OnClickListener()
+   @SuppressWarnings("serial")
+   OnClickListener onRepeatButtonPressed = new OnClickListener()
    {
+      private Map<SqueezeService.RepeatMode, SqueezeService.RepeatMode> nextRepeatModeMap = new HashMap<SqueezeService.RepeatMode, SqueezeService.RepeatMode>(){
+      {
+         put( SqueezeService.RepeatMode.NONE, SqueezeService.RepeatMode.SONG );
+         put( SqueezeService.RepeatMode.SONG, SqueezeService.RepeatMode.ALL);
+         put( SqueezeService.RepeatMode.ALL, SqueezeService.RepeatMode.NONE );
+      }};
+      
       public void onClick(View v)
       {
-         launchSubActivity( PlayListActivity.class, null );
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
+            if( nextMode != null )
+            {
+               service.setRepeatMode( getSelectedPlayer(), nextMode);
+            }
+         }
       }
    };
 

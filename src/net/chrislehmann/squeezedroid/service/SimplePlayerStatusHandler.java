@@ -2,6 +2,8 @@ package net.chrislehmann.squeezedroid.service;
 
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
+import net.chrislehmann.squeezedroid.service.SqueezeService.ShuffleMode;
 
 
 public class SimplePlayerStatusHandler implements PlayerStatusHandler
@@ -25,5 +27,9 @@ public class SimplePlayerStatusHandler implements PlayerStatusHandler
    public void onStop(){}
 
    public void onDisconnect() {}
+
+   public void onRepeatModeChanged(RepeatMode newMode) {}
+
+   public void onShuffleModeChanged(ShuffleMode newMode) {}
 
 }
