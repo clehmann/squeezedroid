@@ -494,19 +494,25 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    OnSeekBarChangeListener onTimeUpdatedByUser = new OnSeekBarChangeListener()
    {
-      public void onStopTrackingTouch(SeekBar seekBar){}
+      private int time = 0;
+
+      public void onStopTrackingTouch(SeekBar seekBar)
+      {
+         Log.v( LOGTAG, "User changed time seek bar position to " + time );
+         SqueezeService service = ActivityUtils.getService( context );
+         if ( service != null )
+         {
+            service.seekTo( getSelectedPlayer(), time );
+         }
+      }
+      
       public void onStartTrackingTouch(SeekBar seekBar){}
 
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
          if ( fromUser )
          {
-            Log.v( LOGTAG, "User changed time seek bar position to " + progress );
-            SqueezeService service = ActivityUtils.getService( context );
-            if ( service != null )
-            {
-               service.seekTo( getSelectedPlayer(), progress );
-            }
+            time = progress;
          }
       }
    };

@@ -166,21 +166,23 @@ public class PlayerSyncPanel extends LinearLayout
    private class OnVolumeChangedListener implements OnSeekBarChangeListener
    {
       private Player _player;
+      private int volume = 0;
       
       public OnVolumeChangedListener(Player player)
       {
          _player = player;
       }
       
-      public void onStopTrackingTouch(SeekBar seekBar){}
+      public void onStartTrackingTouch(SeekBar seekBar){ }
       
-      public void onStartTrackingTouch(SeekBar seekBar){}
+      public void onStopTrackingTouch(SeekBar seekBar){ service.changeVolume( _player, volume ); }
       
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
          if( fromUser )
          {
-            service.changeVolume( _player, progress );
+            volume = progress;
+            
          }
       }
    };

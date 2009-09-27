@@ -30,6 +30,7 @@ public class UpdatingSeekBar
    {
       public void onStopTrackingTouch(SeekBar seekBar)
       {
+         start();
          _isUserSeeking = false;
          Log.v( LOGTAG, "User finished drag" );
          if ( _userOnSeekBarChangeListener != null )
@@ -40,6 +41,7 @@ public class UpdatingSeekBar
 
       public void onStartTrackingTouch(SeekBar seekBar)
       {
+         pause();
          _isUserSeeking = true;
          Log.v( LOGTAG, "User starting drag" );
          if ( _userOnSeekBarChangeListener != null )
