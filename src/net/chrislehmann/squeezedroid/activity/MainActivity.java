@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.chrislehmann.squeezedroid.R;
+import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Player;
@@ -163,6 +164,10 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void resultOk(String resultString, Bundle resultMap)
       {
             Player selectedPlayer = (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER );
+            if( selectedPlayer == null )
+            {
+               finish();
+            }
             getSqueezeDroidApplication().setSelectedPlayer( selectedPlayer );
             onPlayerChanged();
       }
@@ -190,6 +195,20 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
       
       public void resultCancel(String resultString, Bundle resultMap){}
+   };
+
+   private IntentResultCallback editSettingsIntentCallback = new IntentResultCallback()
+   {
+      public void resultOk(String resultString, Bundle resultMap)
+      {
+         getSqueezeDroidApplication().resetService();
+         ActivityUtils.getService( context );
+      }
+      
+      public void resultCancel(String resultString, Bundle resultMap)
+      {
+         resultOk( resultString, resultMap );
+      }
    };
 
    @Override
@@ -235,7 +254,7 @@ public class MainActivity extends SqueezedroidActivitySupport
             launchSubActivity( PlayListActivity.class, null );
             return true;
          case MENU_SETTINGS :
-            launchSubActivity( EditPrefrencesActivity.class, null );
+            launchSubActivity( EditPrefrencesActivity.class, editSettingsIntentCallback );
             return true;
          case MENU_CHOOSE_PLAYER :
             launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
@@ -515,5 +534,5 @@ public class MainActivity extends SqueezedroidActivitySupport
             time = progress;
          }
       }
-   };
+   };   
 }

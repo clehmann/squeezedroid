@@ -55,7 +55,13 @@ public class ActivitySupport extends Activity
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data)
    {
-
+      Bundle extras = null;
+      String result = null;
+      if( data != null )
+      {
+         extras = data.getExtras();
+         result = data.getDataString();
+      }
       try
       {
          IntentResultCallback callback = _callbackMap.get( requestCode );
@@ -63,7 +69,7 @@ public class ActivitySupport extends Activity
          switch ( resultCode )
          {
             case Activity.RESULT_CANCELED :
-               callback.resultCancel( data.getDataString(), data.getExtras() );
+               callback.resultCancel( result, extras );
                _callbackMap.remove( requestCode );
                break;
             case Activity.RESULT_OK :

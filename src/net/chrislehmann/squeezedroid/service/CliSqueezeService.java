@@ -608,12 +608,18 @@ public class CliSqueezeService implements SqueezeService
 
    public void unsubscribe(Player player, PlayerStatusHandler handler)
    {
-      eventThread.unsubscribe( player, handler );
+      if( eventThread != null )
+      {
+         eventThread.unsubscribe( player, handler );
+      }
    }
 
    public void unsubscribeAll(PlayerStatusHandler handler)
    {
-      eventThread.unsubscribe( handler );
+      if( eventThread != null )
+      {
+         eventThread.unsubscribe( handler );
+      }
    }
 
    public void seekTo(Player player, int time)
