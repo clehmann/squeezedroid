@@ -522,17 +522,21 @@ public class CliSqueezeService implements SqueezeService
    public void addItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
-
-      String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
-      executeAsyncCommand( command );
+      if( extraParams != null )
+      {
+         String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
+         executeAsyncCommand( command );
+      }
    }
 
    public void playItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
-
-      String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
-      executeAsyncCommand( command );
+      if( extraParams != null )
+      {
+         String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
+         executeAsyncCommand( command );
+      }
    }
 
    private String getParamName(Item item)
@@ -549,6 +553,10 @@ public class CliSqueezeService implements SqueezeService
       else if ( item instanceof Artist )
       {
          extraParams = "track.id";
+      }
+      else if ( item instanceof Genre )
+      {
+         extraParams = "genre.id";
       }
       return extraParams;
    }
