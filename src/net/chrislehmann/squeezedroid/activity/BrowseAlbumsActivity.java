@@ -1,5 +1,6 @@
 package net.chrislehmann.squeezedroid.activity;
 
+import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.AlbumListAdapter;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Item;
@@ -9,23 +10,31 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class BrowseAlbumsActivity extends ItemListActivity
+public class BrowseAlbumsActivity extends SqueezedroidActivitySupport
 {
 
+   protected ListView listView;
+   
+   
    /** Called when the activity is first created. */
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
 
-      getListView().setFastScrollEnabled( true );
+      setContentView(R.layout.list_layout);
+      listView = (ListView) findViewById( R.id.list );
+      
+      listView.setFastScrollEnabled( true );
 
       SqueezeService.Sort sort = getSort( getIntent().getData() );
       Item parentItem = getParentItem();
-      setListAdapter( new AlbumListAdapter( ActivityUtils.getService( this ), this, parentItem, sort ) );
-
+      listView.setAdapter( new AlbumListAdapter( getService(), this, parentItem, sort ) );
+      listView.setOnItemClickListener( onListItemClick );
    };
 
    private Sort getSort(Uri data)
@@ -64,16 +73,17 @@ public class BrowseAlbumsActivity extends ItemListActivity
       return item;
    }
 
-
-   @Override
-   protected void onListItemClick(ListView l, View v, int position, long id)
+   OnItemClickListener onListItemClick = new OnItemClickListener()
    {
-      Item item = (Item) getListAdapter().getItem( position );
-      Intent i = new Intent();
-      i.setAction( "net.chrislehmann.squeezedroid.action.BrowseSong" );
-      i.setData( Uri.parse( "squeeze:///album/" + item.getId() ) );
-      startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
-      super.onListItemClick( l, v, position, id );
-   }
 
+      @SuppressWarnings("unchecked")
+      public void onItemClick(AdapterView parent, View view, int position, long id)
+      {
+         Item item = (Item) listView.getAdapter().getItem( position );
+         Intent i = new Intent();
+         i.setAction( "net.chrislehmann.squeezedroid.action.BrowseSong" );
+         i.setData( Uri.parse( "squeeze:///album/" + item.getId() ) );
+         startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
+      }
+   };
 }

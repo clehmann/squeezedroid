@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.chrislehmann.squeezedroid.R;
-import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Player;
@@ -13,7 +12,6 @@ import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
@@ -36,6 +34,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 @SuppressWarnings("serial")
 public class MainActivity extends SqueezedroidActivitySupport
 {
+   protected Activity context = this;   
+
    private static final String LOGTAG = "MainActivity";
    
    private static final int MENU_SETTINGS = 1;
@@ -50,8 +50,6 @@ public class MainActivity extends SqueezedroidActivitySupport
    private TextView _songLabel;
    private TextView _artistLabel;
    private TextView _albumLabel;
-
-   private Activity context = this;
 
    private ImageButton _prevButton;
    private ImageButton _nextButton;
@@ -70,7 +68,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onClick(View v)
       {
-         SqueezeService service = ActivityUtils.getService( context );
+         SqueezeService service = getService();
          if ( service != null )
          {
             service.togglePause( getSqueezeDroidApplication().getSelectedPlayer() );
@@ -82,7 +80,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onClick(View v)
       {
-         SqueezeService service = ActivityUtils.getService( context );
+         SqueezeService service = getService();
          if ( service != null )
          {
             service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "+1" );
@@ -94,7 +92,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onClick(View v)
       {
-         SqueezeService service = ActivityUtils.getService( context );
+         SqueezeService service = getService();
          if ( service != null )
          {
             service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "-1" );
@@ -148,14 +146,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       _repeatButton.setOnClickListener( onRepeatButtonPressed );
       _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
       
-      if ( !isPlayerSelected() )
-      {
-         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
-      }
-      else
-      {
-         onPlayerChanged();
-      }
    }
 
 
@@ -202,19 +192,18 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void resultOk(String resultString, Bundle resultMap)
       {
          getSqueezeDroidApplication().resetService();
-         ActivityUtils.getService( context );
       }
       
       public void resultCancel(String resultString, Bundle resultMap)
       {
-         resultOk( resultString, resultMap );
+         getSqueezeDroidApplication().resetService();
       }
    };
 
    @Override
    protected void onDestroy()
    {
-      SqueezeService service = ActivityUtils.getService( context, false );
+      SqueezeService service = getService( false );
       if ( service != null )
       {
          service.unsubscribeAll( onPlayerStatusChanged );
@@ -230,11 +219,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       menu.add( 0, MENU_ADD_PLAYER, 0, "Sync Player" );
       menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
       return true;
-   }
-   
-   private Player getSelectedPlayer()
-   {
-      return ActivityUtils.getSqueezeDroidApplication( context ).getSelectedPlayer();
    }
 
    private boolean isPlayerSelected()
@@ -335,10 +319,9 @@ public class MainActivity extends SqueezedroidActivitySupport
 
       public void onSongChanged(final PlayerStatus status)
       {
-               
          if ( _currentStatus == null || _currentStatus.getCurrentSong().getId() != status.getCurrentSong().getId() )
          {
-            final BrowseResult<Song> playlist = ActivityUtils.getService( context ).getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
+            final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
             runOnUiThread( new Thread()
             {
                public void run()
@@ -423,6 +406,8 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    }};
 
+
+
    private void updateRepeatMode( final SqueezeService.RepeatMode newMode)
    {
       _currentStatus.setRepeatMode( newMode );
@@ -437,30 +422,30 @@ public class MainActivity extends SqueezedroidActivitySupport
    
    private void onPlayerChanged()
    {
-      if ( getSqueezeDroidApplication().getSelectedPlayer() != null )
+      runWithService( new SqueezeServiceAwareThread()
       {
-         SqueezeService service = ActivityUtils.getService( this );
-         if ( service != null )
+         public void runWithService(SqueezeService service) throws Exception
          {
             _volumePanel.removeAllViews();
-            _syncPanel = new PlayerSyncPanel( this, service, this );
+            _syncPanel = new PlayerSyncPanel( context, service, context );
             _syncPanel.setPlayer( getSelectedPlayer() );
             _volumePanel.addView( _syncPanel );
             
             service.unsubscribeAll( onPlayerStatusChanged );
             service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
-
-            _playlistListAdapter = new PlayListAdapter( service, this, getSqueezeDroidApplication().getSelectedPlayer() );
+   
+            _playlistListAdapter = new PlayListAdapter( service, context, getSqueezeDroidApplication().getSelectedPlayer() );
             _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
-            PlayerStatus status = ActivityUtils.getService( this ).getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
+            PlayerStatus status = getService().getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
             updateSongDisplay( status );
-         }  
-      }
+         }
+      });
    }
 
    OnClickListener onShuffleButtonPressed = new OnClickListener()
    {
-      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>(){{
+      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>()
+      {{
          put( SqueezeService.ShuffleMode.NONE, SqueezeService.ShuffleMode.SONG );
          put( SqueezeService.ShuffleMode.SONG, SqueezeService.ShuffleMode.ALBUM );
          put( SqueezeService.ShuffleMode.ALBUM, SqueezeService.ShuffleMode.NONE );
@@ -480,7 +465,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-   @SuppressWarnings("serial")
+
    OnClickListener onRepeatButtonPressed = new OnClickListener()
    {
       private Map<SqueezeService.RepeatMode, SqueezeService.RepeatMode> nextRepeatModeMap = new HashMap<SqueezeService.RepeatMode, SqueezeService.RepeatMode>(){
@@ -507,7 +492,14 @@ public class MainActivity extends SqueezedroidActivitySupport
    @Override
    protected void onResume()
    {
-      onPlayerChanged();
+      if ( !isPlayerSelected() )
+      {
+         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+      }
+      else
+      {
+         onPlayerChanged();
+      }
       super.onResume();
    }
 
@@ -518,7 +510,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onStopTrackingTouch(SeekBar seekBar)
       {
          Log.v( LOGTAG, "User changed time seek bar position to " + time );
-         SqueezeService service = ActivityUtils.getService( context );
+         SqueezeService service = getService();
          if ( service != null )
          {
             service.seekTo( getSelectedPlayer(), time );

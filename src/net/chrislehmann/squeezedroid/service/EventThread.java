@@ -82,7 +82,7 @@ public class EventThread extends Thread
          while ( !isInterrupted() && _eventSocket.isConnected() )
          {
             String line = _eventReader.readLine();
-            if ( line != null )
+            if ( !isInterrupted() && line != null )
             {
                Matcher matcher = eventPattern.matcher( line );
                if ( matcher.find() )
@@ -104,7 +104,7 @@ public class EventThread extends Thread
             }
 
          }
-         if ( _eventSocket.isClosed() )
+         if ( !_eventSocket.isClosed() )
          {
             _eventSocket.close();
          }

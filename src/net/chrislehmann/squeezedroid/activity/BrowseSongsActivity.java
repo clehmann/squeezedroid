@@ -6,8 +6,6 @@ import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Item;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
 
 public class BrowseSongsActivity extends ItemListActivity {
 
@@ -16,13 +14,7 @@ public class BrowseSongsActivity extends ItemListActivity {
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
      
-     setListAdapter( new SongListAdapter( ActivityUtils.getService(this), this, getParentItem()  ) );
-   }
-   
-   @Override
-   protected void onListItemClick(ListView l, View v, int position, long id)
-   {
-       super.onListItemClick( l, v, position, id );
+     getListView().setAdapter( new SongListAdapter( getService(), this, getParentItem()  ) );
    }
 
    protected Item getParentItem()

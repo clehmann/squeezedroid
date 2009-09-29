@@ -65,10 +65,13 @@ public class CliSqueezeService implements SqueezeService
       public void run() {
          try
          {
-            while( !interrupted() )
+            while( !isInterrupted() )
             {
                Runnable r = commandQueue.take();
-               r.run();
+               if( !isInterrupted() )
+               {
+                  r.run();
+               }
             }
          } catch (InterruptedException e) {
             //just finish...
@@ -186,6 +189,7 @@ public class CliSqueezeService implements SqueezeService
 
       eventThread.interrupt();
       commandThread.interrupt();
+      eventThread = null;
    }
 
    public boolean isConnected()
@@ -214,22 +218,30 @@ public class CliSqueezeService implements SqueezeService
 
    private String readResponse()
    {
+      String response = null;
       try
       {
-         return clientReader.readLine();
+         if( clientReader != null )
+         {
+            response = clientReader.readLine();
+         }
       }
       catch ( IOException e )
       {
          throw new RuntimeException( "Error reading from server", e );
       }
+      return response;
    }
 
    private void writeCommand(String command)
    {
       try
       {
-         clientWriter.write( command + "\n" );
-         clientWriter.flush();
+         if( clientWriter != null )
+         {
+            clientWriter.write( command + "\n" );
+            clientWriter.flush();
+         }
       }
       catch ( IOException e )
       {

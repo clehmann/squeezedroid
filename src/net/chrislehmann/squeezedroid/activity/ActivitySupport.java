@@ -19,13 +19,13 @@ public class ActivitySupport extends Activity
 
 
    /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
-   protected void launchSubActivity(Class subActivityClass, IntentResultCallback callback )
+   protected void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback )
    {
       launchSubActivity( subActivityClass, callback, false );
    }
 
    /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
-   protected void launchSubActivity(Class subActivityClass, IntentResultCallback callback, boolean startNewTask )
+   protected void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback, boolean startNewTask )
    {
       Intent i = new Intent( this, subActivityClass );
       if( startNewTask )
@@ -73,7 +73,7 @@ public class ActivitySupport extends Activity
                _callbackMap.remove( requestCode );
                break;
             case Activity.RESULT_OK :
-               callback.resultOk( data.getDataString(), data.getExtras() );
+               callback.resultOk( result, extras );
                _callbackMap.remove( requestCode );
                break;
             default :

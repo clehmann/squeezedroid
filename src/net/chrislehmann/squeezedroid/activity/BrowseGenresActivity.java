@@ -2,37 +2,42 @@ package net.chrislehmann.squeezedroid.activity;
 
 import net.chrislehmann.squeezedroid.listadapter.GenreListAdapter;
 import net.chrislehmann.squeezedroid.model.Item;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class BrowseGenresActivity extends ItemListActivity {
+public class BrowseGenresActivity extends ItemListActivity
+{
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+   @Override
+   public void onCreate(Bundle savedInstanceState)
+   {
+      super.onCreate( savedInstanceState );
 
-		setListAdapter(new GenreListAdapter(((SqueezeDroidApplication) getApplication()).getService(), this, null));
-	}
+      listView.setAdapter( new GenreListAdapter( ((SqueezeDroidApplication) getApplication()).getService(), this, null ) );
+      listView.setOnItemClickListener( onItemClick );
+   }
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Item item = (Item) getListAdapter().getItem(position);
-		Intent i = new Intent();
-		i.setAction("net.chrislehmann.squeezedroid.action.BrowseArtist");
-		i.setData(Uri.parse("squeeze:///genre/" + item.getId()));
-		startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE);
+   private OnItemClickListener onItemClick = new OnItemClickListener()
+   {
 
-		super.onListItemClick(l, v, position, id);
-	}
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+      {
+         Item item = (Item) listView.getAdapter().getItem( position );
+         Intent i = new Intent();
+         i.setAction( "net.chrislehmann.squeezedroid.action.BrowseArtist" );
+         i.setData( Uri.parse( "squeeze:///genre/" + item.getId() ) );
+         startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
+      }
+   };
 
-	@Override
-	protected Item getParentItem()
-	{
-	   return null;
-	}
-
+   @Override
+   protected Item getParentItem()
+   {
+      //We have no parent...
+      return null;
+   }
 }
