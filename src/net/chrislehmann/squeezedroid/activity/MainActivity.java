@@ -290,6 +290,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          }
 
          _timeSeekBar.setMax( currentSong.getDurationInSeconds() );
+         _timeSeekBar.setProgress( status.getCurrentPosition() );
          if( status.isPlaying() )
          {
             _timeSeekBar.start();
@@ -335,8 +336,6 @@ public class MainActivity extends SqueezedroidActivitySupport
                }
             } );
          }
-         _timeSeekBar.setProgress( status.getCurrentPosition() );
-
       }
       
       public void onPlay() { 
