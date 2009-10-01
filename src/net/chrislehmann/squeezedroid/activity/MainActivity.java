@@ -320,22 +320,19 @@ public class MainActivity extends SqueezedroidActivitySupport
 
       public void onSongChanged(final PlayerStatus status)
       {
-         if ( _currentStatus == null || _currentStatus.getCurrentSong().getId() != status.getCurrentSong().getId() )
+         final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
+         runOnUiThread( new Thread()
          {
-            final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
-            runOnUiThread( new Thread()
+            public void run()
             {
-               public void run()
+               // Cache the next album art
+               updateSongDisplay( status );
+               if ( playlist.getResutls().size() > 1 )
                {
-                  // Cache the next album art
-                  updateSongDisplay( status );
-                  if ( playlist.getResutls().size() > 1 )
-                  {
-                     ImageLoader.getInstance().load( null, playlist.getResutls().get( 1 ).getImageUrl(), true );
-                  }
+                  ImageLoader.getInstance().load( null, playlist.getResutls().get( 1 ).getImageUrl(), true );
                }
-            } );
-         }
+            }
+         } );
       }
       
       public void onPlay() { 
