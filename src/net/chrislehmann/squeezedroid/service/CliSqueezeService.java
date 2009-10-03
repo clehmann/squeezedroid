@@ -43,7 +43,7 @@ public class CliSqueezeService implements SqueezeService
 {
 
    private static final String LOGTAG = "SQUEEZE";
-   private static final String SONG_TAGS = "asleJpPdxK";
+   private static final String SONG_TAGS = "aslepPdxKJ";
    /**
     * Host to connect to
     */
@@ -93,7 +93,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
-   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*" );
+   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*.*?( artwork_track_id%3A([^ ]*))*" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
@@ -122,15 +122,20 @@ public class CliSqueezeService implements SqueezeService
             song.setRadioStation( true );
          }
          
-
+         //set the artwork images
          if( matcher.group( 14 ) != null )
          {
             song.setImageUrl( SerializationUtils.decode(matcher.group( 14 )) );
          }
          else
          {
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_50x50_o" );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 1 ) + "/cover_320x320_o" );
+            String artId = "";
+            if ( matcher.group( 16 ) != null )
+            {
+               artId = matcher.group( 16 ) + "/";
+            }
+            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + artId  + "cover_50x50_o" );
+            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + artId + "cover_320x320_o" );
          }
          
          try
