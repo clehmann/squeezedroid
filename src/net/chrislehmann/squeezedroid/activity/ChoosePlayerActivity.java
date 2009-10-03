@@ -37,7 +37,7 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
    {
       runWithService( new SqueezeServiceAwareThread()
       {
-         public void runWithService(SqueezeService service) throws Exception
+         public void runWithService(SqueezeService service)
          {
             final List<Player> players = service.getPlayers();
             ArrayAdapter<Player> playersAdapter = new PlayerListAdapter( context, players, context );

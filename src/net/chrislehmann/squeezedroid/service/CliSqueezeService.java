@@ -403,33 +403,27 @@ public class CliSqueezeService implements SqueezeService
       } );
 
       List<Player> groupedPlayers = new ArrayList<Player>();
-      List<String> handledPlayerIds = new ArrayList<String>();
 
       for ( Player player : players )
       {
-         if( !handledPlayerIds.contains( player.getId() ) )
+         command = player.getId() + " sync ?";
+         String playerSyncResult = executeCommand( command );
+         Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
+         if ( matcher.find() )
          {
-            handledPlayerIds.add( player.getId() );
-            command = player.getId() + " sync ?";
-            String playerSyncResult = executeCommand( command );
-            Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
-            if ( matcher.find() )
+            String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
+            String[] syncedPlayersArray = syncedPlayersString.split( "," );
+            for ( int i = 0; i < syncedPlayersArray.length; i++ )
             {
-               String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
-               String[] syncedPlayersArray = syncedPlayersString.split( "," );
-               for ( int i = 0; i < syncedPlayersArray.length; i++ )
+               String syncedPlayerId = syncedPlayersArray[i];
+               Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId ) );
+               if ( syncedPlayer != null )
                {
-                  String syncedPlayerId = syncedPlayersArray[i];
-                  Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId ) );
-                  if ( syncedPlayer != null )
-                  {
-                     player.getSyncronizedPlayers().add( syncedPlayer );
-                     handledPlayerIds.add( syncedPlayer.getId() );
-                  }
+                  player.getSyncronizedPlayers().add( syncedPlayer );
                }
             }
-            groupedPlayers.add( player );
          }
+         groupedPlayers.add( player );
       }
       return groupedPlayers;
    }
@@ -454,11 +448,6 @@ public class CliSqueezeService implements SqueezeService
          {
             Player rhs = (Player) arg0;
             matches = playerId.equals( rhs.getId() );
-            if( !matches )
-            {
-               Player syncedPlayer = (Player) CollectionUtils.find( rhs.getSyncronizedPlayers(), new PlayerIdEqualsPredicate( playerId ) );
-               matches = syncedPlayer != null;
-            }
          }
          return matches;
       }
@@ -646,7 +635,7 @@ public class CliSqueezeService implements SqueezeService
 
    public void synchronize(Player player, Player playerToSyncTo)
    {
-      executeAsyncCommand( player.getId() + " sync " +  playerToSyncTo.getId());
+      executeAsyncCommand(  playerToSyncTo.getId() + " sync " +  player.getId());
    }
 
    public void unsynchronize(Player player)

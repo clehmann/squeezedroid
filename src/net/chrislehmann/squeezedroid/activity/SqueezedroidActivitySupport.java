@@ -22,20 +22,46 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     */
    protected interface SqueezeServiceAwareThread
    {
-      public void runWithService(SqueezeService service) throws Exception;
+      public void runWithService(SqueezeService service);
    }
 
    /**
     * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
     * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
     * 
-    * @param onConnect
+    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
+    * @param runOnThread If set to true, a new thread will be spawned to run the onConnect
     */
-   protected void runWithService(final SqueezeServiceAwareThread onConnect)
+   protected void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
    {
+      SqueezeServiceAwareThread onConnectThread = onConnect;
+      if( runOnThread )
+      {
+         onConnectThread = new SqueezeServiceAwareThread()
+         {
+            public void runWithService(final SqueezeService service)
+            {
+               new Thread()
+               {
+                  public void run() { onConnect.runWithService( service ); };
+               }.start();
+            }
+         };
+      }
+      
       getService( true, onConnect );
    }
 
+   /**
+    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
+    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
+    * 
+    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
+    */
+   protected void runWithService(final SqueezeServiceAwareThread onConnect)
+   {
+      runWithService( onConnect, false );
+   }
    /**
     * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
@@ -67,6 +93,15 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       return getSqueezeDroidApplication().getSelectedPlayer();
    }
 
+   /**
+    * Sets the currently selected player.
+    * @player the currently selected player
+    */
+   protected void setSelectedPlayer(Player player)
+   {
+      getSqueezeDroidApplication().setSelectedPlayer( player );
+   }
+   
    /**
     * Returns true if a player is selected
     */

@@ -114,14 +114,7 @@ public class PlayerSyncPanel extends LinearLayout
       volumeSeekBar.setOnSeekBarChangeListener( new OnVolumeChangedListener( player ) );
       
       ImageButton unsyncButton = (ImageButton) view.findViewById( R.id.unsync_button );
-      if( isPrimary )
-      {
-         unsyncButton.setVisibility( GONE );
-      }
-      else
-      {
-         unsyncButton.setOnClickListener( new OnUnsyncButtonPressedListener( player ) );
-      }
+      unsyncButton.setOnClickListener( new OnUnsyncButtonPressedListener( player ) );
 
       
       PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler( volumeSeekBar );

@@ -164,7 +164,7 @@ public class MainActivity extends SqueezedroidActivitySupport
             launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
             return true;
          case MENU_ADD_PLAYER:
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForAddCallback );
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForSyncCallback );
             return true;
       }
       return false;
@@ -173,7 +173,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    /**
     * View OnClick listeners
     */
-   OnClickListener onPlayButtonPressed = new android.view.View.OnClickListener()
+   OnClickListener onPlayButtonPressed = new OnClickListener()
    {
       public void onClick(View v)
       {
@@ -185,7 +185,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
   
-   OnClickListener onNextButtonPressed = new android.view.View.OnClickListener()
+   OnClickListener onNextButtonPressed = new OnClickListener()
    {
       public void onClick(View v)
       {
@@ -197,7 +197,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-   OnClickListener onPrevButtonPressed = new android.view.View.OnClickListener()
+   OnClickListener onPrevButtonPressed = new OnClickListener()
    {
       public void onClick(View v)
       {
@@ -319,16 +319,20 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
    
-   private IntentResultCallback choosePlayerForAddCallback = new IntentResultCallback()
+   private IntentResultCallback choosePlayerForSyncCallback = new IntentResultCallback()
    {
-      public void resultOk(String resultString, Bundle resultMap)
+      public void resultOk(String resultString, final Bundle resultMap)
       {
-         SqueezeService service = getSqueezeDroidApplication().getService();
-         if( service != null )
+         runWithService( new SqueezeServiceAwareThread()
          {
-            //service.unsynchronize( getSelectedPlayer() );
-            service.synchronize( getSelectedPlayer(), (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER ) );         
-         }
+            public void runWithService(SqueezeService service)
+            {
+               service.synchronize( getSelectedPlayer(), (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER ) );         
+               Player player  = service.getPlayer( getSelectedPlayer().getId() );
+               setSelectedPlayer( player );
+               _syncPanel.setPlayer( player );  
+            }
+         }, true);
       }
       
       public void resultCancel(String resultString, Bundle resultMap){}
@@ -354,7 +358,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       runWithService( new SqueezeServiceAwareThread()
       {
-         public void runWithService(SqueezeService service) throws Exception
+         public void runWithService(SqueezeService service)
          {
             _volumePanel.removeAllViews();
             _syncPanel = new PlayerSyncPanel( context, service, context );

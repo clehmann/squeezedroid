@@ -13,11 +13,17 @@ import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 
+/**
+ * Represents a connection to a SqueezeServer instance. 
+ * @author lehmanc
+ *
+ */
 public interface SqueezeService
 {
    enum Sort {
       TITLE( ), NEW
    }
+   
    @SuppressWarnings("serial")
    enum ShuffleMode {
       NONE(0), SONG(1), ALBUM(2);
