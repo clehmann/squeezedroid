@@ -160,21 +160,34 @@ public class PlayerSyncPanel extends LinearLayout
    {
       private Player _player;
       private int volume = 0;
+      private boolean seeking = false;
       
       public OnVolumeChangedListener(Player player)
       {
          _player = player;
       }
       
-      public void onStartTrackingTouch(SeekBar seekBar){ }
+      public void onStartTrackingTouch(SeekBar seekBar){ seeking = true; }
       
-      public void onStopTrackingTouch(SeekBar seekBar){ service.changeVolume( _player, volume ); }
+      public void onStopTrackingTouch(SeekBar seekBar)
+      {
+         if ( seeking )
+         {
+            service.changeVolume( _player, volume );
+         }
+         seeking = false;
+      }
       
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
          if( fromUser )
          {
             volume = progress;
+            //This will happen if the hardware buttons are used
+            if( !seeking )
+            {
+               service.changeVolume( _player, volume );
+            }
             
          }
       }
