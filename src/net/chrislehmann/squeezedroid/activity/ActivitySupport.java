@@ -9,29 +9,46 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * ActivitySupport - Adapted from http://developerlife.com/tutorials/?p=302 to work on cupcake
+ * Base Activity to provide some simple helper methods to simplify the starting of subactivities.  Rather than overriding
+ * {@link Activity#onActivityResult}, you can simply call {@link #launchSubActivity(Class, IntentResultCallback)} with a 
+ * {@link IntentResultCallback} to be executed when the child activity returns.
+ * 
+ * Adapted from http://developerlife.com/tutorials/?p=302 to work on cupcake
  */
 public class ActivitySupport extends Activity
 {
 
    private static final String LOGTAG = "ActivitySupport";
+
+   /**
+    * Interface containing callbacks that will be executed when an {@link Activity} result is returned
+    * @author lehmanc
+    */
+   public static interface IntentResultCallback
+   {
+      /**
+       * Will be called then {@link Activity#RESULT_OK} is returned
+       */
+      public void resultOk(String resultString, Bundle resultMap);
+
+      /**
+       * Will be called then {@link Activity#RESULT_CANCELED} is returned
+       */
+      public void resultCancel(String resultString, Bundle resultMap);
+   }
+   
    protected HashMap<Integer, IntentResultCallback> _callbackMap = new HashMap<Integer, IntentResultCallback>();
 
+   /**
+    * Launch a Activity with {@link Class} subActivityClass, and execute the {@link IntentResultCallback#resultOk(String, Bundle)} or 
+    * {@link IntentResultCallback#resultCancel(String, Bundle)(String, Bundle)} method depending on the result
+    * @param subActivityClass The {@link Class} of the {@link Activity} to start
+    * @param callback the {@link IntentResultCallback} to execute when the activity is finished
+    */
 
-   /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
    protected void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback )
    {
-      launchSubActivity( subActivityClass, callback, false );
-   }
-
-   /** use this method to launch the sub-Activity, and provide a functor to handle the result - ok or cancel */
-   protected void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback, boolean startNewTask )
-   {
       Intent i = new Intent( this, subActivityClass );
-      if( startNewTask )
-      {
-         i.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK  );
-      }
 
       Random rand = new Random();
       int correlationId = Math.abs( rand.nextInt() );
@@ -46,7 +63,6 @@ public class ActivitySupport extends Activity
          startActivity( i );
       }
    }
-   
 
    /**
     * this is the underlying implementation of the onActivityResult method that handles auto generation of
@@ -84,15 +100,6 @@ public class ActivitySupport extends Activity
       {
          Log.e( LOGTAG, "Problem processing result from sub-activity", e );
       }
-
-   }
-
-   public static interface IntentResultCallback
-   {
-
-      public void resultOk(String resultString, Bundle resultMap);
-
-      public void resultCancel(String resultString, Bundle resultMap);
 
    }
 }

@@ -6,14 +6,94 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+/**
+ * Base activity that contains some methods to manage the {@link SqueezeService} and the 
+ * currently selected {@link Player} objects. 
+ * @author lehmanc
+ *
+ */
 public class SqueezedroidActivitySupport extends ActivitySupport
 {
-   private String LOGTAG = "SqueezeDroidActivitySupport";
+   private static final String LOGTAG = "SqueezeDroidActivitySupport";
 
    /**
-    * Gets the SqueezeService and makes sure it is still connected.  If not connected, this fill start the {@link ConnectToServerActivity} 
-    * and return null.  Your code should take this into account.
+    * Interface that simply contains a callback that will be executed within the context of a valid, connected {@link SqueezeService}
+    * @author lehmanc
+    */
+   protected interface SqueezeServiceAwareThread
+   {
+      public void runWithService(SqueezeService service) throws Exception;
+   }
+
+   /**
+    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
+    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
+    * 
+    * @param onConnect
+    */
+   protected void runWithService(final SqueezeServiceAwareThread onConnect)
+   {
+      getService( true, onConnect );
+   }
+
+   /**
+    * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
+    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
+    * 
+    * @param connect If true, try and connect to the service if it is not connected
+    */
+   protected SqueezeService getService(boolean connect)
+   {
+      return getService( connect, null );
+   }
+
+   /**
+    * Gets the {@link SqueezeService}.  If the {@link SqueezeService} is not connected, 
+    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
+    * 
+    * @param connect If true, try and connect to the service if it is not connected
+    */
+   protected SqueezeService getService()
+   {
+      return getService( true, null );
+   }
+
+   /**
+    * Gets the currently selected player.  If no player is selected, this will return null
+    * @return the currently selected player
+    */
+   protected Player getSelectedPlayer()
+   {
+      return getSqueezeDroidApplication().getSelectedPlayer();
+   }
+
+   /**
+    * Returns true if a player is selected
+    */
+   protected boolean isPlayerSelected()
+   {
+      return getSqueezeDroidApplication().getSelectedPlayer() != null;
+   }
+
+   /**
+    * Helper method to simply get the application and cast it to a {@link SqueezeDroidApplication}
+    * @param context
     * @return
+    */
+   protected SqueezeDroidApplication getSqueezeDroidApplication()
+   {
+      return (SqueezeDroidApplication) getApplication();
+   }
+
+
+   /**
+    * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
+    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
+    * 
+    * @param connect  If set to true, this method will attempt to connect the {@link SqueezeService} by starting the 
+    * {@link ConnectToServerActivity} and return null
+    * @param onConnect A {@link SqueezeServiceAwareThread} that will be executed when the server is connected.  If the server is
+    * already connected, this will be executed immediately.
     */
    private SqueezeService getService(boolean connect, final SqueezeServiceAwareThread onConnect)
    {
@@ -27,7 +107,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       }
       else if ( service != null && service.isConnected() )
       {
-         if( onConnect != null )
+         if ( onConnect != null )
          {
             try
             {
@@ -35,18 +115,13 @@ public class SqueezedroidActivitySupport extends ActivitySupport
             }
             catch ( Exception e )
             {
-               Log.e( LOGTAG, "Error executing callback",  e);
-            } 
+               Log.e( LOGTAG, "Error executing callback", e );
+            }
          }
       }
       return service;
    }
 
-   protected void runWithService(final SqueezeServiceAwareThread onConnect)
-   {
-      getService(true, onConnect);
-   }
-   
    private class ExecuteWithServiceCallback implements IntentResultCallback
    {
       SqueezeServiceAwareThread thread;
@@ -77,33 +152,4 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       }
    };
 
-   protected SqueezeService getService(boolean connect)
-   {
-      return getService( connect, null );
-   }
-
-   protected SqueezeService getService()
-   {
-      return getService( true, null );
-   }
-
-   protected Player getSelectedPlayer()
-   {
-      return getSqueezeDroidApplication().getSelectedPlayer();
-   }
-
-   /**
-    * Helper method to simply get the application and cast it to a {@link SqueezeDroidApplication}
-    * @param context
-    * @return
-    */
-   protected SqueezeDroidApplication getSqueezeDroidApplication()
-   {
-      return (SqueezeDroidApplication) getApplication();
-   }
-
-   protected interface SqueezeServiceAwareThread
-   {
-      public void runWithService(SqueezeService service) throws Exception;
-   }
 }

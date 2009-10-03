@@ -31,6 +31,12 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+/**
+ * Main activity of the SqueezeDroid application.  This contains a view of the current player's status. 
+ * And some playback controls.
+ * 
+ * @author lehmanc
+ */
 @SuppressWarnings("serial")
 public class MainActivity extends SqueezedroidActivitySupport
 {
@@ -38,12 +44,18 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    private static final String LOGTAG = "MainActivity";
    
+   /**
+    * Menu Constants
+    */
    private static final int MENU_SETTINGS = 1;
    private static final int MENU_CHOOSE_PLAYER = 2;
    private static final int MENU_ADD_PLAYER = 3;
    private static final int MENU_PLAYLIST = 4;
    private static final int MENU_LIBRARY = 5;
 
+   /**
+    * Views
+    */
    private PlayListAdapter _playlistListAdapter;
    private ViewSwitcher _coverArtImageView;
 
@@ -63,7 +75,104 @@ public class MainActivity extends SqueezedroidActivitySupport
    private UpdatingSeekBar _timeSeekBar;
 
    private PlayerStatus _currentStatus;
+
+   /**
+    * {@link Activity} Lifecycle overrides
+    */
+   @Override
+   public void onCreate(Bundle savedInstanceState)
+   {
+      super.onCreate( savedInstanceState );
+
+      requestWindowFeature( Window.FEATURE_NO_TITLE );
+      this.setContentView( R.layout.main_layout );
+
+      _coverArtImageView = (ViewSwitcher) findViewById( R.id.cover_image );
+
+      _artistLabel = (TextView) findViewById( R.id.artist_label );
+      _albumLabel = (TextView) findViewById( R.id.album_label );
+      _songLabel = (TextView) findViewById( R.id.title_label );
+      
+      _playButton = (ImageButton) findViewById( R.id.playButton );
+      _nextButton = (ImageButton) findViewById( R.id.nextButton );
+      _prevButton = (ImageButton) findViewById( R.id.prevButton );
+      _shuffleButton = (ImageButton) findViewById( R.id.shuffleButton );
+      _repeatButton = (ImageButton) findViewById( R.id.repeatButton );
+      _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
+      _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
+      _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
+      
+      _timeSeekBar.setOnSeekBarChangeListener( onTimeUpdatedByUser );
+      _prevButton.setOnClickListener( onPrevButtonPressed );
+      _playButton.setOnClickListener( onPlayButtonPressed );
+      _nextButton.setOnClickListener( onNextButtonPressed );
+      _shuffleButton.setOnClickListener( onShuffleButtonPressed );
+      _repeatButton.setOnClickListener( onRepeatButtonPressed );
+      _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
+      
+   }
+
+   @Override
+   protected void onDestroy()
+   {
+      SqueezeService service = getService( false );
+      if ( service != null )
+      {
+         service.unsubscribeAll( onPlayerStatusChanged );
+      }
+      super.onDestroy();
+   }
+
+   @Override
+   protected void onResume()
+   {
+      if ( !isPlayerSelected() )
+      {
+         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+      }
+      else
+      {
+         onPlayerChanged();
+      }
+      super.onResume();
+   }
+
+   public boolean onCreateOptionsMenu(Menu menu)
+   {
+      menu.add( 0, MENU_LIBRARY, 0, "Library" );
+      menu.add( 0, MENU_PLAYLIST, 0, "Playlist" );
+      menu.add( 0, MENU_SETTINGS, 0, "Settings" );
+      menu.add( 0, MENU_ADD_PLAYER, 0, "Sync Player" );
+      menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
+      return true;
+   }
+
+   public boolean onOptionsItemSelected(MenuItem item)
+   {
+      switch ( item.getItemId() )
+      {
+         case MENU_LIBRARY :
+            launchSubActivity( BrowseRootActivity.class, null );
+            return true;
+         case MENU_PLAYLIST :
+            launchSubActivity( PlayListActivity.class, null );
+            return true;
+         case MENU_SETTINGS :
+            launchSubActivity( EditPrefrencesActivity.class, editSettingsIntentCallback );
+            return true;
+         case MENU_CHOOSE_PLAYER :
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
+            return true;
+         case MENU_ADD_PLAYER:
+            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForAddCallback );
+            return true;
+      }
+      return false;
+   }
    
+   /**
+    * View OnClick listeners
+    */
    OnClickListener onPlayButtonPressed = new android.view.View.OnClickListener()
    {
       public void onClick(View v)
@@ -114,41 +223,80 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-
-   @Override
-   public void onCreate(Bundle savedInstanceState)
+   OnClickListener onShuffleButtonPressed = new OnClickListener()
    {
-      super.onCreate( savedInstanceState );
-
-      requestWindowFeature( Window.FEATURE_NO_TITLE );
-      this.setContentView( R.layout.main_layout );
-
-      _coverArtImageView = (ViewSwitcher) findViewById( R.id.cover_image );
-
-      _artistLabel = (TextView) findViewById( R.id.artist_label );
-      _albumLabel = (TextView) findViewById( R.id.album_label );
-      _songLabel = (TextView) findViewById( R.id.title_label );
+      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>()
+      {{
+         put( SqueezeService.ShuffleMode.NONE, SqueezeService.ShuffleMode.SONG );
+         put( SqueezeService.ShuffleMode.SONG, SqueezeService.ShuffleMode.ALBUM );
+         put( SqueezeService.ShuffleMode.ALBUM, SqueezeService.ShuffleMode.NONE );
+      }};
       
-      _playButton = (ImageButton) findViewById( R.id.playButton );
-      _nextButton = (ImageButton) findViewById( R.id.nextButton );
-      _prevButton = (ImageButton) findViewById( R.id.prevButton );
-      _shuffleButton = (ImageButton) findViewById( R.id.shuffleButton );
-      _repeatButton = (ImageButton) findViewById( R.id.repeatButton );
-      _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
-      _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
-      _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
-      
-      _timeSeekBar.setOnSeekBarChangeListener( onTimeUpdatedByUser );
-      _prevButton.setOnClickListener( onPrevButtonPressed );
-      _playButton.setOnClickListener( onPlayButtonPressed );
-      _nextButton.setOnClickListener( onNextButtonPressed );
-      _shuffleButton.setOnClickListener( onShuffleButtonPressed );
-      _repeatButton.setOnClickListener( onRepeatButtonPressed );
-      _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
-      
-   }
+      public void onClick(View v)
+      {
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
+            if( nextMode != null )
+            {
+               service.setShuffleMode( getSelectedPlayer(), nextMode);
+            }
+         }
+      }
+   };
 
+   OnClickListener onRepeatButtonPressed = new OnClickListener()
+   {
+      private Map<SqueezeService.RepeatMode, SqueezeService.RepeatMode> nextRepeatModeMap = new HashMap<SqueezeService.RepeatMode, SqueezeService.RepeatMode>(){
+      {
+         put( SqueezeService.RepeatMode.NONE, SqueezeService.RepeatMode.SONG );
+         put( SqueezeService.RepeatMode.SONG, SqueezeService.RepeatMode.ALL);
+         put( SqueezeService.RepeatMode.ALL, SqueezeService.RepeatMode.NONE );
+      }};
+      
+      public void onClick(View v)
+      {
+         SqueezeService service = getSqueezeDroidApplication().getService();
+         if( service != null )
+         {
+            SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
+            if( nextMode != null )
+            {
+               service.setRepeatMode( getSelectedPlayer(), nextMode);
+            }
+         }
+      }
+   };
+   
+   OnSeekBarChangeListener onTimeUpdatedByUser = new OnSeekBarChangeListener()
+   {
+      private int time = 0;
 
+      public void onStopTrackingTouch(SeekBar seekBar)
+      {
+         Log.v( LOGTAG, "User changed time seek bar position to " + time );
+         SqueezeService service = getService();
+         if ( service != null )
+         {
+            service.seekTo( getSelectedPlayer(), time );
+         }
+      }
+      
+      public void onStartTrackingTouch(SeekBar seekBar){}
+
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      {
+         if ( fromUser )
+         {
+            time = progress;
+         }
+      }
+   };   
+   
+   /**
+    * Child Activity callback {@link IntentResultCallback}s
+    */
    private IntentResultCallback choosePlayerIntentCallback = new IntentResultCallback()
    {
       public void resultOk(String resultString, Bundle resultMap)
@@ -170,7 +318,6 @@ public class MainActivity extends SqueezedroidActivitySupport
          }
       }
    };
-
    
    private IntentResultCallback choosePlayerForAddCallback = new IntentResultCallback()
    {
@@ -200,56 +347,36 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-   @Override
-   protected void onDestroy()
+   /**
+    * Called when the currently selected {@link Player} has changed
+    */
+   private void onPlayerChanged()
    {
-      SqueezeService service = getService( false );
-      if ( service != null )
+      runWithService( new SqueezeServiceAwareThread()
       {
-         service.unsubscribeAll( onPlayerStatusChanged );
-      }
-      super.onDestroy();
-   }
-
-   public boolean onCreateOptionsMenu(Menu menu)
-   {
-      menu.add( 0, MENU_LIBRARY, 0, "Library" );
-      menu.add( 0, MENU_PLAYLIST, 0, "Playlist" );
-      menu.add( 0, MENU_SETTINGS, 0, "Settings" );
-      menu.add( 0, MENU_ADD_PLAYER, 0, "Sync Player" );
-      menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
-      return true;
-   }
-
-   private boolean isPlayerSelected()
-   {
-      return getSqueezeDroidApplication().getSelectedPlayer() != null;
-   }
+         public void runWithService(SqueezeService service) throws Exception
+         {
+            _volumePanel.removeAllViews();
+            _syncPanel = new PlayerSyncPanel( context, service, context );
+            _syncPanel.setPlayer( getSelectedPlayer() );
+            _volumePanel.addView( _syncPanel );
+            
+            service.unsubscribeAll( onPlayerStatusChanged );
+            service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
    
-
-   public boolean onOptionsItemSelected(MenuItem item)
-   {
-      switch ( item.getItemId() )
-      {
-         case MENU_LIBRARY :
-            launchSubActivity( BrowseRootActivity.class, null );
-            return true;
-         case MENU_PLAYLIST :
-            launchSubActivity( PlayListActivity.class, null );
-            return true;
-         case MENU_SETTINGS :
-            launchSubActivity( EditPrefrencesActivity.class, editSettingsIntentCallback );
-            return true;
-         case MENU_CHOOSE_PLAYER :
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
-            return true;
-         case MENU_ADD_PLAYER:
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForAddCallback );
-            return true;
-      }
-      return false;
+            _playlistListAdapter = new PlayListAdapter( service, context, getSqueezeDroidApplication().getSelectedPlayer() );
+            _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
+            PlayerStatus status = getService().getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
+            updateSongDisplay( status );
+         }
+      });
    }
 
+
+   /**
+    * Called to update the main screen to display information about a new song
+    * @param status
+    */
    private synchronized void updateSongDisplay(final PlayerStatus status)
    {
       if ( status != null && status.getCurrentSong() != null )
@@ -314,10 +441,12 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    }
 
-
+   /**
+    * {@link PlayerStatusHandler} to handle events from the {@link SqueezeService}.  This will update the ui based on
+    * various status change events from the current player
+    */
    private PlayerStatusHandler onPlayerStatusChanged = new SimplePlayerStatusHandler()
    {
-
       public void onSongChanged(final PlayerStatus status)
       {
          final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
@@ -402,8 +531,6 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    }};
 
-
-
    private void updateRepeatMode( final SqueezeService.RepeatMode newMode)
    {
       _currentStatus.setRepeatMode( newMode );
@@ -415,112 +542,4 @@ public class MainActivity extends SqueezedroidActivitySupport
          }
       });
    }
-   
-   private void onPlayerChanged()
-   {
-      runWithService( new SqueezeServiceAwareThread()
-      {
-         public void runWithService(SqueezeService service) throws Exception
-         {
-            _volumePanel.removeAllViews();
-            _syncPanel = new PlayerSyncPanel( context, service, context );
-            _syncPanel.setPlayer( getSelectedPlayer() );
-            _volumePanel.addView( _syncPanel );
-            
-            service.unsubscribeAll( onPlayerStatusChanged );
-            service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
-   
-            _playlistListAdapter = new PlayListAdapter( service, context, getSqueezeDroidApplication().getSelectedPlayer() );
-            _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
-            PlayerStatus status = getService().getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
-            updateSongDisplay( status );
-         }
-      });
-   }
-
-   OnClickListener onShuffleButtonPressed = new OnClickListener()
-   {
-      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>()
-      {{
-         put( SqueezeService.ShuffleMode.NONE, SqueezeService.ShuffleMode.SONG );
-         put( SqueezeService.ShuffleMode.SONG, SqueezeService.ShuffleMode.ALBUM );
-         put( SqueezeService.ShuffleMode.ALBUM, SqueezeService.ShuffleMode.NONE );
-      }};
-      
-      public void onClick(View v)
-      {
-         SqueezeService service = getSqueezeDroidApplication().getService();
-         if( service != null )
-         {
-            SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
-            if( nextMode != null )
-            {
-               service.setShuffleMode( getSelectedPlayer(), nextMode);
-            }
-         }
-      }
-   };
-
-
-   OnClickListener onRepeatButtonPressed = new OnClickListener()
-   {
-      private Map<SqueezeService.RepeatMode, SqueezeService.RepeatMode> nextRepeatModeMap = new HashMap<SqueezeService.RepeatMode, SqueezeService.RepeatMode>(){
-      {
-         put( SqueezeService.RepeatMode.NONE, SqueezeService.RepeatMode.SONG );
-         put( SqueezeService.RepeatMode.SONG, SqueezeService.RepeatMode.ALL);
-         put( SqueezeService.RepeatMode.ALL, SqueezeService.RepeatMode.NONE );
-      }};
-      
-      public void onClick(View v)
-      {
-         SqueezeService service = getSqueezeDroidApplication().getService();
-         if( service != null )
-         {
-            SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
-            if( nextMode != null )
-            {
-               service.setRepeatMode( getSelectedPlayer(), nextMode);
-            }
-         }
-      }
-   };
-
-   @Override
-   protected void onResume()
-   {
-      if ( !isPlayerSelected() )
-      {
-         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
-      }
-      else
-      {
-         onPlayerChanged();
-      }
-      super.onResume();
-   }
-
-   OnSeekBarChangeListener onTimeUpdatedByUser = new OnSeekBarChangeListener()
-   {
-      private int time = 0;
-
-      public void onStopTrackingTouch(SeekBar seekBar)
-      {
-         Log.v( LOGTAG, "User changed time seek bar position to " + time );
-         SqueezeService service = getService();
-         if ( service != null )
-         {
-            service.seekTo( getSelectedPlayer(), time );
-         }
-      }
-      
-      public void onStartTrackingTouch(SeekBar seekBar){}
-
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-      {
-         if ( fromUser )
-         {
-            time = progress;
-         }
-      }
-   };   
 }
