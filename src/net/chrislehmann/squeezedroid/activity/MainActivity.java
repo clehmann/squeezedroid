@@ -390,8 +390,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       {
          Song currentSong = status.getCurrentSong();
 
-         //Update the image if it has changed...
-         if ( _currentStatus == null || !_currentStatus.getCurrentSong().getImageUrl().equals( status.getCurrentSong().getImageUrl() ) )
+         if( hasCoverImageChanged( status ) )
          {
             if ( _currentStatus != null && _currentStatus.getCurrentIndex() <= status.getCurrentIndex() )
             {
@@ -403,7 +402,7 @@ public class MainActivity extends SqueezedroidActivitySupport
                _coverArtImageView.setOutAnimation( this, R.anim.slide_out_right );
                _coverArtImageView.setInAnimation( this, R.anim.slide_in_left );
             }
-
+   
             ImageView nextView = (ImageView) _coverArtImageView.getNextView();
             if( status.getCurrentSong().getImageUrl() != null )
             {
@@ -415,8 +414,8 @@ public class MainActivity extends SqueezedroidActivitySupport
                nextView.setImageResource( R.drawable.default_album );
             }
             _coverArtImageView.showNext();
-         }
 
+         }
          _songLabel.setText( currentSong.getName() );
          _artistLabel.setText( currentSong.getArtist() );
          _albumLabel.setText( currentSong.getAlbum() );
@@ -453,6 +452,24 @@ public class MainActivity extends SqueezedroidActivitySupport
          _timeSeekBar.pause();
          _timeSeekBar.setProgress( 0 );
       }
+   }
+
+   private boolean hasCoverImageChanged(final PlayerStatus newStatus)
+   {
+      boolean coverImageHasChanged = false;
+      if( _currentStatus == null )
+      {
+         coverImageHasChanged = true;
+      }
+      else if( _currentStatus.getCurrentSong().getImageUrl() == null && newStatus.getCurrentSong().getImageUrl() != null )
+      {
+         coverImageHasChanged = true;
+      }
+      else if( _currentStatus.getCurrentSong().getImageUrl() != null )
+      {
+         coverImageHasChanged = !_currentStatus.getCurrentSong().getImageUrl().equals( newStatus.getCurrentSong().getImageUrl() );     
+      }
+      return coverImageHasChanged;
    }
 
    /**
