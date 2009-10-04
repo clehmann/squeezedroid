@@ -82,18 +82,25 @@ public class ActivitySupport extends Activity
       {
          IntentResultCallback callback = _callbackMap.get( requestCode );
 
-         switch ( resultCode )
+         if( callback != null )
          {
-            case Activity.RESULT_CANCELED :
-               callback.resultCancel( result, extras );
-               _callbackMap.remove( requestCode );
-               break;
-            case Activity.RESULT_OK :
-               callback.resultOk( result, extras );
-               _callbackMap.remove( requestCode );
-               break;
-            default :
-               Log.e( LOGTAG, "Couldn't find callback handler for correlationId" );
+            switch ( resultCode )
+            {
+               case Activity.RESULT_CANCELED :
+                  callback.resultCancel( result, extras );
+                  _callbackMap.remove( requestCode );
+                  break;
+               case Activity.RESULT_OK :
+                  callback.resultOk( result, extras );
+                  _callbackMap.remove( requestCode );
+                  break;
+               default :
+                  Log.e( LOGTAG, "Couldn't find callback handler for correlationId" );
+            }
+         }
+         else
+         {
+            Log.e( LOGTAG, "No callback found for correlationId: " + requestCode );
          }
       }
       catch ( Exception e )

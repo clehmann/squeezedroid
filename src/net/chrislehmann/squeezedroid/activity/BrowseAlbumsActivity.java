@@ -3,6 +3,7 @@ package net.chrislehmann.squeezedroid.activity;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.AlbumListAdapter;
 import net.chrislehmann.squeezedroid.model.Artist;
+import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.SqueezeService.Sort;
@@ -14,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class BrowseAlbumsActivity extends SqueezedroidActivitySupport
+public class BrowseAlbumsActivity extends ItemListActivity
 {
 
    protected ListView listView;
@@ -28,8 +29,6 @@ public class BrowseAlbumsActivity extends SqueezedroidActivitySupport
 
       setContentView(R.layout.list_layout);
       listView = (ListView) findViewById( R.id.list );
-      
-      listView.setFastScrollEnabled( true );
 
       SqueezeService.Sort sort = getSort( getIntent().getData() );
       Item parentItem = getParentItem();
@@ -65,7 +64,7 @@ public class BrowseAlbumsActivity extends SqueezedroidActivitySupport
          }
          else if ( "genre".equalsIgnoreCase( type ) )
          {
-            // TODO
+            item = new Genre();
          }
 
          item.setId( id );

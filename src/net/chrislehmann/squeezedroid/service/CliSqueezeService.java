@@ -7,9 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
@@ -38,7 +36,6 @@ import android.util.Log;
  * 
  * @author lehmanc
  */
-@SuppressWarnings("serial")
 public class CliSqueezeService implements SqueezeService
 {
 
@@ -127,15 +124,10 @@ public class CliSqueezeService implements SqueezeService
          {
             song.setImageUrl( SerializationUtils.decode(matcher.group( 14 )) );
          }
-         else
+         else if ( matcher.group( 16 ) != null )
          {
-            String artId = "";
-            if ( matcher.group( 16 ) != null )
-            {
-               artId = matcher.group( 16 ) + "/";
-            }
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + artId  + "cover_50x50_o" );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + artId + "cover_320x320_o" );
+            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 )  + "/cover_50x50_o" );
+            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 ) + "/cover_320x320_o" );
          }
          
          try

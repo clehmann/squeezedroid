@@ -27,7 +27,6 @@
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.Browse" />
                <category android:name="android.intent.category.DEFAULT" />
-
             </intent-filter>
         </activity> 
         <activity android:name=".activity.BrowseArtistsActivity" android:label="Browse Artists">

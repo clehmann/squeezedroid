@@ -68,7 +68,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    private ImageButton _playButton;
    private ImageButton _shuffleButton;
    private ImageButton _repeatButton;
-   private ImageButton _toggleVolumeButton;
+   private ImageButton _toggleSyncPanelButton;
 
    private PlayerSyncPanel _syncPanel;
    private TransparentPanel _volumePanel;
@@ -98,7 +98,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       _prevButton = (ImageButton) findViewById( R.id.prevButton );
       _shuffleButton = (ImageButton) findViewById( R.id.shuffleButton );
       _repeatButton = (ImageButton) findViewById( R.id.repeatButton );
-      _toggleVolumeButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
+      _toggleSyncPanelButton = (ImageButton) findViewById( R.id.toggleVolumeButton );
       _timeSeekBar = new UpdatingSeekBar( (SeekBar) findViewById( R.id.timeSeekBar ) );
       _volumePanel = (TransparentPanel) findViewById( R.id.volume_panel);
       
@@ -108,7 +108,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       _nextButton.setOnClickListener( onNextButtonPressed );
       _shuffleButton.setOnClickListener( onShuffleButtonPressed );
       _repeatButton.setOnClickListener( onRepeatButtonPressed );
-      _toggleVolumeButton.setOnClickListener( onToggleVolumeButtonPressed );
+      _toggleSyncPanelButton.setOnClickListener( onToggleSyncPanelButtonPressed );
       
    }
 
@@ -209,15 +209,18 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
-   OnClickListener onToggleVolumeButtonPressed = new OnClickListener()
+   OnClickListener onToggleSyncPanelButtonPressed = new OnClickListener()
    {
       public void onClick(View v)
       {
          int visibility = View.VISIBLE;
+         int imageId = R.drawable.up;
          if ( _volumePanel.getVisibility() == View.VISIBLE )
          {
+            imageId = R.drawable.down;
             visibility = View.INVISIBLE;
          }
+         _toggleSyncPanelButton.setImageResource( imageId );
          _volumePanel.setVisibility( visibility );
          _volumePanel.bringToFront();
       }
@@ -402,8 +405,15 @@ public class MainActivity extends SqueezedroidActivitySupport
             }
 
             ImageView nextView = (ImageView) _coverArtImageView.getNextView();
-            nextView.setImageBitmap( null );
-            ImageLoader.getInstance().load( nextView, status.getCurrentSong().getImageUrl(), true );
+            if( status.getCurrentSong().getImageUrl() != null )
+            {
+               nextView.setImageBitmap( null );
+               ImageLoader.getInstance().load( nextView, status.getCurrentSong().getImageUrl(), true );
+            }
+            else
+            {
+               nextView.setImageResource( R.drawable.default_album );
+            }
             _coverArtImageView.showNext();
          }
 
@@ -460,7 +470,7 @@ public class MainActivity extends SqueezedroidActivitySupport
             {
                // Cache the next album art
                updateSongDisplay( status );
-               if ( playlist.getResutls().size() > 1 )
+               if ( playlist.getResutls().size() > 1 && playlist.getResutls().get( 1 ).getImageUrl() != null )
                {
                   ImageLoader.getInstance().load( null, playlist.getResutls().get( 1 ).getImageUrl(), true );
                }
