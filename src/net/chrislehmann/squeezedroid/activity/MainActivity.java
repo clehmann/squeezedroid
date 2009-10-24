@@ -10,6 +10,7 @@ import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
+import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
@@ -112,6 +113,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       
    }
 
+   
    @Override
    protected void onDestroy()
    {
@@ -126,6 +128,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    @Override
    protected void onResume()
    {
+      
       if ( !isPlayerSelected() )
       {
          launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
@@ -133,8 +136,26 @@ public class MainActivity extends SqueezedroidActivitySupport
       else
       {
          onPlayerChanged();
+         runWithService( new SqueezeServiceAwareThread()
+         {
+            public void runWithService(SqueezeService service)
+            {
+               service.subscribe( onServiceStatusChanged );
+            }
+         });
       }
       super.onResume();
+   }
+   
+   @Override
+   protected void onPause()
+   {
+      SqueezeService service = getService( false );
+      if( service != null )
+      {
+         service.unsubscribe( onServiceStatusChanged );
+      }
+      super.onPause();
    }
 
    public boolean onCreateOptionsMenu(Menu menu)
@@ -178,7 +199,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          SqueezeService service = getService();
-         if ( service != null )
+         if ( service != null && getSelectedPlayer() != null )
          {
             service.togglePause( getSqueezeDroidApplication().getSelectedPlayer() );
          }
@@ -190,7 +211,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          SqueezeService service = getService();
-         if ( service != null )
+         if ( service != null && getSelectedPlayer() != null  )
          {
             service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "+1" );
          }
@@ -202,7 +223,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          SqueezeService service = getService();
-         if ( service != null )
+         if ( service != null && getSelectedPlayer() != null )
          {
             service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "-1" );
          }
@@ -237,11 +258,11 @@ public class MainActivity extends SqueezedroidActivitySupport
       
       public void onClick(View v)
       {
-         SqueezeService service = getSqueezeDroidApplication().getService();
+         SqueezeService service = getService();
          if( service != null )
          {
             SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
-            if( nextMode != null )
+            if( nextMode != null && getSelectedPlayer() != null )
             {
                service.setShuffleMode( getSelectedPlayer(), nextMode);
             }
@@ -260,8 +281,8 @@ public class MainActivity extends SqueezedroidActivitySupport
       
       public void onClick(View v)
       {
-         SqueezeService service = getSqueezeDroidApplication().getService();
-         if( service != null )
+         SqueezeService service = getService();
+         if( service != null && getSelectedPlayer() != null  )
          {
             SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
             if( nextMode != null )
@@ -280,7 +301,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       {
          Log.v( LOGTAG, "User changed time seek bar position to " + time );
          SqueezeService service = getService();
-         if ( service != null )
+         if ( service != null && getSelectedPlayer() != null )
          {
             service.seekTo( getSelectedPlayer(), time );
          }
@@ -472,6 +493,16 @@ public class MainActivity extends SqueezedroidActivitySupport
       return coverImageHasChanged;
    }
 
+   private ServerStatusHandler onServiceStatusChanged = new ServerStatusHandler()
+   {
+      public void onDisconnect()
+      {
+//         //Just try and reconnect...
+//         getSqueezeDroidApplication().resetService();
+//         getService();
+      }
+   };
+   
    /**
     * {@link PlayerStatusHandler} to handle events from the {@link SqueezeService}.  This will update the ui based on
     * various status change events from the current player

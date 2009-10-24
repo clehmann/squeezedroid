@@ -599,25 +599,46 @@ public class CliSqueezeService implements SqueezeService
       executeAsyncCommand( player.getId() + " playlist delete " + playlistIndex );
    }
 
-   public void subscribe(Player player, PlayerStatusHandler handler)
+   public void subscribe(final Player player, final PlayerStatusHandler handler)
    {
-      eventThread.subscribe( player, handler );
+      Runnable r = new Runnable()
+      {
+         public void run()
+         {
+            eventThread.subscribe( player, handler );
+         }
+      };
+      commandQueue.add( r );
    }
 
-   public void unsubscribe(Player player, PlayerStatusHandler handler)
+   public void unsubscribe(final Player player, final PlayerStatusHandler handler)
    {
-      if( eventThread != null )
+      Runnable r = new Runnable()
       {
-         eventThread.unsubscribe( player, handler );
-      }
+         public void run()
+         {
+            if( eventThread != null )
+            {
+               eventThread.unsubscribe( player, handler );
+            }
+         }
+      };
+      commandQueue.add( r );
    }
 
-   public void unsubscribeAll(PlayerStatusHandler handler)
+   public void unsubscribeAll(final PlayerStatusHandler handler)
    {
-      if( eventThread != null )
+      Runnable r = new Runnable()
       {
-         eventThread.unsubscribe( handler );
-      }
+         public void run()
+         {
+            if( eventThread != null )
+            {
+               eventThread.unsubscribe( handler );
+            }
+         }
+      };
+      commandQueue.add( r );
    }
 
    public void seekTo(Player player, int time)
@@ -648,5 +669,32 @@ public class CliSqueezeService implements SqueezeService
    public void setRepeatMode( Player player, RepeatMode mode )
    {
       executeAsyncCommand( player.getId() + " playlist repeat " + mode.id );
+   }
+
+   public void unsubscribe( final ServerStatusHandler handler )
+   {
+      Runnable r = new Runnable()
+      {
+         
+         public void run()
+         {
+            eventThread.unsubscribe( handler );
+         }
+      };
+      commandQueue.add( r );
+ 
+   }
+
+   public void subscribe(final ServerStatusHandler handler)
+   {
+      Runnable r = new Runnable()
+      {
+         
+         public void run()
+         {
+            eventThread.subscribe( handler );
+         }
+      };
+      commandQueue.add( r );
    }
 }

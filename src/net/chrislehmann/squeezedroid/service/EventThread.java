@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,30 +29,12 @@ public class EventThread extends Thread
    private Writer _eventWriter;
    private BufferedReader _eventReader;
 
-   private Object _handlersMutex = new Object();
-
-   private Map<String, List<PlayerStatusHandler>> _handlers = new HashMap<String, List<PlayerStatusHandler>>();
+   private Object _playerHandlersMutex = new Object();
+   private Object _serverHandlersMutex = new Object();
    
-   private BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
+   private Map<String, List<PlayerStatusHandler>> _playerHandlers = new HashMap<String, List<PlayerStatusHandler>>();
+   private List<ServerStatusHandler> _serverHandlers = new ArrayList<ServerStatusHandler>();
    
-   private Thread workerThread = new Thread()
-   {
-      public void run()
-      {
-         try
-         {
-            while ( !interrupted() )
-            {
-               Runnable r = commandQueue.take();
-               r.run();
-            }
-         }
-         catch ( InterruptedException e )
-         {
-            Log.d( LOGTAG, "Worker thread interrupted, stopping" );
-         }
-      }
-   };
 
    private String host = "localhost";
    private int cliPort = 9090;
@@ -81,6 +61,7 @@ public class EventThread extends Thread
       {
          while ( !isInterrupted() && _eventSocket.isConnected() )
          {
+            
             String line = _eventReader.readLine();
             if ( !isInterrupted() && line != null )
             {
@@ -119,9 +100,13 @@ public class EventThread extends Thread
       _eventReader = null;
       _eventWriter = null;
 
-      //TODO - Handle server notifications
-      // notify( Event.DISCONNECT.toString(), null, null );
-
+      synchronized ( _serverHandlersMutex )
+      {
+         for ( ServerStatusHandler handler : _serverHandlers )
+         {
+            handler.onDisconnect();
+         }
+      }
    }
 
    private interface CommandHandler
@@ -252,13 +237,13 @@ public class EventThread extends Thread
 
    private void notify(String event, String playerId, String data)
    {
-      synchronized ( _handlersMutex )
+      synchronized ( _playerHandlersMutex )
       {
          Log.v( LOGTAG, "Got event '" + playerId + ":" + event + "', notifying any handlers that care" );
          updateStatus( playerId );
-         if ( _handlers.containsKey( playerId ) )
+         if ( _playerHandlers.containsKey( playerId ) )
          {
-            List<PlayerStatusHandler> handlers = _handlers.get( playerId );
+            List<PlayerStatusHandler> handlers = _playerHandlers.get( playerId );
             for ( PlayerStatusHandler handler : handlers )
             {
                Log.v( LOGTAG, "Handler '" + handler + " cares about this player" );
@@ -297,10 +282,6 @@ public class EventThread extends Thread
          _eventWriter.flush();
          Log.v( LOGTAG, "subscribed to events" );
 
-         Log.v( LOGTAG, "Starting worker thread" );
-         workerThread.start();
-         Log.v( LOGTAG, "Worker thread started" );
-
       }
       catch ( Exception e )
       {
@@ -311,84 +292,65 @@ public class EventThread extends Thread
 
    public void subscribe(final Player player, final PlayerStatusHandler handler)
    {
-      Runnable action = new Runnable()
+      synchronized ( _playerHandlersMutex )
       {
-         public void run()
+         Log.v( LOGTAG, "Suscribing to notifications for player " + player.getId() + " with handler " + handler );
+         if ( !_playerHandlers.containsKey( player.getId() ) )
          {
-            synchronized ( _handlersMutex )
-            {
-               Log.v( LOGTAG, "Suscribing to notifications for player " + player.getId() + " with handler " + handler );
-               if ( !_handlers.containsKey( player.getId() ) )
-               {
-                  _handlers.put( player.getId(), Collections.synchronizedList( new ArrayList<PlayerStatusHandler>() ) );
-               }
-               List<PlayerStatusHandler> handlers = _handlers.get( player.getId() );
-               handlers.add( handler );
-               Log.v( LOGTAG, "Done subscribing to notifications for player " + player.getId() + " with handler " + handler );
-            }
+            _playerHandlers.put( player.getId(), Collections.synchronizedList( new ArrayList<PlayerStatusHandler>() ) );
          }
-      };
-      addToQueue( action );
-   }
-
-   public void addToQueue( Runnable runnable )
-   {
-      try
-      {
-         commandQueue.put( runnable );
+         List<PlayerStatusHandler> handlers = _playerHandlers.get( player.getId() );
+         handlers.add( handler );
+         Log.v( LOGTAG, "Done subscribing to notifications for player " + player.getId() + " with handler " + handler );
       }
-      catch ( InterruptedException e )
-      {
-         //should only be called on the main thread anyway, we can just ignore.
-      }
-      
    }
    
+   public void subscribe( ServerStatusHandler handler )
+   {
+      synchronized ( _serverHandlersMutex )
+      {
+         _serverHandlers.add( handler );
+      }
+   }
+   
+   public void unsubscribe( ServerStatusHandler handler )
+   {
+      synchronized ( _serverHandlersMutex )
+      {
+         _serverHandlers.remove( handler );
+      }
+   }
+
    public void unsubscribe(final Player player, final PlayerStatusHandler handler)
    {
-      Runnable action = new Runnable()
+      synchronized ( _playerHandlersMutex )
       {
-         public void run()
+         Log.v( LOGTAG, "Unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
+         if ( _playerHandlers.containsKey( player.getId() ) )
          {
-            synchronized ( _handlersMutex )
+            List<PlayerStatusHandler> handlers = _playerHandlers.get( player.getId() );
+            synchronized ( handlers )
             {
-               Log.v( LOGTAG, "Unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
-               if ( _handlers.containsKey( player.getId() ) )
-               {
-                  List<PlayerStatusHandler> handlers = _handlers.get( player.getId() );
-                  synchronized ( handlers )
-                  {
-                     handlers.remove( handler );
-                  }
-               }
-               Log.v( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
-      
+               handlers.remove( handler );
             }
          }
-      };
-      addToQueue( action );
+         Log.v( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
+
+      }
    }
 
 
    public void unsubscribe(final PlayerStatusHandler handler)
    {
-      Runnable action = new Runnable()
+      synchronized ( _playerHandlersMutex )
       {
-         public void run()
+         Log.d( LOGTAG, "Unsubscribing from all notifactions handled by " + handler );
+         for ( List<PlayerStatusHandler> handlerList : _playerHandlers.values() )
          {
-
-            synchronized ( _handlersMutex )
-            {
-               Log.d( LOGTAG, "Unsubscribing from all notifactions handled by " + handler );
-               for ( List<PlayerStatusHandler> handlerList : _handlers.values() )
-               {
-                  handlerList.remove( handler );
-               }
-               Log.d( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler );
-            }
+            handlerList.remove( handler );
          }
-      };
-      addToQueue( action );
+         Log.d( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler );
+      }
    }
    
    public CommandHandler getTimeChangeHandler()
@@ -405,6 +367,5 @@ public class EventThread extends Thread
    {
       _service = service;
    }
-
 
 }

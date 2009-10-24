@@ -100,6 +100,10 @@ public interface SqueezeService
 
    public boolean isConnected();
 
+   public void subscribe(ServerStatusHandler handler);
+
+   public void unsubscribe(ServerStatusHandler onServiceStatusChanged);
+
    public void subscribe(Player player, PlayerStatusHandler handler);
 
    public void unsubscribe(Player player, PlayerStatusHandler handler);

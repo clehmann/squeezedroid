@@ -34,21 +34,23 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     */
    protected void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
    {
-      SqueezeServiceAwareThread onConnectThread = onConnect;
-      if( runOnThread )
+      if ( runOnThread )
       {
-         onConnectThread = new SqueezeServiceAwareThread()
+         new SqueezeServiceAwareThread()
          {
             public void runWithService(final SqueezeService service)
             {
                new Thread()
                {
-                  public void run() { onConnect.runWithService( service ); };
+                  public void run()
+                  {
+                     onConnect.runWithService( service );
+                  };
                }.start();
             }
          };
       }
-      
+
       getService( true, onConnect );
    }
 
@@ -62,6 +64,8 @@ public class SqueezedroidActivitySupport extends ActivitySupport
    {
       runWithService( onConnect, false );
    }
+   
+
    /**
     * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
@@ -101,7 +105,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
    {
       getSqueezeDroidApplication().setSelectedPlayer( player );
    }
-   
+
    /**
     * Returns true if a player is selected
     */
@@ -135,10 +139,10 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       SqueezeService service = getSqueezeDroidApplication().getService();
       if ( connect && (service == null || !service.isConnected()) )
       {
-         service = null;
-         Intent intent = new Intent();
-         intent.setAction( SqueezeDroidConstants.Actions.ACTION_CONNECT );
-         launchSubActivity( ConnectToServerActivity.class, new ExecuteWithServiceCallback( onConnect ) );
+            service = null;
+            Intent intent = new Intent();
+            intent.setAction( SqueezeDroidConstants.Actions.ACTION_CONNECT );
+            launchSubActivity( ConnectToServerActivity.class, new ExecuteWithServiceCallback( onConnect ) );
       }
       else if ( service != null && service.isConnected() )
       {

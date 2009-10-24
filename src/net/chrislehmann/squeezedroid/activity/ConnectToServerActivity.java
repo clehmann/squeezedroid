@@ -80,7 +80,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
 					finish();
 				}
 			} catch (ApplicationException e) {
-				runOnUiThread(new Runnable() {
+			   runOnUiThread(new Runnable() {
 					public void run() {
 						_connectingDialog.hide();
 						showDialog(DIALOG_ERROR_CONNECTING);
@@ -150,9 +150,8 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
       {
          public void onClick(DialogInterface dialog, int which)
          {
-            Intent i = new Intent();
-            i.setAction( "net.chrislehmann.squeezedroid.action.Status" );
-            startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_CONNECT );
+            _connectionThread = new ConnectionThread();
+            _connectionThread.start();
          }
       });
       builder.setNegativeButton( "Cancel", new OnClickListener()
