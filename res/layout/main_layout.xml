@@ -91,7 +91,7 @@
 		<RelativeLayout android:id="@+id/media_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"
 			android:gravity="center_horizontal" android:layout_height="50px">
-			<ImageButton android:scaleType="fitCenter" android:src="@drawable/browse"
+			<ImageButton android:scaleType="fitCenter"
 				android:layout_width="50px" android:layout_height="50px"
 				android:layout_alignParentLeft="true"
 				android:background="@drawable/button_background"
