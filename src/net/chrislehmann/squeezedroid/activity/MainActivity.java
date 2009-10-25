@@ -128,21 +128,23 @@ public class MainActivity extends SqueezedroidActivitySupport
    @Override
    protected void onResume()
    {
-      
-      if ( !isPlayerSelected() )
+      if( !closing )
       {
-         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
-      }
-      else
-      {
-         onPlayerChanged();
-         runWithService( new SqueezeServiceAwareThread()
+         if ( !isPlayerSelected() )
          {
-            public void runWithService(SqueezeService service)
+            launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+         }
+         else
+         {
+            onPlayerChanged();
+            runWithService( new SqueezeServiceAwareThread()
             {
-               service.subscribe( onServiceStatusChanged );
-            }
-         });
+               public void runWithService(SqueezeService service)
+               {
+                  service.subscribe( onServiceStatusChanged );
+               }
+            });
+         }
       }
       super.onResume();
    }
@@ -334,13 +336,7 @@ public class MainActivity extends SqueezedroidActivitySupport
             onPlayerChanged();
       }
       
-      public void resultCancel(String resultString, Bundle resultMap)
-      {
-         if( getSqueezeDroidApplication().getSelectedPlayer() == null )
-         {
-            finish();
-         }
-      }
+      public void resultCancel(String resultString, Bundle resultMap){}
    };
    
    private IntentResultCallback choosePlayerForSyncCallback = new IntentResultCallback()

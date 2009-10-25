@@ -1,6 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.chrislehmann.squeezedroid.R;

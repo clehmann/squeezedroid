@@ -12,44 +12,46 @@ import android.util.Log;
 public class SqueezeDroidApplication extends Application
 {
 
-   private SqueezeService _service;
+   private static final String LOGTAG = "SqueezeDroidApplication";
+   private SqueezeService service;
    private Player selectedPlayer;
-
+   
    @Override
-	public void onLowMemory() {
-	   ImageLoader.getInstance().clearCache();
-	   super.onLowMemory();
-	}
+   public void onLowMemory()
+   {
+      ImageLoader.getInstance().clearCache();
+      super.onLowMemory();
+   }
+
    
    @Override
    public void onTerminate()
    {
-      if( _service != null )
+      if ( service != null )
       {
-         _service.disconnect();
+         service.disconnect();
       }
       super.onTerminate();
    }
-   
+
    public SqueezeService getService()
    {
-      if( _service == null )
+      if ( service == null )
       {
-         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( getBaseContext() );
          String serverIp = prefs.getString( "server_ip", "bonk" );
          String serverWebPort = prefs.getString( "server_web_port", "9000" );
          String serverCliPort = prefs.getString( "server_cli_port", "9090" );
 
-         SqueezeService service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
-         _service = service;
+         service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
       }
 
-      return _service;
+      return service;
    }
 
    public void setService(SqueezeService service)
    {
-      this._service = service;
+      this.service = service;
    }
 
    public Player getSelectedPlayer()
@@ -62,14 +64,20 @@ public class SqueezeDroidApplication extends Application
       this.selectedPlayer = selectedPlayer;
    }
 
-	public void resetService() {
-		if (_service != null && _service.isConnected()) {
-			try{
-				_service.disconnect();
-			} catch (Exception e) {
-				Log.e("SQUEEZE", "Error disconnecting from service", e);
-			}
-		}
-		_service = null;
-	}
+   public void resetService()
+   {
+      if ( service != null && service.isConnected() )
+      {
+         try
+         {
+            service.disconnect();
+         }
+         catch ( Exception e )
+         {
+            Log.e( LOGTAG, "Error disconnecting from service", e );
+         }
+      }
+      service = null;
+      selectedPlayer = null;
+   }
 }

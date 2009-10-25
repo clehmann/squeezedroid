@@ -5,13 +5,10 @@ import java.util.regex.Pattern;
 
 import net.chrislehmann.squeezedroid.R;
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.widget.Toast;
 
@@ -60,7 +57,5 @@ public class EditPrefrencesActivity extends PreferenceActivity
 
       preference = (EditTextPreference) findPreference( "server_cli_port" );
       preference.setOnPreferenceChangeListener( new ValidatingOnPreferenceChangeListener( numericPattern, this,  "'Cli Port' must be numeric" ) );
-
-      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
    }
 }

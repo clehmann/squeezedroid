@@ -19,6 +19,9 @@ public class ActivitySupport extends Activity
 {
 
    private static final String LOGTAG = "ActivitySupport";
+   protected static final int RESULT_CLOSE_APPLICATION_CHAIN = 666;
+
+   protected boolean closing = false;
 
    /**
     * Interface containing callbacks that will be executed when an {@link Activity} result is returned
@@ -63,6 +66,17 @@ public class ActivitySupport extends Activity
          startActivity( i );
       }
    }
+   
+   
+   /**
+    * Sets the result
+    */
+   protected void closeApplication()
+   {
+      closing = true;
+      setResult( RESULT_CLOSE_APPLICATION_CHAIN );
+      finish();
+   }
 
    /**
     * this is the underlying implementation of the onActivityResult method that handles auto generation of
@@ -71,6 +85,16 @@ public class ActivitySupport extends Activity
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data)
    {
+      
+      //If we get the RESULT_CLOSE_APPLICATION_CHAIN, set our result to that and finish.
+      //  This should bubble all the way up to the top of the application activity stack
+      if( resultCode == RESULT_CLOSE_APPLICATION_CHAIN )
+      {
+         setResult( RESULT_CLOSE_APPLICATION_CHAIN );
+         finish();
+         return;
+      }
+      
       Bundle extras = null;
       String result = null;
       if( data != null )
@@ -95,7 +119,7 @@ public class ActivitySupport extends Activity
                   _callbackMap.remove( requestCode );
                   break;
                default :
-                  Log.e( LOGTAG, "Couldn't find callback handler for correlationId" );
+                  Log.e( LOGTAG, "Couldn't find callback handler for correlationId " + requestCode + " and result code " + resultCode);
             }
          }
          else

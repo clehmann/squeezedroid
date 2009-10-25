@@ -34,6 +34,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     */
    protected void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
    {
+      
       if ( runOnThread )
       {
          new SqueezeServiceAwareThread()
@@ -185,9 +186,8 @@ public class SqueezedroidActivitySupport extends ActivitySupport
          }
       }
 
-      public void resultCancel(String resultString, Bundle resultMap)
-      {
-         finish();
+      public void resultCancel(String resultString, Bundle resultMap){
+         closeApplication();
       }
    };
 
