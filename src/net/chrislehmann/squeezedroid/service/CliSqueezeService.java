@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -59,21 +60,24 @@ public class CliSqueezeService implements SqueezeService
    private BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
    private Thread commandThread = new Thread()
    {
-      public void run() {
+      public void run()
+      {
          try
          {
-            while( !isInterrupted() )
+            while ( !isInterrupted() )
             {
                Runnable r = commandQueue.take();
-               if( !isInterrupted() )
+               if ( !isInterrupted() )
                {
                   r.run();
                }
             }
-         } catch (InterruptedException e) {
+         }
+         catch ( InterruptedException e )
+         {
             //just finish...
          }
-         
+
       };
    };
 
@@ -90,7 +94,8 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
-   private Pattern songsResponsePattern = Pattern.compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*.*?( artwork_track_id%3A([^ ]*))*" );
+   private Pattern songsResponsePattern = Pattern
+         .compile( "id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*.*?( artwork_track_id%3A([^ ]*))*" );
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
@@ -103,42 +108,45 @@ public class CliSqueezeService implements SqueezeService
          song.setId( matcher.group( 1 ) );
          song.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
          song.setArtist( SerializationUtils.decode( matcher.group( 3 ) ) );
-         if( matcher.group( 5 ) != null )
+         if ( matcher.group( 5 ) != null )
          {
             song.setArtistId( SerializationUtils.decode( matcher.group( 5 ) ) );
          }
          song.setAlbum( SerializationUtils.decode( matcher.group( 7 ) ) );
-         if( matcher.group( 9 ) != null )
+         if ( matcher.group( 9 ) != null )
          {
             song.setAlbumId( SerializationUtils.decode( matcher.group( 10 ) ) );
          }
-         
-         
-         if( matcher.group( 11 ) != null && "1".equals( matcher.group( 12 )  ) )
+
+
+         if ( matcher.group( 11 ) != null && "1".equals( matcher.group( 12 ) ) )
          {
             song.setRadioStation( true );
          }
-         
+
          //set the artwork images
-         if( matcher.group( 14 ) != null )
+         if ( matcher.group( 14 ) != null )
          {
-            song.setImageUrl( SerializationUtils.decode(matcher.group( 14 )) );
+            song.setImageUrl( SerializationUtils.decode( matcher.group( 14 ) ) );
          }
          else if ( matcher.group( 16 ) != null )
          {
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 )  + "/cover_50x50_o" );
+            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 ) + "/cover_50x50_o" );
             song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 ) + "/cover_320x320_o" );
          }
-         
+
          try
          {
             Float duration = Float.parseFloat( matcher.group( 10 ) );
             song.setDurationInSeconds( duration.intValue() );
-         } catch (NumberFormatException e) {}
+         }
+         catch ( NumberFormatException e )
+         {
+         }
          return song;
       }
    };
-   
+
    /**
     * Connect to the squeezecenter server and log in if required. Will throw an
     * {@link ApplicationException} if the connection fails.
@@ -150,6 +158,8 @@ public class CliSqueezeService implements SqueezeService
          clientSocket = new Socket( host, cliPort );
          clientWriter = new OutputStreamWriter( clientSocket.getOutputStream() );
          clientReader = new BufferedReader( new InputStreamReader( clientSocket.getInputStream() ) );
+
+         clientSocket.setSoTimeout( 10 * 10000 );
       }
       catch ( Exception e )
       {
@@ -159,7 +169,7 @@ public class CliSqueezeService implements SqueezeService
       eventThread = new EventThread( host, cliPort );
       eventThread.setService( this );
       eventThread.start();
-      
+
       commandThread.start();
    }
 
@@ -184,7 +194,7 @@ public class CliSqueezeService implements SqueezeService
          clientSocket = null;
       }
 
-      eventThread.interrupt();
+      eventThread.disconnect();
       commandThread.interrupt();
       eventThread = null;
    }
@@ -196,10 +206,14 @@ public class CliSqueezeService implements SqueezeService
 
    synchronized private String executeCommand(String command)
    {
-      writeCommand( command );
-      return readResponse();
+      String response = null;
+      if ( writeCommand( command ) )
+      {
+         response = readResponse();
+      }
+      return response;
    }
-   
+
    private void executeAsyncCommand(final String commandString)
    {
       Runnable command = new Runnable()
@@ -218,32 +232,47 @@ public class CliSqueezeService implements SqueezeService
       String response = null;
       try
       {
-         if( clientReader != null )
+         if ( clientReader != null )
          {
             response = clientReader.readLine();
          }
       }
+      catch ( SocketTimeoutException sto )
+      {
+         Log.e( LOGTAG, "Timeout reading socket, disconnecting from server" );
+      }
       catch ( IOException e )
       {
-         throw new RuntimeException( "Error reading from server", e );
+         Log.e( LOGTAG, "error reading response", e );
+      }
+
+      //Disconnect from the server if we don't have a response.
+      if ( response == null )
+      {
+         Log.e( LOGTAG, "Error reading response, disconnecting from server" );
+         this.disconnect();
       }
       return response;
    }
 
-   private void writeCommand(String command)
+   private boolean writeCommand(String command)
    {
+      boolean written = false;
       try
       {
-         if( clientWriter != null )
+         if ( clientWriter != null )
          {
             clientWriter.write( command + "\n" );
             clientWriter.flush();
+            written = true;
          }
       }
       catch ( IOException e )
       {
-         throw new RuntimeException( "Error communitcating with server.", e );
+         Log.e( LOGTAG, "Error writing response, disconnecting from server" );
+         disconnect();
       }
+      return written;
    }
 
    public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems)
@@ -261,11 +290,14 @@ public class CliSqueezeService implements SqueezeService
             return genre;
          }
       };
-      String result = executeCommand( command );
-      List<Genre> genres = SerializationUtils.unserializeList( genresResponsePattern, result, unserializer );
       BrowseResult<Genre> browseResult = new BrowseResult<Genre>();
-      browseResult.setResutls( genres );
-      browseResult.setTotalItems( unserializeCount( result ) );
+      String result = executeCommand( command );
+      if ( result != null )
+      {
+         List<Genre> genres = SerializationUtils.unserializeList( genresResponsePattern, result, unserializer );
+         browseResult.setResutls( genres );
+         browseResult.setTotalItems( unserializeCount( result ) );
+      }
       return browseResult;
    }
 
@@ -282,7 +314,7 @@ public class CliSqueezeService implements SqueezeService
       {
          command += " artist_id:" + parent.getId();
       }
-      
+
       if ( parent instanceof Genre )
       {
          command += " genre_id:" + parent.getId();
@@ -294,51 +326,56 @@ public class CliSqueezeService implements SqueezeService
 
       command += " tags:laj";
       String result = executeCommand( command );
-
-      List<Album> albums = SerializationUtils.unserializeList( albumsResponsePattern, result, new Unserializer<Album>()
-      {
-         public Album unserialize(Matcher matcher)
-         {
-            Album album = new Album();
-            album.setId( matcher.group( 1 ) );
-            album.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-            album.setArtist( SerializationUtils.decode( matcher.group( 5 ) ) );
-            album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
-            album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320	_o" );
-            return album;
-         }
-      } );
-
       BrowseResult<Album> browseResult = new BrowseResult<Album>();
-      browseResult.setTotalItems( unserializeCount( result ) );
-      browseResult.setResutls( albums );
+
+      if ( result != null )
+      {
+         List<Album> albums = SerializationUtils.unserializeList( albumsResponsePattern, result, new Unserializer<Album>()
+         {
+            public Album unserialize(Matcher matcher)
+            {
+               Album album = new Album();
+               album.setId( matcher.group( 1 ) );
+               album.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
+               album.setArtist( SerializationUtils.decode( matcher.group( 5 ) ) );
+               album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
+               album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320	_o" );
+               return album;
+            }
+         } );
+
+         browseResult.setTotalItems( unserializeCount( result ) );
+         browseResult.setResutls( albums );
+      }
       return browseResult;
    }
 
    public BrowseResult<Artist> browseArtists(Item parent, int start, int numberOfItems)
    {
       String command = "artists " + start + " " + numberOfItems;
-      if( parent instanceof Genre)
+      if ( parent instanceof Genre )
       {
          command += " genre_id:" + parent.getId();
       }
-      
-      String result = executeCommand( command );
-      
-      Matcher matcher = artistsResponsePattern.matcher( result );
-
-      List<Artist> artists = new ArrayList<Artist>();
-      while ( matcher.find() )
-      {
-         Artist artist = new Artist();
-         artist.setId( matcher.group( 1 ) );
-         artist.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-         artists.add( artist );
-      }
 
       BrowseResult<Artist> browseResult = new BrowseResult<Artist>();
-      browseResult.setResutls( artists );
-      browseResult.setTotalItems( unserializeCount( result ) );
+      String result = executeCommand( command );
+      if ( result != null )
+      {
+         Matcher matcher = artistsResponsePattern.matcher( result );
+
+         List<Artist> artists = new ArrayList<Artist>();
+         while ( matcher.find() )
+         {
+            Artist artist = new Artist();
+            artist.setId( matcher.group( 1 ) );
+            artist.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
+            artists.add( artist );
+         }
+
+         browseResult.setResutls( artists );
+         browseResult.setTotalItems( unserializeCount( result ) );
+      }
       return browseResult;
    }
 
@@ -346,7 +383,6 @@ public class CliSqueezeService implements SqueezeService
    {
       String command = "titles " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
 
-      BrowseResult<Song> browseResult = new BrowseResult<Song>();
 
       if ( parent instanceof Artist )
       {
@@ -357,12 +393,16 @@ public class CliSqueezeService implements SqueezeService
          command += " album_id:" + parent.getId();
       }
 
+      BrowseResult<Song> browseResult = new BrowseResult<Song>();
       String result = executeCommand( command );
+      if ( result != null )
+      {
+         List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
+         browseResult.setTotalItems( unserializeCount( result ) );
+         browseResult.setResutls( songs );
 
-      List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
+      }
 
-      browseResult.setTotalItems( unserializeCount( result ) ); 
-      browseResult.setResutls( songs );
       return browseResult;
    }
 
@@ -386,18 +426,21 @@ public class CliSqueezeService implements SqueezeService
    {
 
       String command = new String( "players 0 1000" );
+      List<Player> players = new ArrayList<Player>();
       String result = executeCommand( command );
-
-      List<Player> players = SerializationUtils.unserializeList( playersResponsePattern, result, new SerializationUtils.Unserializer<Player>()
+      if ( result != null )
       {
-         public Player unserialize(Matcher matcher)
+         players = SerializationUtils.unserializeList( playersResponsePattern, result, new SerializationUtils.Unserializer<Player>()
          {
-            Player player = new Player();
-            player.setId( SerializationUtils.decode( matcher.group( 1 ) ) );
-            player.setName( SerializationUtils.decode( matcher.group( 4 ) ) );
-            return player;
-         }
-      } );
+            public Player unserialize(Matcher matcher)
+            {
+               Player player = new Player();
+               player.setId( SerializationUtils.decode( matcher.group( 1 ) ) );
+               player.setName( SerializationUtils.decode( matcher.group( 4 ) ) );
+               return player;
+            }
+         } );
+      }
 
       List<Player> groupedPlayers = new ArrayList<Player>();
 
@@ -430,14 +473,16 @@ public class CliSqueezeService implements SqueezeService
       List<Player> players = getPlayers();
       return (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( playerId ) );
    }
-   
+
    private class PlayerIdEqualsPredicate implements Predicate
    {
       private String playerId;
-      public PlayerIdEqualsPredicate( String playerId )
+
+      public PlayerIdEqualsPredicate(String playerId)
       {
          this.playerId = playerId;
       }
+
       public boolean evaluate(Object arg0)
       {
          boolean matches = false;
@@ -449,46 +494,53 @@ public class CliSqueezeService implements SqueezeService
          return matches;
       }
    }
-   
+
    public PlayerStatus getPlayerStatus(Player player)
    {
       String command = new String( player.getId() + " status - 1 tags:" + SONG_TAGS );
       String result = executeCommand( command );
 
       PlayerStatus status = new PlayerStatus();
-      Song song = SerializationUtils.unserialize( songsResponsePattern, result, songUnserializer );
-      status.setCurrentSong( song );
-      
-      
-      Matcher statusMatcher = playerStatusResponsePattern.matcher( result );
-      if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
+      if ( result != null )
       {
-         Log.d( LOGTAG, "Status: " + statusMatcher.group( 1 ) );
-         Log.d( LOGTAG, "Time: " + statusMatcher.group( 3 ) );
-         Log.d( LOGTAG, "Volume: " + statusMatcher.group( 4 ) );
-         Log.d( LOGTAG, "Repeat: " + statusMatcher.group( 5 ) );
-         Log.d( LOGTAG, "Shuffle: " + statusMatcher.group( 6 ) );
-         Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 7 ) );
-         
-         status.setStatus( statusMatcher.group(1) );
-         status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 7 ) ) );
-         String positionString = statusMatcher.group( 3 );
-         try
+
+         Song song = SerializationUtils.unserialize( songsResponsePattern, result, songUnserializer );
+         status.setCurrentSong( song );
+
+
+         Matcher statusMatcher = playerStatusResponsePattern.matcher( result );
+         if ( status != null && statusMatcher.find() && statusMatcher.group( 1 ) != null )
          {
-            if( positionString != null )
+            Log.d( LOGTAG, "Status: " + statusMatcher.group( 1 ) );
+            Log.d( LOGTAG, "Time: " + statusMatcher.group( 3 ) );
+            Log.d( LOGTAG, "Volume: " + statusMatcher.group( 4 ) );
+            Log.d( LOGTAG, "Repeat: " + statusMatcher.group( 5 ) );
+            Log.d( LOGTAG, "Shuffle: " + statusMatcher.group( 6 ) );
+            Log.d( LOGTAG, "Playlist Index: " + statusMatcher.group( 7 ) );
+
+            status.setStatus( statusMatcher.group( 1 ) );
+            status.setCurrentIndex( Integer.parseInt( statusMatcher.group( 7 ) ) );
+            String positionString = statusMatcher.group( 3 );
+            try
             {
-               Double d = Double.parseDouble( positionString );
-               status.setCurrentPosition( d.intValue() );
+               if ( positionString != null )
+               {
+                  Double d = Double.parseDouble( positionString );
+                  status.setCurrentPosition( d.intValue() );
+               }
+               if ( statusMatcher.group( 4 ) != null )
+               {
+                  Double d = Double.parseDouble( statusMatcher.group( 4 ) );
+                  status.setVolume( d.intValue() );
+               }
             }
-            if( statusMatcher.group( 4 ) != null  )
-            {
-               Double d = Double.parseDouble( statusMatcher.group( 4 ) );
-               status.setVolume( d.intValue() );
+            catch ( NumberFormatException nfd )
+            {/* Invalid, don't set volume. */
             }
-         } catch (NumberFormatException nfd) {/* Invalid, don't set volume. */}
-         
-         status.setRepeatMode( RepeatMode.intToRepeatModeMap.get( statusMatcher.group(5) ) );
-         status.setShuffleMode( ShuffleMode.intToShuffleModeMap.get( statusMatcher.group(6) ) );
+
+            status.setRepeatMode( RepeatMode.intToRepeatModeMap.get( statusMatcher.group( 5 ) ) );
+            status.setShuffleMode( ShuffleMode.intToShuffleModeMap.get( statusMatcher.group( 6 ) ) );
+         }
 
       }
       return status;
@@ -501,18 +553,21 @@ public class CliSqueezeService implements SqueezeService
       String result = executeCommand( command );
 
       BrowseResult<Song> browseResult = new BrowseResult<Song>();
-      List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
-      browseResult.setResutls( songs );
+      if ( result != null )
+      {
+         List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
+         browseResult.setResutls( songs );
 
-      Matcher countMatcher = playlistCountPattern.matcher( result );
-      if ( countMatcher.find() )
-      {
-         String countString = countMatcher.group( 1 );
-         browseResult.setTotalItems( Integer.valueOf( countString ) );
-      }
-      else
-      {
-         android.util.Log.e( this.getClass().getCanonicalName(), "Cannot find match for count from status response '" + result + "'" );
+         Matcher countMatcher = playlistCountPattern.matcher( result );
+         if ( countMatcher.find() )
+         {
+            String countString = countMatcher.group( 1 );
+            browseResult.setTotalItems( Integer.valueOf( countString ) );
+         }
+         else
+         {
+            android.util.Log.e( this.getClass().getCanonicalName(), "Cannot find match for count from status response '" + result + "'" );
+         }
       }
       return browseResult;
    }
@@ -520,7 +575,7 @@ public class CliSqueezeService implements SqueezeService
    public void addItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
-      if( extraParams != null )
+      if ( extraParams != null )
       {
          String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
          executeAsyncCommand( command );
@@ -530,7 +585,7 @@ public class CliSqueezeService implements SqueezeService
    public void playItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
-      if( extraParams != null )
+      if ( extraParams != null )
       {
          String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
          executeAsyncCommand( command );
@@ -617,7 +672,7 @@ public class CliSqueezeService implements SqueezeService
       {
          public void run()
          {
-            if( eventThread != null )
+            if ( eventThread != null )
             {
                eventThread.unsubscribe( player, handler );
             }
@@ -632,7 +687,7 @@ public class CliSqueezeService implements SqueezeService
       {
          public void run()
          {
-            if( eventThread != null )
+            if ( eventThread != null )
             {
                eventThread.unsubscribe( handler );
             }
@@ -643,7 +698,7 @@ public class CliSqueezeService implements SqueezeService
 
    public void seekTo(Player player, int time)
    {
-      executeAsyncCommand( player.getId() + " time " + time);
+      executeAsyncCommand( player.getId() + " time " + time );
    }
 
    public void changeVolume(Player player, int volumeLevel)
@@ -653,7 +708,7 @@ public class CliSqueezeService implements SqueezeService
 
    public void synchronize(Player player, Player playerToSyncTo)
    {
-      executeAsyncCommand(  playerToSyncTo.getId() + " sync " +  player.getId());
+      executeAsyncCommand( playerToSyncTo.getId() + " sync " + player.getId() );
    }
 
    public void unsynchronize(Player player)
@@ -661,35 +716,38 @@ public class CliSqueezeService implements SqueezeService
       executeAsyncCommand( player.getId() + " sync -" );
    }
 
-   public void setShuffleMode( Player player, ShuffleMode mode )
+   public void setShuffleMode(Player player, ShuffleMode mode)
    {
       executeAsyncCommand( player.getId() + " playlist shuffle " + mode.id );
    }
-   
-   public void setRepeatMode( Player player, RepeatMode mode )
+
+   public void setRepeatMode(Player player, RepeatMode mode)
    {
       executeAsyncCommand( player.getId() + " playlist repeat " + mode.id );
    }
 
-   public void unsubscribe( final ServerStatusHandler handler )
+   public void unsubscribe(final ServerStatusHandler handler)
    {
       Runnable r = new Runnable()
       {
-         
+
          public void run()
          {
-            eventThread.unsubscribe( handler );
+            if( eventThread != null )
+            {
+               eventThread.unsubscribe( handler );
+            }
          }
       };
       commandQueue.add( r );
- 
+
    }
 
    public void subscribe(final ServerStatusHandler handler)
    {
       Runnable r = new Runnable()
       {
-         
+
          public void run()
          {
             eventThread.subscribe( handler );

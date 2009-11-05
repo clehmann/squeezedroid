@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,10 +32,10 @@ public class EventThread extends Thread
 
    private Object _playerHandlersMutex = new Object();
    private Object _serverHandlersMutex = new Object();
-   
+
    private Map<String, List<PlayerStatusHandler>> _playerHandlers = new HashMap<String, List<PlayerStatusHandler>>();
    private List<ServerStatusHandler> _serverHandlers = new ArrayList<ServerStatusHandler>();
-   
+
 
    private String host = "localhost";
    private int cliPort = 9090;
@@ -59,41 +60,23 @@ public class EventThread extends Thread
       connect();
       try
       {
-         while ( !isInterrupted() && _eventSocket.isConnected() )
-         {
-            
-            String line = _eventReader.readLine();
-            if ( !isInterrupted() && line != null )
-            {
-               Matcher matcher = eventPattern.matcher( line );
-               if ( matcher.find() )
-               {
-                  String playerId = SerializationUtils.decode( matcher.group( 1 ) );
-                  String eventType = SerializationUtils.decode( matcher.group( 2 ) );
-                  String data = matcher.group( 3 );
-                  notify( eventType, playerId, data );
-
-                  //TODO - find a better way of doing this.  Squeezeserver only sends one sync command, 
-                  // and it might be associated to a player we are not subscribed too.
-                  //
-                  //As a hack, just 'fake' a second sync command, swapping the playerid and data.
-                  if( "sync".equals( eventType ) && !data.equals(  "-" ) )
-                  {
-                     notify( eventType, SerializationUtils.decode( data ), playerId );
-                  }
-               }
-            }
-
-         }
-         if ( !_eventSocket.isClosed() )
+         listen();
+      }
+      catch ( Exception e )
+      {
+         Log.e( LOGTAG, "Error listening to events from socke", e );
+      }
+      
+      if ( _eventSocket != null && !_eventSocket.isClosed() )
+      {
+         try
          {
             _eventSocket.close();
          }
-
-      }
-      catch ( IOException e )
-      {
-         // error reading, just end thread
+         catch ( IOException e )
+         {
+            Log.e( LOGTAG, "Error closing socket", e );
+         }
       }
 
       _eventSocket = null;
@@ -105,6 +88,61 @@ public class EventThread extends Thread
          for ( ServerStatusHandler handler : _serverHandlers )
          {
             handler.onDisconnect();
+         }
+      }
+   }
+   
+   public void disconnect()
+   {
+      interrupt();
+      if( this._eventSocket != null && this._eventSocket.isConnected() )
+      {
+         try
+         {
+            this._eventSocket.close();
+         }
+         catch ( IOException e )
+         {
+            Log.d( LOGTAG, "Error closing event socket", e );
+         }
+         
+      }
+      synchronized ( _serverHandlersMutex )
+      {
+         for ( ServerStatusHandler handler : _serverHandlers )
+         {
+            handler.onDisconnect();
+         }
+      }
+   }
+
+   private void listen() throws IOException
+   {
+      String line = "";
+      while ( line  != null && !isInterrupted() && _eventSocket.isConnected()  ) 
+      {
+         Log.v( LOGTAG, "Reading line");
+         line = _eventReader.readLine();
+         Log.v( LOGTAG, "Got line '" + line + "'");
+         if ( !isInterrupted() && line != null )
+         {
+            Matcher matcher = eventPattern.matcher( line );
+            if ( matcher.find() )
+            {
+               String playerId = SerializationUtils.decode( matcher.group( 1 ) );
+               String eventType = SerializationUtils.decode( matcher.group( 2 ) );
+               String data = matcher.group( 3 );
+               notify( eventType, playerId, data );
+
+               //TODO - find a better way of doing this.  Squeezeserver only sends one sync command, 
+               // and it might be associated to a player we are not subscribed too.
+               //
+               //As a hack, just 'fake' a second sync command, swapping the playerid and data.
+               if ( "sync".equals( eventType ) && !data.equals( "-" ) )
+               {
+                  notify( eventType, SerializationUtils.decode( data ), playerId );
+               }
+            }
          }
       }
    }
@@ -134,12 +172,12 @@ public class EventThread extends Thread
          {
             handler.onPlaylistChanged( _status );
          }
-         if( "shuffle".equalsIgnoreCase( action ) )
+         if ( "shuffle".equalsIgnoreCase( action ) )
          {
             ShuffleMode mode = ShuffleMode.intToShuffleModeMap.get( splitData[1] );
             handler.onShuffleModeChanged( mode );
          }
-         if( "repeat".equalsIgnoreCase( action ) )
+         if ( "repeat".equalsIgnoreCase( action ) )
          {
             RepeatMode mode = RepeatMode.intToRepeatModeMap.get( splitData[1] );
             handler.onRepeatModeChanged( mode );
@@ -157,7 +195,9 @@ public class EventThread extends Thread
             handler.onTimeChanged( newTime );
 
          }
-         catch ( NumberFormatException e ){/* Invalid time, do not notify */}
+         catch ( NumberFormatException e )
+         {/* Invalid time, do not notify */
+         }
       }
    };
 
@@ -165,13 +205,22 @@ public class EventThread extends Thread
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
       {
-         if( _status.isPaused() ){ handler.onPause(); }
-         if( _status.isPlaying() ){ handler.onPlay(); }
-         if( _status.isStopped() ){ handler.onStop(); }
+         if ( _status.isPaused() )
+         {
+            handler.onPause();
+         }
+         if ( _status.isPlaying() )
+         {
+            handler.onPlay();
+         }
+         if ( _status.isStopped() )
+         {
+            handler.onStop();
+         }
       }
    };
 
-   
+
    private CommandHandler clientHandler = new CommandHandler()
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
@@ -199,7 +248,7 @@ public class EventThread extends Thread
       }
    };
 
-   
+
    private CommandHandler mixerChangeHandler = new CommandHandler()
    {
       public void handleCommand(String playerId, String data, PlayerStatusHandler handler)
@@ -304,16 +353,16 @@ public class EventThread extends Thread
          Log.v( LOGTAG, "Done subscribing to notifications for player " + player.getId() + " with handler " + handler );
       }
    }
-   
-   public void subscribe( ServerStatusHandler handler )
+
+   public void subscribe(ServerStatusHandler handler)
    {
       synchronized ( _serverHandlersMutex )
       {
          _serverHandlers.add( handler );
       }
    }
-   
-   public void unsubscribe( ServerStatusHandler handler )
+
+   public void unsubscribe(ServerStatusHandler handler)
    {
       synchronized ( _serverHandlersMutex )
       {
@@ -352,7 +401,7 @@ public class EventThread extends Thread
          Log.d( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler );
       }
    }
-   
+
    public CommandHandler getTimeChangeHandler()
    {
       return timeChangeHandler;

@@ -2,6 +2,9 @@ package net.chrislehmann.squeezedroid.activity;
 
 import net.chrislehmann.squeezedroid.listadapter.GenreListAdapter;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,13 +14,20 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class BrowseGenresActivity extends ItemListActivity
 {
+   private Activity context = this;
 
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
-
-      listView.setAdapter( new GenreListAdapter( ((SqueezeDroidApplication) getApplication()).getService(), this, null ) );
+      runWithService( new SqueezeServiceAwareThread()
+      {
+         public void runWithService(SqueezeService service)
+         {
+            listView.setAdapter( new GenreListAdapter( service, context, null ) );
+         }
+      });
+      
       listView.setOnItemClickListener( onItemClick );
    }
 

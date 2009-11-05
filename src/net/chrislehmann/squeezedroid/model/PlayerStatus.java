@@ -10,10 +10,10 @@ public class PlayerStatus
    private static final String STATUS_STOPPED = "stop";
    
    private Song currentSong;
-   private int currentIndex;
-   private String status;
-   private int currentPosition;
-   private int volume;
+   private int currentIndex = 0;
+   private String status = STATUS_STOPPED;
+   private int currentPosition = 0;
+   private int volume = 0;
    
    private SqueezeService.ShuffleMode shuffleMode;
    private SqueezeService.RepeatMode repeatMode;

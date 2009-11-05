@@ -2,9 +2,13 @@ package net.chrislehmann.squeezedroid.activity;
 
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.util.Log;
 
 /**
  * Base activity that contains some methods to manage the {@link SqueezeService} and the 
@@ -14,81 +18,31 @@ import android.util.Log;
  */
 public class SqueezedroidActivitySupport extends ActivitySupport
 {
-   private static final String LOGTAG = "SqueezeDroidActivitySupport";
+   //private static final String LOGTAG = "SqueezeDroidActivitySupport";
 
-   /**
-    * Interface that simply contains a callback that will be executed within the context of a valid, connected {@link SqueezeService}
-    * @author lehmanc
-    */
-   protected interface SqueezeServiceAwareThread
-   {
-      public void runWithService(SqueezeService service);
-   }
-
-   /**
-    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
-    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
-    * 
-    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
-    * @param runOnThread If set to true, a new thread will be spawned to run the onConnect
-    */
-   protected void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
+   BroadcastReceiver onConnectionChanged = new BroadcastReceiver()
    {
       
-      if ( runOnThread )
+      @Override
+      public void onReceive(Context context, Intent intent)
       {
-         new SqueezeServiceAwareThread()
+         boolean isDisconnected = intent.getBooleanExtra( ConnectivityManager.EXTRA_NO_CONNECTIVITY, false );
+         if( isDisconnected )
          {
-            public void runWithService(final SqueezeService service)
-            {
-               new Thread()
-               {
-                  public void run()
-                  {
-                     onConnect.runWithService( service );
-                  };
-               }.start();
-            }
-         };
+            getSqueezeDroidApplication().resetService();
+         }
       }
-
-      getService( true, onConnect );
-   }
-
-   /**
-    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
-    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
-    * 
-    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
-    */
-   protected void runWithService(final SqueezeServiceAwareThread onConnect)
+   };
+   
+   @Override
+   protected void onCreate(Bundle savedInstanceState)
    {
-      runWithService( onConnect, false );
+      super.onCreate( savedInstanceState );
+      
+      IntentFilter filter = new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION );
+      registerReceiver( onConnectionChanged, filter );
    }
    
-
-   /**
-    * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
-    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
-    * 
-    * @param connect If true, try and connect to the service if it is not connected
-    */
-   protected SqueezeService getService(boolean connect)
-   {
-      return getService( connect, null );
-   }
-
-   /**
-    * Gets the {@link SqueezeService}.  If the {@link SqueezeService} is not connected, 
-    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
-    * 
-    * @param connect If true, try and connect to the service if it is not connected
-    */
-   protected SqueezeService getService()
-   {
-      return getService( true, null );
-   }
-
    /**
     * Gets the currently selected player.  If no player is selected, this will return null
     * @return the currently selected player
@@ -120,75 +74,75 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     * @param context
     * @return
     */
-   protected SqueezeDroidApplication getSqueezeDroidApplication()
+   public SqueezeDroidApplication getSqueezeDroidApplication()
    {
       return (SqueezeDroidApplication) getApplication();
    }
 
 
    /**
+    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
+    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
+    * 
+    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
+    * @param runOnThread If set to true, a new thread will be spawned to run the onConnect
+    */
+   public void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
+   {
+      
+      if ( runOnThread )
+      {
+         new SqueezeServiceAwareThread()
+         {
+            public void runWithService(final SqueezeService service)
+            {
+               new Thread()
+               {
+                  public void run()
+                  {
+                     onConnect.runWithService( service );
+                  };
+               }.start();
+            }
+         };
+      }
+
+      getSqueezeDroidApplication().getConnectionManager().getService( this, true, onConnect );
+   }
+   
+   /**
+    * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
+    * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
+    * 
+    * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
+    */
+   public void runWithService( final SqueezeServiceAwareThread onConnect)
+   {
+      runWithService( onConnect, false );
+   }
+   
+
+   /**
     * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
     * 
-    * @param connect  If set to true, this method will attempt to connect the {@link SqueezeService} by starting the 
-    * {@link ConnectToServerActivity} and return null
-    * @param onConnect A {@link SqueezeServiceAwareThread} that will be executed when the server is connected.  If the server is
-    * already connected, this will be executed immediately.
+    * @param connect If true, try and connect to the service if it is not connected
     */
-   private SqueezeService getService(boolean connect, final SqueezeServiceAwareThread onConnect)
+   public SqueezeService getService(boolean connect)
    {
-      SqueezeService service = getSqueezeDroidApplication().getService();
-      if ( connect && (service == null || !service.isConnected()) )
-      {
-            service = null;
-            Intent intent = new Intent();
-            intent.setAction( SqueezeDroidConstants.Actions.ACTION_CONNECT );
-            launchSubActivity( ConnectToServerActivity.class, new ExecuteWithServiceCallback( onConnect ) );
-      }
-      else if ( service != null && service.isConnected() )
-      {
-         if ( onConnect != null )
-         {
-            try
-            {
-               onConnect.runWithService( service );
-            }
-            catch ( Exception e )
-            {
-               Log.e( LOGTAG, "Error executing callback", e );
-            }
-         }
-      }
-      return service;
+      return getSqueezeDroidApplication().getConnectionManager().getService( this, connect, null );
    }
 
-   private class ExecuteWithServiceCallback implements IntentResultCallback
+   /**
+    * Gets the {@link SqueezeService}.  If the {@link SqueezeService} is not connected, 
+    * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
+    * 
+    * @param connect If true, try and connect to the service if it is not connected
+    */
+   public SqueezeService getService()
    {
-      SqueezeServiceAwareThread thread;
-
-      public ExecuteWithServiceCallback(SqueezeServiceAwareThread thread)
-      {
-         this.thread = thread;
-      }
-
-      public void resultOk(String resultString, Bundle resultMap)
-      {
-         if ( thread != null )
-         {
-            try
-            {
-               thread.runWithService( getSqueezeDroidApplication().getService() );
-            }
-            catch ( Exception e )
-            {
-               Log.e( LOGTAG, "Error executing callback", e );
-            }
-         }
-      }
-
-      public void resultCancel(String resultString, Bundle resultMap){
-         closeApplication();
-      }
-   };
-
+      return getService( true );
+   }
+   
+   
 }

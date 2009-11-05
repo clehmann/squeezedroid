@@ -181,5 +181,9 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
          setResult( SqueezeDroidConstants.ResultCodes.RESULT_DONE );
          finish();
       }
+      else
+      {
+         super.onActivityResult( requestCode, resultCode, data );
+      }
    }
 }

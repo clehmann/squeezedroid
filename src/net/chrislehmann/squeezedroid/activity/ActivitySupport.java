@@ -49,7 +49,7 @@ public class ActivitySupport extends Activity
     * @param callback the {@link IntentResultCallback} to execute when the activity is finished
     */
 
-   protected void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback )
+   public void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback )
    {
       Intent i = new Intent( this, subActivityClass );
 
@@ -71,7 +71,7 @@ public class ActivitySupport extends Activity
    /**
     * Sets the result
     */
-   protected void closeApplication()
+   public void closeApplication()
    {
       closing = true;
       setResult( RESULT_CLOSE_APPLICATION_CHAIN );

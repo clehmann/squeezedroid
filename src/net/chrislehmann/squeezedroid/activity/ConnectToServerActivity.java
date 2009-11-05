@@ -83,7 +83,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
                }
             } );
 
-            service = getSqueezeDroidApplication().getService();
+            service = getService(false);
             if ( !service.isConnected() )
             {
                //throw new ApplicationException("bad", null);
@@ -134,7 +134,6 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
       return initalized;
    }
 
-   
    private IntentResultCallback settingsCallback = new IntentResultCallback()
    {
       

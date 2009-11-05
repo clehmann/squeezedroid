@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.chrislehmann.squeezedroid.model.Item;
-import android.R;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;

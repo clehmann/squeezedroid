@@ -4,17 +4,25 @@ import net.chrislehmann.squeezedroid.listadapter.SongListAdapter;
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 
 public class BrowseSongsActivity extends ItemListActivity {
-
+   private Activity context = this;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
-     
-     getListView().setAdapter( new SongListAdapter( getService(), this, getParentItem()  ) );
+     runWithService( new SqueezeServiceAwareThread()
+     {
+        public void runWithService(SqueezeService service)
+        {
+           getListView().setAdapter( new SongListAdapter( service, context, getParentItem()  ) );
+        }
+     });
    }
 
    protected Item getParentItem()

@@ -6,6 +6,7 @@ import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.PlayerListAdapter;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,9 +30,16 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
       setContentView( R.layout.list_layout );
       listView = (ListView) findViewById( R.id.list );
       listView.setOnItemClickListener( onItemClicked );
-      createList();
+      
    }
 
+   @Override
+   protected void onResume()
+   {
+      createList();
+      super.onResume();
+   }
+   
    private void createList()
    {
       runWithService( new SqueezeServiceAwareThread()

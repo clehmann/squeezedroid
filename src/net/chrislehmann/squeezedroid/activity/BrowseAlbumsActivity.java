@@ -6,6 +6,7 @@ import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.service.SqueezeService.Sort;
 import android.content.Intent;
 import android.net.Uri;
@@ -30,9 +31,15 @@ public class BrowseAlbumsActivity extends ItemListActivity
       setContentView(R.layout.list_layout);
       listView = (ListView) findViewById( R.id.list );
 
-      SqueezeService.Sort sort = getSort( getIntent().getData() );
-      Item parentItem = getParentItem();
-      listView.setAdapter( new AlbumListAdapter( getService(), this, parentItem, sort ) );
+      final SqueezeService.Sort sort = getSort( getIntent().getData() );
+      final Item parentItem = getParentItem();
+      runWithService( new SqueezeServiceAwareThread()
+      {
+         public void runWithService(SqueezeService service)
+         {
+            listView.setAdapter( new AlbumListAdapter( service, context, parentItem, sort ) );
+         }
+      });
       listView.setOnItemClickListener( onListItemClick );
    };
 

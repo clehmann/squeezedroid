@@ -3,7 +3,9 @@ package net.chrislehmann.squeezedroid.activity;
 
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,6 +33,8 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    protected abstract Item getParentItem();
    
    protected ListView listView;
+   
+   protected SqueezeService service;
    
    public ItemListActivity()
    {
@@ -106,6 +110,10 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
          setResult( resultCode );
          finish();
       }
+      else
+      {
+         super.onActivityResult( requestCode, resultCode, data );
+      }
    }
    
    @Override
@@ -153,5 +161,44 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    {
       return listView;
    }
+   
+   private ServerStatusHandler onServiceStatusChanged = new ServerStatusHandler()
+   {
+      public void onDisconnect()
+      {
+         //Just try and reconnect...
+         getSqueezeDroidApplication().resetService();
+         getService();
+      }
+   };
+   
+   @Override
+   protected void onResume()
+   {
+      if( !closing )
+      {
+         runWithService( new SqueezeServiceAwareThread()
+         {
+            public void runWithService(SqueezeService service)
+            {
+               service.subscribe( onServiceStatusChanged );
+            }
+         });
+      }
+
+      super.onResume();
+   }
+   
+   @Override
+   protected void onPause()
+   {
+      SqueezeService service = getService( false );
+      if( service != null )
+      {
+         service.unsubscribe( onServiceStatusChanged );
+      }
+      super.onPause();
+   }
+
 
 }

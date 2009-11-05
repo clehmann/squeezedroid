@@ -1,10 +1,11 @@
 package net.chrislehmann.squeezedroid.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BrowseResult<T extends Item> {
-	private List<T> resutls;
-	private int totalItems;
+	private List<T> resutls = new ArrayList<T>();
+	private int totalItems = 0;
 	
 	public List<T> getResutls() {
 		return resutls;

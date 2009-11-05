@@ -13,6 +13,7 @@ import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
@@ -493,9 +494,9 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onDisconnect()
       {
-//         //Just try and reconnect...
-//         getSqueezeDroidApplication().resetService();
-//         getService();
+         //Just try and reconnect...
+         getSqueezeDroidApplication().resetService();
+         getService();
       }
    };
    
