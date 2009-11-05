@@ -7,7 +7,6 @@ import net.chrislehmann.squeezedroid.activity.ConnectToServerActivity;
 import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
 import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
 import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;

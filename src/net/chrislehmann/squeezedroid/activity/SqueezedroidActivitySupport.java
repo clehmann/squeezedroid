@@ -1,5 +1,6 @@
 package net.chrislehmann.squeezedroid.activity;
 
+import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
@@ -7,8 +8,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 /**
  * Base activity that contains some methods to manage the {@link SqueezeService} and the 
@@ -22,34 +25,53 @@ public class SqueezedroidActivitySupport extends ActivitySupport
 
    BroadcastReceiver onConnectionChanged = new BroadcastReceiver()
    {
-      
+
       @Override
       public void onReceive(Context context, Intent intent)
       {
          boolean isDisconnected = intent.getBooleanExtra( ConnectivityManager.EXTRA_NO_CONNECTIVITY, false );
-         if( isDisconnected )
+         if ( isDisconnected )
          {
             getSqueezeDroidApplication().resetService();
          }
       }
    };
-   
+
    @Override
    protected void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
-      
+
       IntentFilter filter = new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION );
       registerReceiver( onConnectionChanged, filter );
    }
-   
+
    /**
-    * Gets the currently selected player.  If no player is selected, this will return null
+    * Gets the currently selected player.  The previous selected player will be tried If no player is selected. 
+    * Finally, this will forward to the choose player action if the user needs to choose a player.
     * @return the currently selected player
     */
    protected Player getSelectedPlayer()
    {
-      return getSqueezeDroidApplication().getSelectedPlayer();
+      Player selectedPlayer = getSqueezeDroidApplication().getSelectedPlayer();
+      if ( selectedPlayer == null )
+      {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getBaseContext() );
+         String lastPlayerId = prefs.getString( SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, null );
+         SqueezeService service = getService();
+         if ( service != null )
+         {
+            if ( lastPlayerId != null )
+            {
+               selectedPlayer = service.getPlayer( lastPlayerId );
+            }
+            if( selectedPlayer == null )
+            {
+               launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+            }
+         }
+      }
+      return selectedPlayer;
    }
 
    /**
@@ -66,7 +88,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     */
    protected boolean isPlayerSelected()
    {
-      return getSqueezeDroidApplication().getSelectedPlayer() != null;
+      return getSelectedPlayer() != null;
    }
 
    /**
@@ -89,7 +111,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     */
    public void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread)
    {
-      
+
       if ( runOnThread )
       {
          new SqueezeServiceAwareThread()
@@ -109,18 +131,18 @@ public class SqueezedroidActivitySupport extends ActivitySupport
 
       getSqueezeDroidApplication().getConnectionManager().getService( this, true, onConnect );
    }
-   
+
    /**
     * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
     * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
     * 
     * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
     */
-   public void runWithService( final SqueezeServiceAwareThread onConnect)
+   public void runWithService(final SqueezeServiceAwareThread onConnect)
    {
       runWithService( onConnect, false );
    }
-   
+
 
    /**
     * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected, 
@@ -143,6 +165,31 @@ public class SqueezedroidActivitySupport extends ActivitySupport
    {
       return getService( true );
    }
-   
-   
+
+
+   /**
+    * Child Activity callback {@link IntentResultCallback}s
+    */
+   protected IntentResultCallback choosePlayerIntentCallback = new IntentResultCallback()
+   {
+      public void resultOk(String resultString, Bundle resultMap)
+      {
+         Player selectedPlayer = (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER );
+         if ( selectedPlayer == null )
+         {
+            closeApplication();
+         }
+         getSqueezeDroidApplication().setSelectedPlayer( selectedPlayer );
+      }
+
+      public void resultCancel(String resultString, Bundle resultMap)
+      {
+         if ( getSqueezeDroidApplication().getSelectedPlayer() == null )
+         {
+            closeApplication();
+         }
+
+      }
+   };
+
 }

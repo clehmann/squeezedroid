@@ -26,5 +26,11 @@ public class SqueezeDroidConstants
       public static final String ACTION_EDIT_PREFERENCES = "net.chrislehmann.squeezedroid.action.EditPreferences";
       public static final String ACTION_CONNECT = "net.chrislehmann.squeezedroid.action.ConnectToServer";
    }
+   public static class Preferences
+   {
+      public static final String LAST_SELECTED_PLAYER = "last_selected_player";
+   }
 
+   
+   
 }

@@ -131,11 +131,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       if( !closing )
       {
-         if ( !isPlayerSelected() )
-         {
-            launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
-         }
-         else
+         if ( getSelectedPlayer() != null )
          {
             onPlayerChanged();
             runWithService( new SqueezeServiceAwareThread()
@@ -204,7 +200,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = getService();
          if ( service != null && getSelectedPlayer() != null )
          {
-            service.togglePause( getSqueezeDroidApplication().getSelectedPlayer() );
+            service.togglePause( getSelectedPlayer() );
          }
       }
    };
@@ -216,7 +212,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = getService();
          if ( service != null && getSelectedPlayer() != null  )
          {
-            service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "+1" );
+            service.jump( getSelectedPlayer(), "+1" );
          }
       }
    };
@@ -228,7 +224,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = getService();
          if ( service != null && getSelectedPlayer() != null )
          {
-            service.jump( getSqueezeDroidApplication().getSelectedPlayer(), "-1" );
+            service.jump( getSelectedPlayer(), "-1" );
          }
       }
    };
@@ -321,25 +317,6 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };   
    
-   /**
-    * Child Activity callback {@link IntentResultCallback}s
-    */
-   private IntentResultCallback choosePlayerIntentCallback = new IntentResultCallback()
-   {
-      public void resultOk(String resultString, Bundle resultMap)
-      {
-            Player selectedPlayer = (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER );
-            if( selectedPlayer == null )
-            {
-               finish();
-            }
-            getSqueezeDroidApplication().setSelectedPlayer( selectedPlayer );
-            onPlayerChanged();
-      }
-      
-      public void resultCancel(String resultString, Bundle resultMap){}
-   };
-   
    private IntentResultCallback choosePlayerForSyncCallback = new IntentResultCallback()
    {
       public void resultOk(String resultString, final Bundle resultMap)
@@ -389,9 +366,9 @@ public class MainActivity extends SqueezedroidActivitySupport
             service.unsubscribeAll( onPlayerStatusChanged );
             service.subscribe( getSelectedPlayer(), onPlayerStatusChanged );
    
-            _playlistListAdapter = new PlayListAdapter( service, context, getSqueezeDroidApplication().getSelectedPlayer() );
-            _playlistListAdapter.setPlayer( getSqueezeDroidApplication().getSelectedPlayer() );
-            PlayerStatus status = getService().getPlayerStatus( getSqueezeDroidApplication().getSelectedPlayer() );
+            _playlistListAdapter = new PlayListAdapter( service, context, getSelectedPlayer() );
+            _playlistListAdapter.setPlayer( getSelectedPlayer() );
+            PlayerStatus status = getService().getPlayerStatus( getSelectedPlayer() );
             updateSongDisplay( status );
          }
       });
@@ -508,7 +485,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       public void onSongChanged(final PlayerStatus status)
       {
-         final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSqueezeDroidApplication().getSelectedPlayer(), status.getCurrentIndex(), 2 );
+         final BrowseResult<Song> playlist = getService().getCurrentPlaylist( getSelectedPlayer(), status.getCurrentIndex(), 2 );
          runOnUiThread( new Thread()
          {
             public void run()
@@ -550,7 +527,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onDisconnect() 
       {
          getSqueezeDroidApplication().setSelectedPlayer( null );
-         launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+         getSelectedPlayer();
       };
 
       public void onRepeatModeChanged(SqueezeService.RepeatMode newMode) {
