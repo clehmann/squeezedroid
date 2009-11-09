@@ -306,7 +306,6 @@ public class EventThread extends Thread
          Log.v( LOGTAG, "Done notifying event '" + playerId + ":" + event + "'" );
       }
 
-      //_commandHandlers.get( "Done notifying handlers" );
    }
 
    protected void updateStatus(String playerId)
@@ -323,13 +322,21 @@ public class EventThread extends Thread
          _eventWriter = new OutputStreamWriter( _eventSocket.getOutputStream() );
          _eventReader = new BufferedReader( new InputStreamReader( _eventSocket.getInputStream() ) );
          Log.v( LOGTAG, "connected, sending subscribe commands" );
-
-
+         _eventWriter.write( "version ?\n" );
+         _eventWriter.flush();
+         String response = _eventReader.readLine();
+         
+         if( !Pattern.matches( "version ([0-9|.]+)", response ))
+         {
+            throw new ApplicationException( "Invalid response from 'version' command: " + response  );
+         }
+         
          _eventWriter.write( "listen 1\n" );
          _eventWriter.flush();
          _eventWriter.write( "subscribe playlist,time,mixer,sync,play,pause,stop,client\n" );
          _eventWriter.flush();
          Log.v( LOGTAG, "subscribed to events" );
+         
 
       }
       catch ( Exception e )

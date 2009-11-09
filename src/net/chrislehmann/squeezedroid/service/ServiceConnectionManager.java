@@ -62,6 +62,7 @@ public class ServiceConnectionManager
    public SqueezeService getService(SqueezedroidActivitySupport context, boolean connect, final SqueezeServiceAwareThread onConnect)
    {
       SqueezeService service = getService( context );
+      SqueezeService serviceToReturn = null;
       if ( connect && (service == null || !service.isConnected()) )
       {
          if( currentStatus != Status.CONNECTING )
@@ -79,6 +80,7 @@ public class ServiceConnectionManager
       }
       else if ( service != null && service.isConnected() )
       {
+         serviceToReturn = service;
          if ( onConnect != null )
          {
             try
@@ -91,7 +93,11 @@ public class ServiceConnectionManager
             }
          }
       }
-      return service;
+      else
+      {
+         serviceToReturn = null;
+      }
+      return serviceToReturn;
    }
 
    private class ExecuteWithServiceCallback implements IntentResultCallback
@@ -146,6 +152,16 @@ public class ServiceConnectionManager
          service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
       }
 
+      return service;
+   }
+   
+   public SqueezeService getRawService()
+   {
+      return service;
+   }
+
+   public SqueezeService getService()
+   {
       return service;
    }
 }

@@ -83,7 +83,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
                }
             } );
 
-            service = getService(false);
+            service =  getSqueezeDroidApplication().getConnectionManager().getService();
             if ( !service.isConnected() )
             {
                //throw new ApplicationException("bad", null);
@@ -97,6 +97,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
          }
          catch ( ApplicationException e )
          {
+            getSqueezeDroidApplication().resetService();
             runOnUiThread( new Runnable()
             {
 

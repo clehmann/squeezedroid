@@ -99,6 +99,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern playlistCountPattern = Pattern.compile( "playlist_tracks%3A([^ ]*)" );
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
+   private Pattern versionResponsePattern = Pattern.compile( "version ([0-9|.]+)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
    {
@@ -159,11 +160,21 @@ public class CliSqueezeService implements SqueezeService
          clientWriter = new OutputStreamWriter( clientSocket.getOutputStream() );
          clientReader = new BufferedReader( new InputStreamReader( clientSocket.getInputStream() ) );
 
-         clientSocket.setSoTimeout( 10 * 10000 );
+         clientSocket.setSoTimeout( 10 * 1000 );
       }
       catch ( Exception e )
       {
          throw new ApplicationException( "Cannot connect to host '" + host + "' at port '" + cliPort, e );
+      }
+
+      String response = executeCommand( "version ?" );
+      Matcher matcher = versionResponsePattern.matcher( response );
+      if( !matcher.matches() )
+      {
+         clientSocket = null;
+         clientWriter = null;
+         clientWriter = null;
+         throw new ApplicationException( "Cannot log into server" );
       }
 
       eventThread = new EventThread( host, cliPort );

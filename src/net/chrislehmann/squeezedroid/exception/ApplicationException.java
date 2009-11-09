@@ -11,6 +11,11 @@ public class ApplicationException extends RuntimeException
       super( message, e );
    }
 
+   public ApplicationException(String string)
+   {
+      super( string );
+   }
+
    private static final long serialVersionUID = 1L;
 
 }

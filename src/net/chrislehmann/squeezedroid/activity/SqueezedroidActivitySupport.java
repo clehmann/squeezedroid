@@ -23,6 +23,9 @@ public class SqueezedroidActivitySupport extends ActivitySupport
 {
    //private static final String LOGTAG = "SqueezeDroidActivitySupport";
 
+   /**
+    * {@link BroadcastReceiver} to listen for connection changes and re-connect the service.
+    */
    BroadcastReceiver onConnectionChanged = new BroadcastReceiver()
    {
 
@@ -47,9 +50,12 @@ public class SqueezedroidActivitySupport extends ActivitySupport
    }
 
    /**
-    * Gets the currently selected player.  The previous selected player will be tried If no player is selected. 
-    * Finally, this will forward to the choose player action if the user needs to choose a player.
-    * @return the currently selected player
+    * Gets the currently selected player.  This will try the following, in this order:
+    * 
+    * 1) Use the player held in the {@link SqueezeDroidApplication}
+    * 2) Retrieve the last used player from this application's {@link SharedPreferences} and load that
+    *    from ther server
+    * 3) Start an activity that will prompt the user to choose a player
     */
    protected Player getSelectedPlayer()
    {
