@@ -64,8 +64,13 @@ public class SearchActivity extends SqueezedroidActivitySupport
 
          public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
          {
-            menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
-            menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+            ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListContextMenuInfo) menuInfo;
+            int child = ExpandableListView.getPackedPositionChild( contextMenuInfo.packedPosition );
+            if ( child >= 0 )
+            {
+               menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
+               menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+            }
          }
       } );
       searchButton.setOnClickListener( onSearchButtonClicked );
