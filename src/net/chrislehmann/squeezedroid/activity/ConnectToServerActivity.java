@@ -5,7 +5,6 @@ import net.chrislehmann.squeezedroid.service.SqueezeService;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnCancelListener;
@@ -49,7 +48,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
       }
    }
 
-   private Context context = this;
+   private SqueezedroidActivitySupport context = this;
 
    ConnectionThread _connectionThread = new ConnectionThread();
 
@@ -83,7 +82,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
                }
             } );
 
-            service =  getSqueezeDroidApplication().getConnectionManager().getService();
+            service =  getSqueezeDroidApplication().getConnectionManager().getService( context );
             if ( !service.isConnected() )
             {
                //throw new ApplicationException("bad", null);

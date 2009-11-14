@@ -55,6 +55,9 @@ public class CliSqueezeService implements SqueezeService
    private Socket clientSocket;
    private Writer clientWriter;
    private BufferedReader clientReader;
+   
+   private String username;
+   private String password;
 
    private EventThread eventThread;
    private BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
@@ -147,6 +150,8 @@ public class CliSqueezeService implements SqueezeService
          return song;
       }
    };
+   
+   
 
    /**
     * Connect to the squeezecenter server and log in if required. Will throw an
@@ -166,7 +171,11 @@ public class CliSqueezeService implements SqueezeService
       {
          throw new ApplicationException( "Cannot connect to host '" + host + "' at port '" + cliPort, e );
       }
-
+      if( username != null && password != null )
+      {
+         executeCommand( "login " + username + " " + password );
+      }
+      //Check for a valid 'version' response to make sure we are actually connected.
       String response = executeCommand( "version ?" );
       Matcher matcher = versionResponsePattern.matcher( response );
       if( !matcher.matches() )
@@ -178,6 +187,8 @@ public class CliSqueezeService implements SqueezeService
       }
 
       eventThread = new EventThread( host, cliPort );
+      eventThread.setUsername( username );
+      eventThread.setPassword( password );
       eventThread.setService( this );
       eventThread.start();
 
@@ -765,5 +776,25 @@ public class CliSqueezeService implements SqueezeService
          }
       };
       commandQueue.add( r );
+   }
+
+   public String getPassword()
+   {
+      return password;
+   }
+
+   public void setPassword(String password)
+   {
+      this.password = password;
+   }
+
+   public String getUsername()
+   {
+      return username;
+   }
+
+   public void setUsername(String username)
+   {
+      this.username = username;
    }
 }

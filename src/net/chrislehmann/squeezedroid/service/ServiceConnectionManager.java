@@ -140,7 +140,7 @@ public class ServiceConnectionManager
       }
    };
    
-   private SqueezeService getService(SqueezedroidActivitySupport context)
+   public SqueezeService getService(SqueezedroidActivitySupport context)
    {
       if ( service == null )
       {
@@ -149,19 +149,18 @@ public class ServiceConnectionManager
          String serverWebPort = prefs.getString( "server_web_port", "9000" );
          String serverCliPort = prefs.getString( "server_cli_port", "9090" );
 
-         service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
+         CliSqueezeService service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
+         boolean authenticate = prefs.getBoolean( "authentication_enable", false );
+         if( authenticate )
+         {
+            service.setUsername( prefs.getString( "authentication_username", "" ) );
+            service.setPassword( prefs.getString( "authentication_password", "" ) );
+         }
+         
+         this.service = service;
       }
 
       return service;
    }
    
-   public SqueezeService getRawService()
-   {
-      return service;
-   }
-
-   public SqueezeService getService()
-   {
-      return service;
-   }
 }

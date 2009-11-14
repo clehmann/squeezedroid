@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +35,8 @@ public class EventThread extends Thread
    private Map<String, List<PlayerStatusHandler>> _playerHandlers = new HashMap<String, List<PlayerStatusHandler>>();
    private List<ServerStatusHandler> _serverHandlers = new ArrayList<ServerStatusHandler>();
 
+   private String password;
+   private String username;
 
    private String host = "localhost";
    private int cliPort = 9090;
@@ -321,14 +322,13 @@ public class EventThread extends Thread
          _eventSocket = new Socket( host, cliPort );
          _eventWriter = new OutputStreamWriter( _eventSocket.getOutputStream() );
          _eventReader = new BufferedReader( new InputStreamReader( _eventSocket.getInputStream() ) );
-         Log.v( LOGTAG, "connected, sending subscribe commands" );
-         _eventWriter.write( "version ?\n" );
-         _eventWriter.flush();
-         String response = _eventReader.readLine();
          
-         if( !Pattern.matches( "version ([0-9|.]+)", response ))
+         if( username != null && password != null )
          {
-            throw new ApplicationException( "Invalid response from 'version' command: " + response  );
+            _eventWriter.write( "login " + username + " " + password + "\n" );
+            _eventWriter.flush();
+            String result = _eventReader.readLine();
+            result.toString();
          }
          
          _eventWriter.write( "listen 1\n" );
@@ -345,6 +345,8 @@ public class EventThread extends Thread
          throw new ApplicationException( "Cannot connect to squeezeserver", e );
       }
    }
+   
+
 
    public void subscribe(final Player player, final PlayerStatusHandler handler)
    {
@@ -422,6 +424,26 @@ public class EventThread extends Thread
    public void setService(SqueezeService service)
    {
       _service = service;
+   }
+
+   public String getUsername()
+   {
+      return username;
+   }
+
+   public void setUsername(String username)
+   {
+      this.username = username;
+   }
+
+   public String getPassword()
+   {
+      return password;
+   }
+
+   public void setPassword(String password)
+   {
+      this.password = password;
    }
 
 }
