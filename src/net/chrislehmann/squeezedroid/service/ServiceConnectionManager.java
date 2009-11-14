@@ -150,12 +150,8 @@ public class ServiceConnectionManager
          String serverCliPort = prefs.getString( "server_cli_port", "9090" );
 
          CliSqueezeService service = new CliSqueezeService( serverIp, Integer.parseInt( serverCliPort ), Integer.parseInt( serverWebPort ) );
-         boolean authenticate = prefs.getBoolean( "authentication_enable", false );
-         if( authenticate )
-         {
-            service.setUsername( prefs.getString( "authentication_username", "" ) );
-            service.setPassword( prefs.getString( "authentication_password", "" ) );
-         }
+         service.setUsername( prefs.getString( "authentication_username", "" ) );
+         service.setPassword( prefs.getString( "authentication_password", "" ) );
          
          this.service = service;
       }

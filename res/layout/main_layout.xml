@@ -4,20 +4,20 @@
 	android:layout_height="fill_parent" android:layout_width="fill_parent">
 		<RelativeLayout android:id="@+id/song_info"
 			android:orientation="vertical" android:layout_width="fill_parent"
-			android:gravity="center_horizontal" android:layout_height="60px"
-			android:background="@drawable/player_panel_bg"
-			android:layout_alignParentTop="true"
-			>
+			android:gravity="center_horizontal" android:background="@drawable/player_panel_bg"
+			android:layout_alignParentTop="true" android:layout_height="60px">
 			<LinearLayout
+                android:id="@+id/song_info_container"
 				android:layout_height="wrap_content"
-				android:layout_width="320px"
-				android:orientation="vertical"
+				android:layout_width="260px"
 				android:layout_alignParentTop="true"
-				android:layout_centerHorizontal="true"
-			>
+				android:layout_centerHorizontal="true" 
+                android:orientation="vertical"
+                android:paddingLeft="17px"
+            >
 			
 				<TextView android:id="@+id/artist_label"
-					android:layout_height="17px" android:textSize="12px"
+					android:layout_height="17px" android:textSize="14px"
 					android:layout_width="fill_parent" android:gravity="center"
 					android:textColor="@color/text_color"
 					 />
@@ -34,26 +34,15 @@
 					/>
 				
 			</LinearLayout>
-			
-			<!-- ImageButton android:src="@drawable/shuffle_off"
-				android:layout_width="50px" android:layout_height="50px"
-				android:id="@+id/shuffleButton" 
-				android:background="@drawable/button_background"
-				/>
-			<ImageButton android:src="@drawable/repeat_off"
-				android:layout_width="50px" android:layout_height="50px"
-				android:id="@+id/repeatButton" 
-				android:background="@drawable/button_background"
-				/-->
+
 			<ImageButton android:src="@drawable/down"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:padding="3px"
-				android:scaleType="fitCenter"
-				android:layout_alignParentRight="true"
+				android:scaleType="matrix"
 				android:layout_alignParentBottom="true"
 				android:id="@+id/toggleVolumeButton" 
 				android:background="@drawable/button_background"
-				/>
+                android:baselineAlignBottom="true"
+				android:keepScreenOn="true" android:layout_alignParentRight="true" android:layout_marginRight="-17px"/>
 		</RelativeLayout>
 
          <net.chrislehmann.squeezedroid.view.TransparentPanel
