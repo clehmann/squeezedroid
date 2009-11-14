@@ -26,6 +26,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
 {
    private static final int DIALOG_ERROR_CONNECTING = 0;
    private static final int DIALOG_CONNECTING = 1;
+   private static final int DIALOG_WELCOME = 2;
 
    private String LOGTAG = "ConnectToServerActivity";
 
@@ -37,7 +38,7 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
       super.onCreate( savedInstanceState );
       if ( !areSettingInitalized() )
       {
-         launchSubActivity( EditPrefrencesActivity.class, settingsCallback );
+         showDialog( DIALOG_WELCOME );
       }
       else
       {
@@ -163,8 +164,25 @@ public class ConnectToServerActivity extends SqueezedroidActivitySupport
             _connectingDialog = ProgressDialog.show( this, "Connecting...", "Connecting to squeezeserver.", true, false );
             d = _connectingDialog;
             break;
+         case DIALOG_WELCOME :
+            d = createWelcomeDialog();
       }
       return d;
+   }
+
+   private Dialog createWelcomeDialog()
+   {
+      AlertDialog.Builder builder = new AlertDialog.Builder( this );
+      builder.setTitle( "Welcome" );
+      builder.setMessage( "Welcome to SqueezeDroid.  Before you can start, you'll need to enter some information about your server." );
+      builder.setPositiveButton( "Configure", new OnClickListener()
+      {
+         public void onClick(DialogInterface dialog, int which)
+         {
+            launchSubActivity( EditPrefrencesActivity.class, settingsCallback );
+         }
+      } );
+      return builder.create();
    }
 
    private Dialog createErrorConnectingDialog()

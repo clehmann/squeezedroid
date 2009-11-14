@@ -64,6 +64,7 @@ public class MainActivity extends SqueezedroidActivitySupport
    private TextView _songLabel;
    private TextView _artistLabel;
    private TextView _albumLabel;
+   private TextView _noSongSelectedText;
 
    private ImageButton _prevButton;
    private ImageButton _nextButton;
@@ -94,6 +95,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       _artistLabel = (TextView) findViewById( R.id.artist_label );
       _albumLabel = (TextView) findViewById( R.id.album_label );
       _songLabel = (TextView) findViewById( R.id.title_label );
+      _noSongSelectedText = (TextView)findViewById( R.id.no_song_selected_text );
       
       _playButton = (ImageButton) findViewById( R.id.playButton );
       _nextButton = (ImageButton) findViewById( R.id.nextButton );
@@ -111,6 +113,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       _shuffleButton.setOnClickListener( onShuffleButtonPressed );
       _repeatButton.setOnClickListener( onRepeatButtonPressed );
       _toggleSyncPanelButton.setOnClickListener( onToggleSyncPanelButtonPressed );
+      
       
    }
 
@@ -349,6 +352,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       }
    };
 
+   
    /**
     * Called when the currently selected {@link Player} has changed
     */
@@ -383,6 +387,9 @@ public class MainActivity extends SqueezedroidActivitySupport
    {
       if ( status != null && status.getCurrentSong() != null )
       {
+         _noSongSelectedText.setVisibility( View.INVISIBLE );
+         _coverArtImageView.setVisibility( View.VISIBLE );
+
          Song currentSong = status.getCurrentSong();
 
          if( hasCoverImageChanged( status ) )
@@ -446,6 +453,8 @@ public class MainActivity extends SqueezedroidActivitySupport
          _albumLabel.setText( "" );
          _timeSeekBar.pause();
          _timeSeekBar.setProgress( 0 );
+         _coverArtImageView.setVisibility( View.INVISIBLE );
+         _noSongSelectedText.setVisibility( View.VISIBLE );
       }
    }
 

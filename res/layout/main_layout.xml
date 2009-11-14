@@ -35,6 +35,7 @@
 				
 			</LinearLayout>
 
+
 			<ImageButton android:src="@drawable/down"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:scaleType="matrix"
@@ -71,6 +72,13 @@
 			</ViewSwitcher>
 
 		</LinearLayout>
+        <TextView
+            android:text="The current playlist is empty. You can add some music by selecting the library button under the options menu (menu -> library)"
+            android:id="@+id/no_song_selected_text" android:layout_width="fill_parent"
+            android:layout_height="310px" android:gravity="center"
+            android:layout_below="@id/song_info"
+            android:visibility="invisible"
+            />
 	<LinearLayout android:layout_alignParentBottom="true"
 		android:background="@drawable/button_panel_bg" android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_gravity="bottom"

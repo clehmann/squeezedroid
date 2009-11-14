@@ -1,13 +1,12 @@
 <PreferenceScreen
    xmlns:android="http://schemas.android.com/apk/res/android">
    <PreferenceCategory android:title="Server Settings" android:summary="Server Settings">
-      <EditTextPreference android:summary="IP Address/Hostname of the Squeezebox server" android:title="Server Address" android:defaultValue="192.168.0.x" android:key="@string/server_ip" />
-      <EditTextPreference android:title="Username" android:summary="Squeezebox server username" android:key="@string/authentication_username" />
-      <EditTextPreference android:title="Password" android:summary="Squeezebox server password" android:key="@string/authentication_password" />
+      <EditTextPreference android:summary="IP Address/Hostname of the Squeezebox server. You must set this." android:title="Server Address" android:defaultValue="192.168.0.x" android:key="@string/server_ip" />
+      <EditTextPreference android:title="Username" android:summary="Squeezebox server username (Optional)." android:key="@string/authentication_username" />
+      <EditTextPreference android:title="Password" android:summary="Squeezebox server password (Optional)." android:key="@string/authentication_password" />
    </PreferenceCategory>
    <PreferenceCategory android:title="Advanced" >
       <EditTextPreference android:summary="Port that the Squeezebox server web interface runs on, typically 9000" android:title="Web Interface Port"  android:defaultValue="9000" android:key="@string/server_web_port" />
       <EditTextPreference android:summary="Port that the Squeezebox server cli interface runs on, typically 9090" android:title="CLI Port"   android:defaultValue="9090" android:key="@string/server_cli_port" />
    </PreferenceCategory>
-
 </PreferenceScreen>
