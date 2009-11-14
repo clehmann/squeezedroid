@@ -177,8 +177,12 @@ public class CliSqueezeService implements SqueezeService
       }
       //Check for a valid 'version' response to make sure we are actually connected.
       String response = executeCommand( "version ?" );
-      Matcher matcher = versionResponsePattern.matcher( response );
-      if( !matcher.matches() )
+      Matcher matcher = null;
+      if( response != null )
+      {
+         matcher = versionResponsePattern.matcher( response );
+      }
+      if( response == null || !matcher.matches() )
       {
          clientSocket = null;
          clientWriter = null;
@@ -216,9 +220,15 @@ public class CliSqueezeService implements SqueezeService
          clientSocket = null;
       }
 
-      eventThread.disconnect();
-      commandThread.interrupt();
-      eventThread = null;
+      if( eventThread != null )
+      {
+         eventThread.disconnect();
+         eventThread = null;
+      }
+      if( commandThread != null )
+      {
+         commandThread.interrupt();
+      }
    }
 
    public boolean isConnected()
