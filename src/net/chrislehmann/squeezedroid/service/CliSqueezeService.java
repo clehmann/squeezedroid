@@ -23,6 +23,7 @@ import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
+import net.chrislehmann.util.ImageLoader;
 import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
 
@@ -174,6 +175,7 @@ public class CliSqueezeService implements SqueezeService
       if( username != null && password != null )
       {
          executeCommand( "login " + username + " " + password );
+         ImageLoader.getInstance().setCredentials( username, password );
       }
       //Check for a valid 'version' response to make sure we are actually connected.
       String response = executeCommand( "version ?" );
@@ -370,8 +372,11 @@ public class CliSqueezeService implements SqueezeService
                album.setId( matcher.group( 1 ) );
                album.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
                album.setArtist( SerializationUtils.decode( matcher.group( 5 ) ) );
-               album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
-               album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320	_o" );
+               if( matcher.group(4) != null  )
+               {
+                  album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
+                  album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320	_o" );
+               }
                return album;
             }
          } );

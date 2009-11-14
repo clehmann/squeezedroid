@@ -1,7 +1,9 @@
 package net.chrislehmann.util;
 
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,9 +13,11 @@ import java.util.Queue;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageView;
  
 public class ImageLoader {
+    private static final String LOGTAG = "ImageLoader";
     static private ImageLoader _instance;
     static public ImageLoader getInstance() {
         if (_instance == null) {
@@ -22,6 +26,22 @@ public class ImageLoader {
         return _instance;
     }
  
+    public void setCredentials( final String username, final String password)
+    {
+       
+      Authenticator authenticator = new Authenticator()
+      {
+
+         public PasswordAuthentication getPasswordAuthentication()
+         {
+            return new PasswordAuthentication( username, password.toCharArray() );
+         }
+      };
+
+      Authenticator.setDefault (authenticator);
+       
+    }
+    
     private HashMap<String , Bitmap> _urlToBitmap;
     private Queue<Group> _queue;
     private DownloadThread _thread;
@@ -164,7 +184,7 @@ public class ImageLoader {
     }
  
     private class DownloadThread extends Thread {
-        final Handler threadHandler = new Handler();
+      final Handler threadHandler = new Handler();
         final Runnable threadCallback = new Runnable() {
             public void run() {
                 onLoad();
@@ -191,7 +211,7 @@ public class ImageLoader {
                 inStream = null;
                 _conn = null;
             } catch (Exception ex) {
-                // nothing
+                Log.d(LOGTAG, "Error fetching image", ex);
             }
             if (inStream != null) {
                 try {
