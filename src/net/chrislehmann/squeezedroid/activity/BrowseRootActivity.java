@@ -29,8 +29,8 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
      setContentView( R.layout.list_layout );
      listView = (ListView) findViewById( R.id.list );
      
-     String[] values = new String[] { "Artists",  "Albums", "Genres", "New Music" };
-     int[] icons = new int[] { R.drawable.artists, R.drawable.albums_25x25_f, R.drawable.genres_25x25_f, R.drawable.newmusic_25x25_f };
+     String[] values = new String[] { "Artists",  "Albums", "Genres", "New Music", "Search" };
+     int[] icons = new int[] { R.drawable.artists, R.drawable.albums_25x25_f, R.drawable.genres_25x25_f, R.drawable.newmusic_25x25_f, R.drawable.squeeze_search };
      listView.setAdapter( new IconicAdapter<String>( this, R.layout.icon_row_layout, values, icons ) );
      listView.setOnItemClickListener( onItemClick );
    }
@@ -63,6 +63,10 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
             intent.setAction( "net.chrislehmann.squeezedroid.action.BrowseAlbum" );
             intent.setData( Uri.parse( "squeeze:///?sort=new" ));
          }         
+         if( item.equals( "Search" ))
+         {
+            intent.setAction( "net.chrislehmann.squeezedroid.action.Search" );
+         } 
          startActivityForResult( intent, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
       }
    };

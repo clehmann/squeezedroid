@@ -11,6 +11,7 @@ import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.Song;
 
 /**
@@ -121,4 +122,6 @@ public interface SqueezeService
    public void setShuffleMode( Player player, ShuffleMode mode );
    
    public void setRepeatMode( Player player, RepeatMode mode );
+   
+   public SearchResult search( String searchTerms, int numResults);
 }

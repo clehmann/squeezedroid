@@ -258,7 +258,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          SqueezeService service = getService();
-         if( service != null )
+         if( service != null && getSelectedPlayer() != null && _currentStatus != null )
          {
             SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
             if( nextMode != null && getSelectedPlayer() != null )
@@ -281,7 +281,7 @@ public class MainActivity extends SqueezedroidActivitySupport
       public void onClick(View v)
       {
          SqueezeService service = getService();
-         if( service != null && getSelectedPlayer() != null  )
+         if( service != null && getSelectedPlayer() != null && _currentStatus != null )
          {
             SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
             if( nextMode != null )

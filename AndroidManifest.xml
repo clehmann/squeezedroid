@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.chrislehmann.squeezedroid"
-      android:versionCode="6"
-      android:versionName="0.7">
+      android:versionCode="7"
+      android:versionName="0.8">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:name=".activity.SqueezeDroidApplication" >
         <activity android:name=".activity.MainActivity"
                   android:label="@string/app_name">
@@ -75,6 +75,13 @@
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
          </activity>
+         <activity android:name=".activity.SearchActivity" android:label="Search" >
+           <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.Search" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+         </activity>
+         
     </application>
     <uses-sdk android:minSdkVersion="3" />
     <uses-permission android:name="android.permission.INTERNET" />

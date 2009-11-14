@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent" android:layout_width="fill_parent">
+ 
+   <EditText
+      android:id="@+id/search_input" 
+      android:gravity="left" 
+      android:layout_width="fill_parent" android:layout_height="wrap_content" 
+      android:layout_marginRight="45px"
+      android:maxLines="1" />
+   <ImageButton 
+      android:id="@+id/search_button"
+      android:src="@drawable/search"
+      android:minHeight="40px" android:maxHeight="40px"
+      android:minWidth="40px" android:maxWidth="40px"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+      android:layout_alignParentRight="true" android:layout_alignParentTop="true"/>
+   <ExpandableListView 
+      android:id="@+id/search_expandable_list"
+      android:layout_marginTop="45px"
+      android:layout_width="fill_parent" android:layout_height="fill_parent"
+      android:drawSelectorOnTop="false"
+      android:visibility="gone"
+    />
+    <TextView 
+      android:text="Enter a artist, album, genre or song title in the box above and click the search button."
+      android:textSize="15px"
+      android:id="@+id/search_instructions_text"
+      android:layout_centerHorizontal="true"
+      android:layout_width="fill_parent" android:layout_height="fill_parent"
+      android:layout_marginTop="50px"
+      android:gravity="center_horizontal"
+    />
+    <TextView 
+      android:text="No music could be found based on your criteria.  Try changing it and searching again." 
+      android:textSize="15px"
+      android:id="@+id/search_no_results_text"
+      android:layout_width="fill_parent" android:layout_height="fill_parent"
+      android:visibility="gone"
+      android:layout_marginTop="50px"
+      android:layout_centerHorizontal="true"
+      android:gravity="center_horizontal"
+    />
+
+</RelativeLayout>

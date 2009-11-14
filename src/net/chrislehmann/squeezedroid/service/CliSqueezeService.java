@@ -22,6 +22,7 @@ import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.util.ImageLoader;
 import net.chrislehmann.util.SerializationUtils;
@@ -104,6 +105,13 @@ public class CliSqueezeService implements SqueezeService
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
    private Pattern versionResponsePattern = Pattern.compile( "version ([0-9|.]+)" );
+   
+   private Pattern searchResultResponsePattern = Pattern.compile( "count%3A([^ ]*).*?( contributors_count%3A([^ ]*))*.*?( albums_count%3A([^ ]*))*.*?( genres_count%3A([^ ]*))*.*?( tracks_count%3A([^ ]*))*" );
+   
+   private Pattern artistSearchResultResponsePattern = Pattern.compile( "contributor_id%3A([^ ]*) contributor%3A([^ ]*)" );
+   private Pattern albumSearchResultResponsePattern = Pattern.compile( "album_id%3A([^ ]*) album%3A([^ ]*)" );
+   private Pattern genreSearchResultResponsePattern = Pattern.compile( "genre_id%3A([^ ]*) genre%3A([^ ]*)" );
+   private Pattern songSearchResultResponsePattern = Pattern.compile( "song_id%3A([^ ]*) song%3A([^ ]*)" );
 
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
    {
@@ -151,7 +159,6 @@ public class CliSqueezeService implements SqueezeService
          return song;
       }
    };
-   
    
 
    /**
@@ -609,6 +616,114 @@ public class CliSqueezeService implements SqueezeService
       return browseResult;
    }
 
+   /**
+    * Search for {@link Song}s, {@link Artist}s, {@link Album}s and {@link Genre}s
+    * that match the passed searchTerm.
+    * @param searchTerm
+    * @return
+    */
+   public SearchResult search( String searchTerm, int numResultsPerCategory )
+   {
+      String result = executeCommand( "search 0 " + numResultsPerCategory + " term:" + SerializationUtils.encode( searchTerm ) ); 
+      
+      SearchResult searchResult = SerializationUtils.unserialize( searchResultResponsePattern, result, new Unserializer<SearchResult>()
+      {
+         public SearchResult unserialize(Matcher matcher)
+         {
+            SearchResult searchResult = new SearchResult();
+            searchResult.setTotalResults( parseIntIfExists( matcher.group(1), 0 ) );
+            searchResult.setTotalArtists( parseIntIfExists( matcher.group(2), 0 ) );
+            searchResult.setTotalAlbums( parseIntIfExists( matcher.group(3), 0 ) );
+            searchResult.setTotalGenres( parseIntIfExists( matcher.group(4), 0 ) );
+            searchResult.setTotalSongs( parseIntIfExists( matcher.group(5), 0 ) );
+            return searchResult;
+         }
+      });
+      
+      if( searchResult == null )
+      {
+         searchResult = new SearchResult();
+      }
+      
+      List<Song> songs = SerializationUtils.unserializeList( songSearchResultResponsePattern, result, new Unserializer<Song>()
+      {
+         public Song unserialize(Matcher matcher)
+         {
+            Song song = new Song();
+            song.setId( SerializationUtils.decode( matcher.group(1) ) );
+            song.setName( SerializationUtils.decode( matcher.group(2) ) );
+            return song;
+         }
+      });
+      
+      if( songs != null )
+      {
+         searchResult.setSongs( songs );
+      }
+
+      List<Album> albums = SerializationUtils.unserializeList(  albumSearchResultResponsePattern, result, new Unserializer<Album>()
+      {
+         public Album unserialize(Matcher matcher)
+         {
+            Album album = new Album();
+            album.setId(SerializationUtils.decode( matcher.group(1) ) );
+            album.setName( SerializationUtils.decode( matcher.group(2) ) );
+            return album;
+         }
+      });
+      if( albums != null )
+      {
+         searchResult.setAlbums( albums );
+      }
+      List<Artist> artists = SerializationUtils.unserializeList( artistSearchResultResponsePattern, result, new Unserializer<Artist>()
+      {
+         public Artist unserialize(Matcher matcher)
+         {
+            Artist artist = new Artist();
+            artist.setId( SerializationUtils.decode( matcher.group(1) ) );
+            artist.setName( SerializationUtils.decode( matcher.group(2) ) );
+            return artist;
+         }
+      });
+      if( artists != null )
+      {
+         searchResult.setArtists( artists );
+      }
+
+      List<Genre> genres = SerializationUtils.unserializeList( genreSearchResultResponsePattern, result, new Unserializer<Genre>()
+      {
+         public Genre unserialize(Matcher matcher)
+         {
+            Genre genre = new Genre();
+            genre.setId( SerializationUtils.decode( matcher.group(1) ) );
+            genre.setName( SerializationUtils.decode( matcher.group(2) ) );
+            return genre;
+         }
+      });
+      if( genres != null )
+      {
+         searchResult.setGenres( genres );
+      }
+      
+      return searchResult;
+   }
+   
+   private int parseIntIfExists( String number, int defaultValue )
+   {
+      int value = defaultValue;
+      
+      if( number != null )
+      {
+         try
+         {
+            value = Integer.parseInt( number );
+         }
+         catch (NumberFormatException e) {
+            Log.e(LOGTAG, "Error parsing number '" + number + "'", e);
+         }
+      }
+      return value;
+   }
    public void addItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
