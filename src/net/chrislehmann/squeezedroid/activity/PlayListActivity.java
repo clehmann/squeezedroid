@@ -5,8 +5,10 @@ import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -23,6 +25,9 @@ public class PlayListActivity extends SqueezedroidActivitySupport
    private static final int CONTEXTMENU_REMOVE_ALBUM = 422;
    private static final int CONTEXTMENU_REMOVE_ARTIST = 423;
    private static final int CONTEXTMENU_GROUP_REMOVE = 100;
+   private static final int MENU_CLEAR_ALL = 1;
+   private static final int MENU_LIBRARY = 2;
+   private static final int MENU_DONE = 0;
 
    protected ListView listView;
 
@@ -111,4 +116,35 @@ public class PlayListActivity extends SqueezedroidActivitySupport
       }
       return handled;
    }
+   
+   @Override
+   public boolean onCreateOptionsMenu(Menu menu)
+   {
+      menu.add( 0, MENU_LIBRARY, 0, "Add" );
+      menu.add( 0, MENU_CLEAR_ALL, 0, "Clear" );
+      menu.add( 0, MENU_DONE, 0, "Done" );
+      return super.onCreateOptionsMenu( menu );
+   }
+   
+   public boolean onOptionsItemSelected(MenuItem item)
+   {
+      switch ( item.getItemId() )
+      {
+         case MENU_LIBRARY :
+            launchSubActivity( BrowseRootActivity.class, null );
+            return true;
+         case MENU_CLEAR_ALL :
+            runWithService( new SqueezeServiceAwareThread()
+            {
+               public void runWithService(SqueezeService service)
+               {
+                  service.clearPlaylist( getSelectedPlayer() );
+               }
+            });
+         case MENU_DONE:
+            finish();
+      }
+      return false;
+   }
+   
 }

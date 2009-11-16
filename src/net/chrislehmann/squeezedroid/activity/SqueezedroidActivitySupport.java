@@ -47,6 +47,12 @@ public class SqueezedroidActivitySupport extends ActivitySupport
 
       IntentFilter filter = new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION );
       registerReceiver( onConnectionChanged, filter );
+      
+      String dialogName = getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_DIALOG_NAME );
+      if( dialogName != null )
+      {
+         setTitle( dialogName );
+      }
    }
 
    /**
@@ -74,6 +80,10 @@ public class SqueezedroidActivitySupport extends ActivitySupport
             if( selectedPlayer == null )
             {
                launchSubActivity( ChoosePlayerActivity.class,  choosePlayerIntentCallback);
+            }
+            else
+            {
+               getSqueezeDroidApplication().setSelectedPlayer( selectedPlayer );
             }
          }
       }

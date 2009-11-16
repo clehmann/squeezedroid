@@ -48,11 +48,20 @@ public class ActivitySupport extends Activity
     * @param subActivityClass The {@link Class} of the {@link Activity} to start
     * @param callback the {@link IntentResultCallback} to execute when the activity is finished
     */
-
    public void launchSubActivity(Class<? extends Activity> subActivityClass, IntentResultCallback callback )
    {
       Intent i = new Intent( this, subActivityClass );
-
+      launchSubActivity( i, callback );
+   }
+   
+   /**
+    * Launch a Activity {@link Intent} intent, and execute the {@link IntentResultCallback#resultOk(String, Bundle)} or 
+    * {@link IntentResultCallback#resultCancel(String, Bundle)(String, Bundle)} method depending on the result
+    * @param subActivityClass The {@link Class} of the {@link Activity} to start
+    * @param callback the {@link IntentResultCallback} to execute when the activity is finished
+    */
+   public void launchSubActivity(Intent i, IntentResultCallback callback )
+   {
       Random rand = new Random();
       int correlationId = Math.abs( rand.nextInt() );
 
@@ -66,7 +75,6 @@ public class ActivitySupport extends Activity
          startActivity( i );
       }
    }
-   
    
    /**
     * Sets the result

@@ -19,6 +19,7 @@ import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
 import net.chrislehmann.util.ImageLoader;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -51,7 +52,7 @@ public class MainActivity extends SqueezedroidActivitySupport
     */
    private static final int MENU_SETTINGS = 1;
    private static final int MENU_CHOOSE_PLAYER = 2;
-   private static final int MENU_ADD_PLAYER = 3;
+   private static final int MENU_SYNC_PLAYER = 3;
    private static final int MENU_PLAYLIST = 4;
    private static final int MENU_LIBRARY = 5;
 
@@ -165,13 +166,14 @@ public class MainActivity extends SqueezedroidActivitySupport
       menu.add( 0, MENU_LIBRARY, 0, "Library" );
       menu.add( 0, MENU_PLAYLIST, 0, "Playlist" );
       menu.add( 0, MENU_SETTINGS, 0, "Settings" );
-      menu.add( 0, MENU_ADD_PLAYER, 0, "Sync Player" );
+      menu.add( 0, MENU_SYNC_PLAYER, 0, "Sync Player" );
       menu.add( 0, MENU_CHOOSE_PLAYER, 0, "Choose Player" );
       return true;
    }
 
    public boolean onOptionsItemSelected(MenuItem item)
    {
+      Intent i = new Intent();
       switch ( item.getItemId() )
       {
          case MENU_LIBRARY :
@@ -184,10 +186,18 @@ public class MainActivity extends SqueezedroidActivitySupport
             launchSubActivity( EditPrefrencesActivity.class, editSettingsIntentCallback );
             return true;
          case MENU_CHOOSE_PLAYER :
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerIntentCallback );
+            i.setAction( SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, true );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS, false );
+            launchSubActivity( i, choosePlayerIntentCallback );
             return true;
-         case MENU_ADD_PLAYER:
-            launchSubActivity( ChoosePlayerActivity.class, choosePlayerForSyncCallback );
+         case MENU_SYNC_PLAYER:
+            i.setAction( SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, false );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS, true );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_EMPTY_PLAYER_NAME, "No Synchronization" );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_DIALOG_NAME, "Choose Player to Synchronize With" );
+            launchSubActivity( i, choosePlayerForSyncCallback );
             return true;
       }
       return false;
@@ -328,10 +338,18 @@ public class MainActivity extends SqueezedroidActivitySupport
          {
             public void runWithService(SqueezeService service)
             {
-               service.synchronize( getSelectedPlayer(), (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER ) );         
+               Player selectedPlayer = (Player) resultMap.getSerializable( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER );
+               if( selectedPlayer != null )
+               {
+                  service.synchronize( getSelectedPlayer(), selectedPlayer );         
+               } 
+               else
+               {
+                  service.unsynchronize( getSelectedPlayer() );
+               }
                Player player  = service.getPlayer( getSelectedPlayer().getId() );
                setSelectedPlayer( player );
-               _syncPanel.setPlayer( player );  
+               _syncPanel.setPlayer( player );
             }
          }, true);
       }

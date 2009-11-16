@@ -73,6 +73,8 @@ public interface SqueezeService
 
    public List<Player> getPlayers();
 
+   public List<Player> getPlayers(boolean removeDuplicatePlayers);
+
    public Player getPlayer(String playerId);
 
    public void addItem(Player player, Item item);
@@ -124,4 +126,7 @@ public interface SqueezeService
    public void setRepeatMode( Player player, RepeatMode mode );
    
    public SearchResult search( String searchTerms, int numResults);
+
+   public void clearPlaylist(Player selectedPlayer);
+
 }

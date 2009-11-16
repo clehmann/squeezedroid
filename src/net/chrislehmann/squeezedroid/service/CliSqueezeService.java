@@ -21,6 +21,7 @@ import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.model.PlayerIdEqualsPredicate;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.Song;
@@ -29,7 +30,6 @@ import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 
 import android.util.Log;
 
@@ -142,11 +142,20 @@ public class CliSqueezeService implements SqueezeService
          {
             song.setImageUrl( SerializationUtils.decode( matcher.group( 14 ) ) );
          }
-         else if ( matcher.group( 16 ) != null )
+         else
          {
-            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 ) + "/cover_50x50_o" );
-            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 16 ) + "/cover_320x320_o" );
+            String artId = song.getId();
+            if ( matcher.group( 16 ) != null )
+            {
+               artId = matcher.group( 16 );
+            }
+
+            song.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + artId + "/cover_50x50_o" );
+            song.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + artId + "/cover_320x320_o" );
+            
          }
+         
+
 
          try
          {
@@ -468,7 +477,11 @@ public class CliSqueezeService implements SqueezeService
 
    public List<Player> getPlayers()
    {
+      return getPlayers( false );
+   }
 
+   public List<Player> getPlayers( boolean removeDuplicates )
+   {
       String command = new String( "players 0 1000" );
       List<Player> players = new ArrayList<Player>();
       String result = executeCommand( command );
@@ -487,27 +500,32 @@ public class CliSqueezeService implements SqueezeService
       }
 
       List<Player> groupedPlayers = new ArrayList<Player>();
-
+      List<Player> handledPlayers = new ArrayList<Player>();
+      
       for ( Player player : players )
       {
-         command = player.getId() + " sync ?";
-         String playerSyncResult = executeCommand( command );
-         Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
-         if ( matcher.find() )
+         if( !removeDuplicates || CollectionUtils.find( handledPlayers, new PlayerIdEqualsPredicate( player.getId() ) ) == null )
          {
-            String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
-            String[] syncedPlayersArray = syncedPlayersString.split( "," );
-            for ( int i = 0; i < syncedPlayersArray.length; i++ )
+            command = player.getId() + " sync ?";
+            String playerSyncResult = executeCommand( command );
+            Matcher matcher = syncgroupsResponsePattern.matcher( playerSyncResult );
+            if ( matcher.find() )
             {
-               String syncedPlayerId = syncedPlayersArray[i];
-               Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId ) );
-               if ( syncedPlayer != null )
+               String syncedPlayersString = SerializationUtils.decode( matcher.group( 1 ) );
+               String[] syncedPlayersArray = syncedPlayersString.split( "," );
+               for ( int i = 0; i < syncedPlayersArray.length; i++ )
                {
-                  player.getSyncronizedPlayers().add( syncedPlayer );
+                  String syncedPlayerId = syncedPlayersArray[i];
+                  Player syncedPlayer = (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( syncedPlayerId ) );
+                  if ( syncedPlayer != null )
+                  {
+                     player.getSyncronizedPlayers().add( syncedPlayer );
+                  }
                }
             }
+            handledPlayers.add( player );
+            groupedPlayers.add( player );
          }
-         groupedPlayers.add( player );
       }
       return groupedPlayers;
    }
@@ -516,27 +534,6 @@ public class CliSqueezeService implements SqueezeService
    {
       List<Player> players = getPlayers();
       return (Player) CollectionUtils.find( players, new PlayerIdEqualsPredicate( playerId ) );
-   }
-
-   private class PlayerIdEqualsPredicate implements Predicate
-   {
-      private String playerId;
-
-      public PlayerIdEqualsPredicate(String playerId)
-      {
-         this.playerId = playerId;
-      }
-
-      public boolean evaluate(Object arg0)
-      {
-         boolean matches = false;
-         if ( arg0 instanceof Player )
-         {
-            Player rhs = (Player) arg0;
-            matches = playerId.equals( rhs.getId() );
-         }
-         return matches;
-      }
    }
 
    public PlayerStatus getPlayerStatus(Player player)
@@ -805,6 +802,12 @@ public class CliSqueezeService implements SqueezeService
    {
       executeAsyncCommand( player.getId() + " playlist delete " + playlistIndex );
    }
+   
+   public void clearPlaylist(Player player)
+   {
+      executeAsyncCommand( player.getId() + " playlist clear");
+   }
+
 
    public void subscribe(final Player player, final PlayerStatusHandler handler)
    {
