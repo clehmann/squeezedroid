@@ -102,7 +102,6 @@ public class ServiceConnectionManager
 
    private class ExecuteWithServiceCallback implements IntentResultCallback
    {
-      SqueezeServiceAwareThread thread;
       private SqueezedroidActivitySupport context;
 
       
@@ -113,25 +112,22 @@ public class ServiceConnectionManager
 
       public void resultOk(String resultString, Bundle resultMap)
       {
-         if ( thread != null )
+         try
          {
-            try
+            currentStatus = Status.CONNECTED;
+            synchronized ( onConnectQueue )
             {
-               currentStatus = Status.CONNECTED;
-               synchronized ( onConnectQueue )
+               for ( SqueezeServiceAwareThread thread : onConnectQueue )
                {
-                  for ( SqueezeServiceAwareThread thread : onConnectQueue )
-                  {
-                     thread.runWithService( service );
-                  }
-                  onConnectQueue.clear();
+                  thread.runWithService( service );
                }
-               
+               onConnectQueue.clear();
             }
-            catch ( Exception e )
-            {
-               Log.e( LOGTAG, "Error executing callback", e );
-            }
+            
+         }
+         catch ( Exception e )
+         {
+            Log.e( LOGTAG, "Error executing callback", e );
          }
       }
 

@@ -27,10 +27,21 @@ public class SqueezeDroidConstants
       public static final String ACTION_CHOOSE_PLAYER = "net.chrislehmann.squeezedroid.action.ChoosePlayer";
       public static final String ACTION_EDIT_PREFERENCES = "net.chrislehmann.squeezedroid.action.EditPreferences";
       public static final String ACTION_CONNECT = "net.chrislehmann.squeezedroid.action.ConnectToServer";
+      
    }
    public static class Preferences
    {
       public static final String LAST_SELECTED_PLAYER = "last_selected_player";
    }
+
+   public static class FolderObjectTypes
+   {
+      public static final String DIRECTORY = "folder";
+      public static final String TRACK = "track";
+      public static final String PLAYLIST = "playlist";
+      public static final String UNKNOWN = "unknown";
+
    
+   }
+
 }

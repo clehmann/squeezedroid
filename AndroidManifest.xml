@@ -50,6 +50,14 @@
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.BrowseFoldersActivity" android:label="Browse Music Folder">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseFolder" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:scheme="squeeze" />
+            </intent-filter>
+        </activity>
+        
         <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Genres">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />

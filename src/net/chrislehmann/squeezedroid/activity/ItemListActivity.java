@@ -24,18 +24,18 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    static final int MENU_DONE = 111;
    static final int MENU_PLAY_ALL = 112;
    static final int MENU_ENQUE_ALL = 113;
-   
+
    private static final int CONTEXTMENU_PLAY_ITEM = 7070;
    private static final int CONTEXTMENU_ADD_ITEM = 7080;
-   
+
    protected Activity context = this;
-   
+
    protected abstract Item getParentItem();
-   
+
    protected ListView listView;
-   
+
    protected SqueezeService service;
-   
+
    public ItemListActivity()
    {
       super();
@@ -45,22 +45,24 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    protected void onCreate(Bundle savedInstanceState)
    {
       setContentView( R.layout.list_layout );
-      
+
       listView = (ListView) findViewById( R.id.list );
-      getListView().setOnCreateContextMenuListener( new OnCreateContextMenuListener() {
-         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-             menu.add(Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist");
-             menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now");
+      getListView().setOnCreateContextMenuListener( new OnCreateContextMenuListener()
+      {
+         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+         {
+            menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
+            menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
          }
-     });
+      } );
       super.onCreate( savedInstanceState );
    }
-   
+
    @Override
    public boolean onCreateOptionsMenu(Menu menu)
    {
       menu.add( 0, MENU_DONE, 0, "Done" );
-      if( getParentItem() != null )
+      if ( getParentItem() != null )
       {
          menu.add( 0, MENU_PLAY_ALL, 0, "Play All" );
          menu.add( 0, MENU_ENQUE_ALL, 0, "Enqueue All" );
@@ -76,6 +78,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
       if ( service != null )
       {
          Item parentItem = getParentItem();
+         String message = null;
          switch ( item.getItemId() )
          {
             case MENU_DONE :
@@ -84,14 +87,26 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
                break;
             case MENU_ENQUE_ALL :
                service.addItem( getSelectedPlayer(), parentItem );
-               Toast.makeText( this, parentItem.getName() + " added to playlist.", Toast.LENGTH_SHORT );
+               message = parentItem.getName() + " added to playlist.";
                break;
             case MENU_PLAY_ALL :
                service.playItem( getSelectedPlayer(), parentItem );
-               Toast.makeText( this, "Now playing " + parentItem.getName(), Toast.LENGTH_SHORT );
+               message = "Now playing " + parentItem.getName();
                break;
             default :
                handled = false;
+         }
+         if ( message != null )
+         {
+            //I hate java...
+            final String messageForClosure = message;
+            runOnUiThread( new Runnable()
+            {
+               public void run()
+               {
+                  Toast.makeText( context, messageForClosure, Toast.LENGTH_SHORT );
+               }
+            } );
          }
       }
       if ( !handled )
@@ -105,7 +120,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    protected void onActivityResult(int requestCode, int resultCode, Intent data)
    {
       super.onActivityResult( requestCode, resultCode, data );
-      if( resultCode == SqueezeDroidConstants.ResultCodes.RESULT_DONE )
+      if ( resultCode == SqueezeDroidConstants.ResultCodes.RESULT_DONE )
       {
          setResult( resultCode );
          finish();
@@ -115,53 +130,59 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
          super.onActivityResult( requestCode, resultCode, data );
       }
    }
-   
-   @Override
-   public boolean onContextItemSelected(MenuItem item) {
-       SqueezeService service = getService();
-       boolean handled = false;
 
-       AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
-       final Item selectedItem = (Item) listView.getAdapter().getItem( menuInfo.position );
-       
-       if( selectedItem != null && service != null )
-       {
-           switch (item.getItemId()) {
-           case CONTEXTMENU_ADD_ITEM:
-               service.addItem(getSelectedPlayer(), selectedItem);
-               runOnUiThread(new Runnable() {
-                   public void run() {
-                       Toast.makeText(context, selectedItem.getName() + " added to playlist.", Toast.LENGTH_LONG);
-                   }
-               });
+   @Override
+   public boolean onContextItemSelected(MenuItem item)
+   {
+      SqueezeService service = getService();
+      boolean handled = false;
+
+      AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+      final Item selectedItem = (Item) listView.getAdapter().getItem( menuInfo.position );
+
+      if ( selectedItem != null && service != null )
+      {
+         switch ( item.getItemId() )
+         {
+            case CONTEXTMENU_ADD_ITEM :
+               service.addItem( getSelectedPlayer(), selectedItem );
+               runOnUiThread( new Runnable()
+               {
+                  public void run()
+                  {
+                     Toast.makeText( context, selectedItem.getName() + " added to playlist.", Toast.LENGTH_LONG );
+                  }
+               } );
                handled = true;
                break;
-           case CONTEXTMENU_PLAY_ITEM:
-               service.playItem(getSelectedPlayer(), selectedItem);
-               runOnUiThread( new Runnable() {
-                   public void run() {
-                       Toast.makeText(context, "Now playing " + selectedItem.getName(), Toast.LENGTH_LONG);
-                   }
-               });
+            case CONTEXTMENU_PLAY_ITEM :
+               service.playItem( getSelectedPlayer(), selectedItem );
+               runOnUiThread( new Runnable()
+               {
+                  public void run()
+                  {
+                     Toast.makeText( context, "Now playing " + selectedItem.getName(), Toast.LENGTH_LONG );
+                  }
+               } );
                handled = true;
                break;
-           default:
+            default :
                break;
-           }
-           
-       }
-       if( !handled )
-       {
-           handled = super.onContextItemSelected(item);
-       }
-       return handled;
+         }
+
+      }
+      if ( !handled )
+      {
+         handled = super.onContextItemSelected( item );
+      }
+      return handled;
    }
 
    public ListView getListView()
    {
       return listView;
    }
-   
+
    private ServerStatusHandler onServiceStatusChanged = new ServerStatusHandler()
    {
       public void onDisconnect()
@@ -171,11 +192,11 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
          getService();
       }
    };
-   
+
    @Override
    protected void onResume()
    {
-      if( !closing )
+      if ( !closing )
       {
          runWithService( new SqueezeServiceAwareThread()
          {
@@ -183,17 +204,17 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
             {
                service.subscribe( onServiceStatusChanged );
             }
-         });
+         } );
       }
 
       super.onResume();
    }
-   
+
    @Override
    protected void onPause()
    {
       SqueezeService service = getService( false );
-      if( service != null )
+      if ( service != null )
       {
          service.unsubscribe( onServiceStatusChanged );
       }

@@ -7,6 +7,7 @@ import java.util.Map;
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
+import net.chrislehmann.squeezedroid.model.Folder;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
@@ -58,6 +59,8 @@ public interface SqueezeService
    }
 
    public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems);
+   
+   public BrowseResult<Item> browseFolders( Folder parent, int start, int numberOfItems );
 
    public BrowseResult<Artist> browseArtists(Item parent, int start, int numberOfItems);
 

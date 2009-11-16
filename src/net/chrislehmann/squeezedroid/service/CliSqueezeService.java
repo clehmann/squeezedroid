@@ -14,10 +14,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
+import net.chrislehmann.squeezedroid.model.Folder;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
@@ -105,6 +107,8 @@ public class CliSqueezeService implements SqueezeService
    private Pattern playerStatusResponsePattern = Pattern.compile( " mode%3A([^ ]*) .*?(time%3A([^ ]*))* .*?mixer%20volume%3A([^ ]*) .*?playlist%20repeat%3A([^ ]*) .*?playlist%20shuffle%3A([^ ]*) .*?playlist_cur_index%3A([0-9]*)" );
    private Pattern syncgroupsResponsePattern = Pattern.compile( "sync (.*)" );
    private Pattern versionResponsePattern = Pattern.compile( "version ([0-9|.]+)" );
+
+   private Pattern foldersResponsePattern = Pattern.compile( "id%3A([^ ]*) filename%3A([^ ]*) type%3A([^ ]*)" );
    
    private Pattern searchResultResponsePattern = Pattern.compile( "count%3A([^ ]*).*?( contributors_count%3A([^ ]*))*.*?( albums_count%3A([^ ]*))*.*?( genres_count%3A([^ ]*))*.*?( tracks_count%3A([^ ]*))*" );
    
@@ -113,6 +117,8 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genreSearchResultResponsePattern = Pattern.compile( "genre_id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern songSearchResultResponsePattern = Pattern.compile( "song_id%3A([^ ]*) song%3A([^ ]*)" );
 
+   private Pattern urlPattern = Pattern.compile( "url%3A([^ ]*)" );
+   
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
    {
       public Song unserialize(Matcher matcher)
@@ -325,6 +331,50 @@ public class CliSqueezeService implements SqueezeService
       return written;
    }
 
+   public BrowseResult<Item> browseFolders( Folder parent, int start, int numberOfItems )
+   {
+      String command = "musicfolder " + start + " " + numberOfItems;
+      if( parent != null )
+      {
+         command += " folder_id:" + parent.getId();
+      }
+
+      String result = executeCommand( command );
+      BrowseResult<Item> browseResult = new BrowseResult<Item>();
+      if( result != null )
+      {
+            
+         Unserializer<Item> unserializer  = new Unserializer<Item>()
+         {
+            public Item unserialize(Matcher matcher)
+            {
+               String id = matcher.group( 1 );
+               String title = SerializationUtils.decode( matcher.group( 2 ) );
+               String type = matcher.group( 3 );
+               Item item = new Item();
+               if( SqueezeDroidConstants.FolderObjectTypes.DIRECTORY.equals( type ))
+               {
+                  item = new Folder();
+               }
+               else if ( SqueezeDroidConstants.FolderObjectTypes.TRACK.equals( type ) )
+               {
+                  item = new Song();
+               }
+               
+               item.setId( id );
+               item.setName( title );
+               return item;
+            }
+         };
+         
+         List<Item> items = SerializationUtils.unserializeList( foldersResponsePattern, result, unserializer );
+         browseResult.setResutls( items );
+         browseResult.setTotalItems( unserializeCount( result ) );
+         
+      }
+      return browseResult;
+   }
+   
    public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems)
    {
 
@@ -457,6 +507,21 @@ public class CliSqueezeService implements SqueezeService
       }
 
       return browseResult;
+   }
+   
+   private String getPath( Item item )
+   {
+      String path = null;
+      String response = executeCommand( "songinfo 0 100 track_id:" + item.getId() + " tags:u" );
+      if (response != null )
+      {
+         Matcher matcher = urlPattern.matcher( response );
+         if( matcher.find() )
+         {
+            path = matcher.group(1);
+         }
+      }
+      return path;
    }
 
    private Integer unserializeCount(String result)
@@ -721,6 +786,7 @@ public class CliSqueezeService implements SqueezeService
       }
       return value;
    }
+
    public void addItem(Player player, Item item)
    {
       String extraParams = getParamName( item );
@@ -728,6 +794,15 @@ public class CliSqueezeService implements SqueezeService
       {
          String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
          executeAsyncCommand( command );
+      }
+      else
+      {
+         String path = getPath( item );
+         if( path != null )
+         {
+            String command = player.getId() + " playlist add " + path;
+            executeAsyncCommand( command );
+         }
       }
    }
 
@@ -739,6 +814,16 @@ public class CliSqueezeService implements SqueezeService
          String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
          executeAsyncCommand( command );
       }
+      else
+      {
+         String path = getPath( item );
+         if( path != null )
+         {
+            String command = player.getId() + " playlist play " + path;
+            executeAsyncCommand( command );
+         }
+      }
+
    }
 
    private String getParamName(Item item)
@@ -760,6 +845,7 @@ public class CliSqueezeService implements SqueezeService
       {
          extraParams = "genre.id";
       }
+
       return extraParams;
    }
 
