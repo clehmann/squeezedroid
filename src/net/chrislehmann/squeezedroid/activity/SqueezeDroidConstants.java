@@ -19,7 +19,7 @@ public class SqueezeDroidConstants
       protected static final String KEY_SELECTED_PLAYER = "keySelectedPlayer";
       protected static final String KEY_DIALOG_NAME = "dialogName";
       protected static final String KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER = "includeSelectedlayer";
-      protected static final String KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS = "removeDuplicatePlayers";
+      protected static final String KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS = "removeDuplicatePlayers";
       protected static final String KEY_PLAYERLIST_EMPTY_PLAYER_NAME = "emptyPlayerName";
    }
    public static class Actions

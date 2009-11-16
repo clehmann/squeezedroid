@@ -188,13 +188,13 @@ public class MainActivity extends SqueezedroidActivitySupport
          case MENU_CHOOSE_PLAYER :
             i.setAction( SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER );
             i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, true );
-            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS, false );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, false );
             launchSubActivity( i, choosePlayerIntentCallback );
             return true;
          case MENU_SYNC_PLAYER:
             i.setAction( SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER );
             i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, false );
-            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS, true );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, true );
             i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_EMPTY_PLAYER_NAME, "No Synchronization" );
             i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_DIALOG_NAME, "Choose Player to Synchronize With" );
             launchSubActivity( i, choosePlayerForSyncCallback );

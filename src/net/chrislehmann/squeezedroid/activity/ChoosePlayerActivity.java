@@ -31,7 +31,7 @@ import android.widget.AdapterView.OnItemClickListener;
  * The following extras can be set to control what appears on the list:
  * {@link SqueezeDroidConstants.IntentDataKeys#KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER} - Boolean - Defaults to true
  *    If set to false, the currently selected player will not be included in the list.
- * {@link SqueezeDroidConstants.IntentDataKeys#KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS} - Boolean - Defaults to false
+ * {@link SqueezeDroidConstants.IntentDataKeys#KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS} - Boolean - Defaults to false
  *    If set to true, if a player will not be included if any other players are in the 
  *    list that is is syncronized to.
  * {@link SqueezeDroidConstants.IntentDataKeys#KEY_PLAYERLIST_EMPTY_PLAYER_NAME} - String
@@ -69,7 +69,7 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
       {
          public void runWithService(SqueezeService service)
          {
-            boolean removeDuplicatePlayers = getIntent().getBooleanExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLUSR_REMOVE_DUPLICATE_PLAYERS, false );
+            boolean removeDuplicatePlayers = getIntent().getBooleanExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, false );
             List<Player> players = service.getPlayers( removeDuplicatePlayers );
             
             //Remove the currently selected player if KEY_INCLUDE_SELECTED_PLAYER is set to true
@@ -84,7 +84,7 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
             }
             
             //If the caller specifies an empty_key_name, add an extra player to use at the 'null' player
-            String emptyPlayerName = getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_DIALOG_NAME );
+            String emptyPlayerName = getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_EMPTY_PLAYER_NAME );
             if( emptyPlayerName != null )
             {
                Player emptyPlayer = new Player();
