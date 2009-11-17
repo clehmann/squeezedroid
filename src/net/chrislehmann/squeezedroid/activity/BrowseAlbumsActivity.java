@@ -1,6 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.AlbumListAdapter;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Genre;
@@ -13,23 +12,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class BrowseAlbumsActivity extends ItemListActivity
 {
-
-   protected ListView listView;
-   
-   
    /** Called when the activity is first created. */
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
-
-      setContentView(R.layout.list_layout);
-      listView = (ListView) findViewById( R.id.list );
 
       final SqueezeService.Sort sort = getSort( getIntent().getData() );
       final Item parentItem = getParentItem();

@@ -47,6 +47,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
       setContentView( R.layout.list_layout );
 
       listView = (ListView) findViewById( R.id.list );
+      listView.setFastScrollEnabled( true );
       getListView().setOnCreateContextMenuListener( new OnCreateContextMenuListener()
       {
          public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
