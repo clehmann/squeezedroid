@@ -37,7 +37,7 @@ public class BrowseApplicationActivity extends ItemListActivity {
          Item item = (Item) listView.getAdapter().getItem( position );
          if( item instanceof ApplicationItem )
          {
-            ApplicationItem applicationItem = (ApplicationItem) item; 
+            final ApplicationItem applicationItem = (ApplicationItem) item; 
             if( applicationItem.isHasItems() )
             {
                Intent i = new Intent();
@@ -48,7 +48,13 @@ public class BrowseApplicationActivity extends ItemListActivity {
             }
             else if( applicationItem.isPlayable() )
             {
-             //todo - play  
+               runWithService( new SqueezeServiceAwareThread()
+               {
+                  public void runWithService(SqueezeService service)
+                  {
+                     service.playItem( getSelectedPlayer(), applicationItem );
+                  }
+               });
             }
          }
       }

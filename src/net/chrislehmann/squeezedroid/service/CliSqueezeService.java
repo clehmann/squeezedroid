@@ -103,7 +103,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern countPattern = Pattern.compile( " count%3A([^ ]*)" );
    private Pattern artistsResponsePattern = Pattern.compile( "id%3A([^ ]*) artist%3A([^ ]*)" );
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
-   private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) name%3A([^ ]*) .*?( image%3A([^ ]*))*.*?isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
+   private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) name%3A([^ ]*) .*?(image%3A([^ ]*) )*isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
    
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
@@ -514,7 +514,7 @@ public class CliSqueezeService implements SqueezeService
    }
    
 
-   public BrowseResult<ApplicationItem> browseApplication(Player player, Application application, ApplicationItem parent, int start, int numberOfItems)
+   public BrowseResult<ApplicationItem> browseApplication(Player player, final Application application, ApplicationItem parent, int start, int numberOfItems)
    {
       String command =  player.getId() + " " + application.getCmd() + " items " + start + " " + numberOfItems;
       
@@ -540,6 +540,7 @@ public class CliSqueezeService implements SqueezeService
                }
                item.setPlayable( !matcher.group( 5 ).equals( "0" ) );
                item.setHasItems( !matcher.group( 6 ).equals( "0" ) );
+               item.setApplication( application );
                return item;
             }
          });
@@ -874,6 +875,13 @@ public class CliSqueezeService implements SqueezeService
 
    public void addItem(Player player, Item item)
    {
+      
+      if( item instanceof ApplicationItem )
+      {
+         playApplicationItem( player, item, "add" );
+         return;
+      }
+
       String extraParams = getParamName( item );
       if ( extraParams != null )
       {
@@ -893,6 +901,12 @@ public class CliSqueezeService implements SqueezeService
 
    public void playItem(Player player, Item item)
    {
+      if( item instanceof ApplicationItem )
+      {
+         playApplicationItem( player, item, "play" );
+         return;
+      }
+      
       String extraParams = getParamName( item );
       if ( extraParams != null )
       {
@@ -909,6 +923,15 @@ public class CliSqueezeService implements SqueezeService
          }
       }
 
+   }
+
+   private void playApplicationItem(Player player, Item item, String action)
+   {
+      ApplicationItem applicationItem = (ApplicationItem) item;
+
+      String command = player.getId() + " " + applicationItem.getApplication().getCmd() + " playlist " + action + " item_id:" + item.getId();
+      executeAsyncCommand( command );
+      
    }
 
    private String getParamName(Item item)
