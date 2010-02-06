@@ -21,6 +21,8 @@ public class SqueezeDroidConstants
       protected static final String KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER = "includeSelectedlayer";
       protected static final String KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS = "removeDuplicatePlayers";
       protected static final String KEY_PLAYERLIST_EMPTY_PLAYER_NAME = "emptyPlayerName";
+      protected static final String KEY_BROWSEAPPLICATION_APPLICATION = "application";
+      protected static final String KEY_BROWSEAPPLICATION_PARENTITEM = "parent_item";
    }
    public static class Actions
    {

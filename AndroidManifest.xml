@@ -63,6 +63,12 @@
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.BrowseApplicationActivity" android:label="List Applications">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.BrowseApplication" />
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Genres">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />

@@ -2,6 +2,8 @@ package net.chrislehmann.squeezedroid.activity;
 
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.ApplicationListAdapter;
+import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.Application;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
@@ -46,14 +48,15 @@ public class ListApplicationsActivity extends SqueezedroidActivitySupport
    {
       public void onItemClick(AdapterView<?> parent, View view, int position, long id)
       {
-//         Item item = (Item) listView.getAdapter().getItem( position );
-//         if ( item instanceof Folder )
-//         {
-//            Intent i = new Intent();
-//            i.setAction( "net.chrislehmann.squeezedroid.action.BrowseFolder" );
-//            i.setData( Uri.parse( "squeeze:///folder/" + item.getId() ) );
-//            startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
-//         }
+         Item item = (Item) listView.getAdapter().getItem( position );
+         if( item instanceof Application )
+         {
+            Application selectedApp = (Application) item;
+            Intent i = new Intent();
+            i.setAction( "net.chrislehmann.squeezedroid.action.BrowseApplication" );
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_APPLICATION, selectedApp );
+            startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
+         }
       }
    };
    

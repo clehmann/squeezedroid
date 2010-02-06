@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Album;
+import net.chrislehmann.squeezedroid.model.ApplicationItem;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Folder;
@@ -99,9 +100,11 @@ public class CliSqueezeService implements SqueezeService
       this.httpPort = httpPort;
    }
 
-   private Pattern countPattern = Pattern.compile( "count%3A([^ ]*)" );
+   private Pattern countPattern = Pattern.compile( " count%3A([^ ]*)" );
    private Pattern artistsResponsePattern = Pattern.compile( "id%3A([^ ]*) artist%3A([^ ]*)" );
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
+   private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) name%3A([^ ]*) .*?( image%3A([^ ]*))*.*?isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
+   
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
    private Pattern songsResponsePattern = Pattern
@@ -507,6 +510,43 @@ public class CliSqueezeService implements SqueezeService
          browseResult.setResutls( songs );
       }
 
+      return browseResult;
+   }
+   
+
+   public BrowseResult<ApplicationItem> browseApplication(Player player, Application application, ApplicationItem parent, int start, int numberOfItems)
+   {
+      String command =  player.getId() + " " + application.getCmd() + " items " + start + " " + numberOfItems;
+      
+      if( parent != null )
+      {
+         command += " item_id:" + parent.getId();
+      }
+      String response = executeCommand( command );
+      BrowseResult<ApplicationItem> browseResult = new BrowseResult<ApplicationItem>();
+      
+      if( response != null )
+      {
+         List<ApplicationItem> items = SerializationUtils.unserializeList( applicationItemPattern, response, new Unserializer<ApplicationItem>()
+         {
+            public ApplicationItem unserialize(Matcher matcher)
+            {
+               ApplicationItem item = new ApplicationItem();
+               item.setId( matcher.group( 1 ) );
+               item.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
+               if( matcher.group( 3 ) != null )
+               {
+                  item.setImageThumbnailUrl( SerializationUtils.decode( matcher.group( 4 ) ) );
+               }
+               item.setPlayable( !matcher.group( 5 ).equals( "0" ) );
+               item.setHasItems( !matcher.group( 6 ).equals( "0" ) );
+               return item;
+            }
+         });
+         browseResult.setResutls( items );
+         browseResult.setTotalItems( unserializeCount( response ) );
+      }
+      
       return browseResult;
    }
    
@@ -1058,4 +1098,5 @@ public class CliSqueezeService implements SqueezeService
    {
       this.username = username;
    }
+
 }
