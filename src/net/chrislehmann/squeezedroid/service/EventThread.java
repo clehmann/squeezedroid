@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
-import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
-import net.chrislehmann.squeezedroid.service.SqueezeService.ShuffleMode;
+import net.chrislehmann.squeezedroid.model.RepeatMode;
+import net.chrislehmann.squeezedroid.model.ShuffleMode;
 import net.chrislehmann.util.SerializationUtils;
 import android.util.Log;
 

@@ -8,6 +8,8 @@ import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.RepeatMode;
+import net.chrislehmann.squeezedroid.model.ShuffleMode;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
@@ -261,11 +263,11 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    OnClickListener onShuffleButtonPressed = new OnClickListener()
    {
-      private Map<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode> nextShuffleModeMap = new HashMap<SqueezeService.ShuffleMode, SqueezeService.ShuffleMode>()
+      private Map<ShuffleMode, ShuffleMode> nextShuffleModeMap = new HashMap<ShuffleMode, ShuffleMode>()
       {{
-         put( SqueezeService.ShuffleMode.NONE, SqueezeService.ShuffleMode.SONG );
-         put( SqueezeService.ShuffleMode.SONG, SqueezeService.ShuffleMode.ALBUM );
-         put( SqueezeService.ShuffleMode.ALBUM, SqueezeService.ShuffleMode.NONE );
+         put( ShuffleMode.NONE, ShuffleMode.SONG );
+         put( ShuffleMode.SONG, ShuffleMode.ALBUM );
+         put( ShuffleMode.ALBUM, ShuffleMode.NONE );
       }};
       
       public void onClick(View v)
@@ -273,7 +275,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = getService();
          if( service != null && getSelectedPlayer() != null && _currentStatus != null )
          {
-            SqueezeService.ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
+            ShuffleMode nextMode = nextShuffleModeMap.get( _currentStatus.getShuffleMode() );
             if( nextMode != null && getSelectedPlayer() != null )
             {
                service.setShuffleMode( getSelectedPlayer(), nextMode);
@@ -284,11 +286,11 @@ public class MainActivity extends SqueezedroidActivitySupport
 
    OnClickListener onRepeatButtonPressed = new OnClickListener()
    {
-      private Map<SqueezeService.RepeatMode, SqueezeService.RepeatMode> nextRepeatModeMap = new HashMap<SqueezeService.RepeatMode, SqueezeService.RepeatMode>(){
+      private Map<RepeatMode, RepeatMode> nextRepeatModeMap = new HashMap<RepeatMode, RepeatMode>(){
       {
-         put( SqueezeService.RepeatMode.NONE, SqueezeService.RepeatMode.SONG );
-         put( SqueezeService.RepeatMode.SONG, SqueezeService.RepeatMode.ALL);
-         put( SqueezeService.RepeatMode.ALL, SqueezeService.RepeatMode.NONE );
+         put( RepeatMode.NONE, RepeatMode.SONG );
+         put( RepeatMode.SONG, RepeatMode.ALL);
+         put( RepeatMode.ALL, RepeatMode.NONE );
       }};
       
       public void onClick(View v)
@@ -296,7 +298,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          SqueezeService service = getService();
          if( service != null && getSelectedPlayer() != null && _currentStatus != null )
          {
-            SqueezeService.RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
+            RepeatMode nextMode = nextRepeatModeMap.get( _currentStatus.getRepeatMode() );
             if( nextMode != null )
             {
                service.setRepeatMode( getSelectedPlayer(), nextMode);
@@ -557,24 +559,24 @@ public class MainActivity extends SqueezedroidActivitySupport
          getSelectedPlayer();
       };
 
-      public void onRepeatModeChanged(SqueezeService.RepeatMode newMode) {
+      public void onRepeatModeChanged(RepeatMode newMode) {
          updateRepeatMode( newMode );
       };
       
-      public void onShuffleModeChanged(SqueezeService.ShuffleMode newMode) {
+      public void onShuffleModeChanged(ShuffleMode newMode) {
          updateShuffleMode( newMode );
       };
    };
 
-   private Map<SqueezeService.ShuffleMode, Integer> shuffleModeToIconMap = new HashMap<SqueezeService.ShuffleMode, Integer>()
+   private Map<ShuffleMode, Integer> shuffleModeToIconMap = new HashMap<ShuffleMode, Integer>()
    {{
-      put( SqueezeService.ShuffleMode.ALBUM, R.drawable.shuffle_album );
-      put( SqueezeService.ShuffleMode.NONE, R.drawable.shuffle_off );
-      put( SqueezeService.ShuffleMode.SONG, R.drawable.shuffle_all );
+      put( ShuffleMode.ALBUM, R.drawable.shuffle_album );
+      put( ShuffleMode.NONE, R.drawable.shuffle_off );
+      put( ShuffleMode.SONG, R.drawable.shuffle_all );
 
    }};
 
-   private void updateShuffleMode( final SqueezeService.ShuffleMode newMode)
+   private void updateShuffleMode( final ShuffleMode newMode)
    {
       _currentStatus.setShuffleMode( newMode );
       runOnUiThread( new Runnable()
@@ -586,15 +588,15 @@ public class MainActivity extends SqueezedroidActivitySupport
       });
    }
    
-   private Map<SqueezeService.RepeatMode, Integer> repeatModeToIconMap = new HashMap<SqueezeService.RepeatMode, Integer>()
+   private Map<RepeatMode, Integer> repeatModeToIconMap = new HashMap<RepeatMode, Integer>()
    {{
-      put( SqueezeService.RepeatMode.ALL, R.drawable.repeat_all );
-      put( SqueezeService.RepeatMode.NONE, R.drawable.repeat_off );
-      put( SqueezeService.RepeatMode.SONG, R.drawable.repeat_song );
+      put( RepeatMode.ALL, R.drawable.repeat_all );
+      put( RepeatMode.NONE, R.drawable.repeat_off );
+      put( RepeatMode.SONG, R.drawable.repeat_song );
 
    }};
 
-   private void updateRepeatMode( final SqueezeService.RepeatMode newMode)
+   private void updateRepeatMode( final RepeatMode newMode)
    {
       _currentStatus.setRepeatMode( newMode );
       runOnUiThread( new Runnable()

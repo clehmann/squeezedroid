@@ -25,7 +25,9 @@ import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerIdEqualsPredicate;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.RepeatMode;
 import net.chrislehmann.squeezedroid.model.SearchResult;
+import net.chrislehmann.squeezedroid.model.ShuffleMode;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.util.ImageLoader;
 import net.chrislehmann.util.SerializationUtils;
@@ -46,12 +48,13 @@ public class CliSqueezeService implements SqueezeService
 
    private static final String LOGTAG = "SQUEEZE";
    private static final String SONG_TAGS = "aslepPdxKJ";
+   
    /**
     * Host to connect to
     */
    private String host = "localhost";
    /**
-    * Port to connect to
+    * Port(s) to connect to
     */
    private int cliPort = 9090;
    private int httpPort = 9000;
@@ -959,19 +962,18 @@ public class CliSqueezeService implements SqueezeService
 
    public void setShuffleMode(Player player, ShuffleMode mode)
    {
-      executeAsyncCommand( player.getId() + " playlist shuffle " + mode.id );
+      executeAsyncCommand( player.getId() + " playlist shuffle " + mode.getId() );
    }
 
    public void setRepeatMode(Player player, RepeatMode mode)
    {
-      executeAsyncCommand( player.getId() + " playlist repeat " + mode.id );
+      executeAsyncCommand( player.getId() + " playlist repeat " + mode.getId() );
    }
 
    public void unsubscribe(final ServerStatusHandler handler)
    {
       Runnable r = new Runnable()
       {
-
          public void run()
          {
             if( eventThread != null )
@@ -981,14 +983,12 @@ public class CliSqueezeService implements SqueezeService
          }
       };
       commandQueue.add( r );
-
    }
 
    public void subscribe(final ServerStatusHandler handler)
    {
       Runnable r = new Runnable()
       {
-
          public void run()
          {
             eventThread.subscribe( handler );

@@ -2,8 +2,8 @@ package net.chrislehmann.squeezedroid.service;
 
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
-import net.chrislehmann.squeezedroid.service.SqueezeService.RepeatMode;
-import net.chrislehmann.squeezedroid.service.SqueezeService.ShuffleMode;
+import net.chrislehmann.squeezedroid.model.RepeatMode;
+import net.chrislehmann.squeezedroid.model.ShuffleMode;
 
 
 public interface PlayerStatusHandler

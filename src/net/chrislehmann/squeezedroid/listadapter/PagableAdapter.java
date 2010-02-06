@@ -22,6 +22,7 @@ public abstract class PagableAdapter extends BaseAdapter
    
    protected Map<Integer, List<? extends Object> > _pages = new HashMap<Integer, List<? extends Object> >();
    protected int _count = 1;
+   
 
    public PagableAdapter(Activity parent)
    {
@@ -34,6 +35,7 @@ public abstract class PagableAdapter extends BaseAdapter
       return _count ;
    }
 
+   
    public void resetPages()
    {
       _pages.clear();
