@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.chrislehmann.squeezedroid"
-      android:versionCode="8"
-      android:versionName="0.9">
+      android:versionCode="9"
+      android:versionName="0.10">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:name=".activity.SqueezeDroidApplication" >
         <activity android:name=".activity.MainActivity"
                   android:label="@string/app_name">
@@ -57,7 +57,12 @@
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        
+        <activity android:name=".activity.ListApplicationsActivity" android:label="List Applications">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.ListApplications" />
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Genres">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />

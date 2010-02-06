@@ -113,6 +113,8 @@ public class CliSqueezeService implements SqueezeService
 
    private Pattern foldersResponsePattern = Pattern.compile( "id%3A([^ ]*) filename%3A([^ ]*) type%3A([^ ]*)" );
    
+   private Pattern appsResponsePattern = Pattern.compile( "icon%3A([^ ]*) cmd%3A([^ ]*) weight%3A([^ ]*) name%3A([^ ]*) type%3Axmlbrowser" );
+
    private Pattern searchResultResponsePattern = Pattern.compile( "count%3A([^ ]*).*?( contributors_count%3A([^ ]*))*.*?( albums_count%3A([^ ]*))*.*?( genres_count%3A([^ ]*))*.*?( tracks_count%3A([^ ]*))*" );
    
    private Pattern artistSearchResultResponsePattern = Pattern.compile( "contributor_id%3A([^ ]*) contributor%3A([^ ]*)" );
@@ -177,8 +179,6 @@ public class CliSqueezeService implements SqueezeService
          return song;
       }
    };
-   
-
    /**
     * Connect to the squeezecenter server and log in if required. Will throw an
     * {@link ApplicationException} if the connection fails.
@@ -444,7 +444,7 @@ public class CliSqueezeService implements SqueezeService
                if( matcher.group(4) != null  )
                {
                   album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
-                  album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320	_o" );
+                  album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320_o" );
                }
                return album;
             }
@@ -489,7 +489,6 @@ public class CliSqueezeService implements SqueezeService
    {
       String command = "titles " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
 
-
       if ( parent instanceof Artist )
       {
          command += " artist_id:" + parent.getId();
@@ -506,12 +505,55 @@ public class CliSqueezeService implements SqueezeService
          List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
          browseResult.setTotalItems( unserializeCount( result ) );
          browseResult.setResutls( songs );
-
       }
 
       return browseResult;
    }
    
+   public BrowseResult<Application> listApplications(int start, int numberOfItems)
+   {
+      String command = "apps " + start + " " + numberOfItems;
+      String response = executeCommand( command );
+      BrowseResult<Application> browseResult = new BrowseResult<Application>();
+      if( response != null)
+      {
+         List<Application> applications = SerializationUtils.unserializeList( appsResponsePattern, response, new Unserializer<Application>()
+               {
+            public Application unserialize(Matcher matcher)
+            {
+               Application application = new Application();
+               application.setImageThumbnailUrl( getIconPath( getBaseHttpPath() + "/" + SerializationUtils.decode( matcher.group( 1 ) ) ) );
+               Log.d( LOGTAG, "App Thumbnail URL: " + application.getImageThumbnailUrl() );
+               application.setImageUrl( getBaseHttpPath() + "/" + SerializationUtils.decode( matcher.group( 1 ) ) );
+               application.setCmd( SerializationUtils.decode( matcher.group( 2 ) ) );
+               application.setName( SerializationUtils.decode( matcher.group( 4 ) ) );
+               return application;
+            }
+          });
+         browseResult.setTotalItems( unserializeCount( response ) );
+         browseResult.setResutls( applications );
+      }
+      
+      return browseResult;
+   }
+   
+   Pattern p = Pattern.compile( "(.*)\\.([a-z|A-Z]{3})" );
+   private String getIconPath( String url )
+   {
+      String iconPath = url; 
+      Matcher matcher = p.matcher( url );
+      if( matcher.matches() && matcher.groupCount() == 2)
+      {
+         iconPath = matcher.group( 1 ) + "_50x50." + matcher.group( 2 );
+      }
+      return iconPath;
+   }
+   
+   private String getBaseHttpPath()
+   {
+      return "http://" + host + ":" + httpPort;
+   }
+
    private String getPath( Item item )
    {
       String path = null;

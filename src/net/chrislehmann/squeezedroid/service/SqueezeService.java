@@ -42,6 +42,8 @@ public interface SqueezeService
 
    public BrowseResult<Song> browseSongs(Item parent, int start, int numberOfItems);
 
+   public BrowseResult<Application> listApplications(int start, int numberOfItems);
+
    public PlayerStatus getPlayerStatus(Player player);
 
    public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems);

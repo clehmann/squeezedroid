@@ -11,7 +11,11 @@
    <ImageView
       android:id="@+id/icon"
       android:layout_width="22px"
-      android:layout_height="wrap_content"
+      android:layout_height="22px"
+      android:maxWidth="22px"
+      android:minWidth="22px"
+      android:maxHeight="22px"
+      android:minHeight="22px"
    />
    <TextView
       android:id="@+id/label"
