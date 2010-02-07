@@ -3,7 +3,7 @@ package net.chrislehmann.squeezedroid.service;
 import java.util.List;
 
 import net.chrislehmann.squeezedroid.model.Album;
-import net.chrislehmann.squeezedroid.model.ApplicationItem;
+import net.chrislehmann.squeezedroid.model.ApplicationMenuItem;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Folder;
@@ -45,7 +45,11 @@ public interface SqueezeService
 
    public BrowseResult<Application> listApplications(int start, int numberOfItems);
 
-   public BrowseResult<ApplicationItem> browseApplication( Player player, Application application, ApplicationItem parent, int start, int numberOfItems);
+   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, int start, int numberOfItems);
+
+   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, ApplicationMenuItem parent, int start, int numberOfItems);
+
+   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems);
 
    public PlayerStatus getPlayerStatus(Player player);
 

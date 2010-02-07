@@ -10,17 +10,17 @@
 >
    <ImageView
       android:id="@+id/icon"
-      android:layout_width="22px"
-      android:layout_height="22px"
-      android:maxWidth="22px"
-      android:minWidth="22px"
-      android:maxHeight="22px"
-      android:minHeight="22px"
+      android:layout_width="30px"
+      android:layout_height="30px"
+      android:maxWidth="30px"
+      android:minWidth="30px"
+      android:maxHeight="30px"
+      android:minHeight="30px"
    />
    <TextView
       android:id="@+id/label"
-      android:paddingLeft="10px"
-      android:paddingRight="10px"
+      android:paddingLeft="12px"
+      android:paddingRight="12px"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
    />

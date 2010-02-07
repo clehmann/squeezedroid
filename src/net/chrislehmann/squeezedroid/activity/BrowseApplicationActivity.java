@@ -1,20 +1,26 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import net.chrislehmann.squeezedroid.listadapter.ApplicationItemListAdapter;
-import net.chrislehmann.squeezedroid.model.ApplicationItem;
+import net.chrislehmann.squeezedroid.listadapter.ApplicationMenuItemListAdapter;
+import net.chrislehmann.squeezedroid.model.ApplicationMenuItem;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.service.Application;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.view.TextInputDialog;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class BrowseApplicationActivity extends ItemListActivity {
+   protected static final int DIALOG_SEARCH_TEXT = 555;
    private Activity context = this;
+   private int lastSelectedPosition;
+   private String searchText;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
@@ -23,7 +29,9 @@ public class BrowseApplicationActivity extends ItemListActivity {
      {
         public void runWithService(SqueezeService service)
         {
-           getListView().setAdapter( new ApplicationItemListAdapter( service, context, getSelectedPlayer(), getSelectedApplication(), getParentItem()  ) );
+           ApplicationMenuItemListAdapter listAdapter = new ApplicationMenuItemListAdapter( service, context, getSelectedPlayer(), getSelectedApplication(), getParentItem()  );
+           listAdapter.setSearchText( getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_SEARCHTEXT ) );
+           getListView().setAdapter( listAdapter );
         }
      });
      
@@ -32,41 +40,90 @@ public class BrowseApplicationActivity extends ItemListActivity {
    
    private OnItemClickListener onItemClick = new OnItemClickListener()
    {
+
       public void onItemClick(AdapterView<?> parent, View view, int position, long id)
       {
-         Item item = (Item) listView.getAdapter().getItem( position );
-         if( item instanceof ApplicationItem )
+         lastSelectedPosition = position;
+         ApplicationMenuItem applicationMenuItem = (ApplicationMenuItem) getLastSelectedItem();
+         if( "search".equals( applicationMenuItem.getType() ) )
          {
-            final ApplicationItem applicationItem = (ApplicationItem) item; 
-            if( applicationItem.isHasItems() )
-            {
-               Intent i = new Intent();
-               i.setAction( "net.chrislehmann.squeezedroid.action.BrowseApplication" );
-               i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_APPLICATION, getSelectedApplication() );
-               i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_PARENTITEM, applicationItem );
-               startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
-            }
-            else if( applicationItem.isPlayable() )
-            {
-               runWithService( new SqueezeServiceAwareThread()
-               {
-                  public void runWithService(SqueezeService service)
-                  {
-                     service.playItem( getSelectedPlayer(), applicationItem );
-                  }
-               });
-            }
+            showDialog(  DIALOG_SEARCH_TEXT );
+         }
+         else
+         {
+            handleListSelection();
          }
       }
    };
-
-   protected ApplicationItem getParentItem()
+   
+   private ApplicationMenuItem getLastSelectedItem()
    {
-      return (ApplicationItem) getIntent().getSerializableExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_PARENTITEM );
+      Item item = (Item) listView.getAdapter().getItem( lastSelectedPosition );
+      return (ApplicationMenuItem) item;
+   }
+   
+   
+   protected Dialog onCreateDialog(int id) 
+   {
+      Dialog d = null;
+      switch ( id )
+      {
+         case DIALOG_SEARCH_TEXT :
+            final TextInputDialog textDialog = new TextInputDialog( context );
+            OnClickListener onClose = new OnClickListener()
+            {
+               public void onClick(View v)
+               {
+                  searchText = textDialog.getText();
+                  handleListSelection();
+               }
+            };
+            textDialog.setTitle( getLastSelectedItem().getName() );
+            textDialog.setOnOkClickedListener( onClose );
+            d = textDialog;
+            break;
+
+         default :
+            d = super.onCreateDialog( id );
+      }
+      return d;
+      
+   };
+
+   protected ApplicationMenuItem getParentItem()
+   {
+      return (ApplicationMenuItem) getIntent().getSerializableExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_PARENTITEM );
    }
    
    protected Application getSelectedApplication()
    {
       return (Application) getIntent().getSerializableExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_APPLICATION );
+   }
+
+   private void handleListSelection()
+   {
+      final ApplicationMenuItem applicationMenuItem = getLastSelectedItem();
+      if ( applicationMenuItem.isHasItems() )
+      {
+         Intent i = new Intent();
+         i.setAction( "net.chrislehmann.squeezedroid.action.BrowseApplication" );
+         i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_APPLICATION, getSelectedApplication() );
+         i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_PARENTITEM, applicationMenuItem );
+         if ( "search".equals( applicationMenuItem.getType() ) )
+         {
+            i.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_SEARCHTEXT, searchText );
+         }
+         startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
+      }
+      else if ( applicationMenuItem.isPlayable() )
+      {
+         runWithService( new SqueezeServiceAwareThread()
+         {
+            public void runWithService(SqueezeService service)
+            {
+               service.playItem( getSelectedPlayer(), applicationMenuItem );
+            }
+         } );
+      }
    }
 }

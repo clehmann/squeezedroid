@@ -1,7 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import org.apache.commons.lang.StringUtils;
-
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.SearchResultExpandableListAdapter;
 import net.chrislehmann.squeezedroid.model.Album;
@@ -11,6 +9,9 @@ import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+
+import org.apache.commons.lang.StringUtils;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,7 +25,6 @@ import android.view.View.OnCreateContextMenuListener;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;

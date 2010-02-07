@@ -4,12 +4,18 @@ import java.io.Serializable;
 
 import net.chrislehmann.squeezedroid.service.Application;
 
-public class ApplicationItem extends Item implements Serializable
+/**
+ * Represents an entry in an app menu.  This might be playable or just a 'container'
+ * type of object.  Use the {@link ApplicationMenuItem#hasItems} and {@link ApplicationMenuItem#playable}
+ * fields to determine if it is.
+ */
+public class ApplicationMenuItem extends Item implements Serializable
 {
    private static final long serialVersionUID = 1L;
    private boolean hasItems;
    private boolean playable;
    private Application application;
+   private String type;
    
    public boolean isHasItems()
    {
@@ -34,5 +40,13 @@ public class ApplicationItem extends Item implements Serializable
    public void setApplication(Application application)
    {
       this.application = application;
+   }
+   public String getType()
+   {
+      return type;
+   }
+   public void setType(String type)
+   {
+      this.type = type;
    }
 }

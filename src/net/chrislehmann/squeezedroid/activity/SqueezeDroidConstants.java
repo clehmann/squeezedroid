@@ -23,6 +23,7 @@ public class SqueezeDroidConstants
       protected static final String KEY_PLAYERLIST_EMPTY_PLAYER_NAME = "emptyPlayerName";
       protected static final String KEY_BROWSEAPPLICATION_APPLICATION = "application";
       protected static final String KEY_BROWSEAPPLICATION_PARENTITEM = "parent_item";
+      public static final String KEY_BROWSEAPPLICATION_SEARCHTEXT = "search_text";
    }
    public static class Actions
    {
