@@ -72,7 +72,7 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
             intent.setAction( "net.chrislehmann.squeezedroid.action.BrowseFolder" );
             intent.setData( Uri.parse( "squeeze:///" ));
          } 
-         if( item.equals( "My Apps" ))
+         if( item.equals( "Applications" ))
          {
             intent.setAction( "net.chrislehmann.squeezedroid.action.ListApplications" );
          } 
