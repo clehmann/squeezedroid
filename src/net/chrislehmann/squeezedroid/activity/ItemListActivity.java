@@ -41,6 +41,11 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
       super();
    }
 
+   protected boolean isItemPlayable( Item item )
+   {
+      return item != null;
+   }
+   
    @Override
    protected void onCreate(Bundle savedInstanceState)
    {
@@ -52,8 +57,13 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
       {
          public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
          {
-            menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
-            menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+            AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) menuInfo;
+            final Item selectedItem = (Item) listView.getAdapter().getItem( adapterMenuInfo.position );
+            if( isItemPlayable( selectedItem ) )
+            {
+               menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
+               menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+            }
          }
       } );
       super.onCreate( savedInstanceState );
@@ -63,7 +73,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    public boolean onCreateOptionsMenu(Menu menu)
    {
       menu.add( 0, MENU_DONE, 0, "Done" );
-      if ( getParentItem() != null )
+      if ( isItemPlayable( getParentItem() ) )
       {
          menu.add( 0, MENU_PLAY_ALL, 0, "Play All" );
          menu.add( 0, MENU_ENQUE_ALL, 0, "Enqueue All" );

@@ -100,6 +100,17 @@ public class BrowseApplicationActivity extends ItemListActivity {
       return (Application) getIntent().getSerializableExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_APPLICATION );
    }
 
+   @Override
+   protected boolean isItemPlayable( Item item )
+   {
+      boolean playable = false;
+      if( item != null && item instanceof ApplicationMenuItem )
+      {
+         ApplicationMenuItem menuItem = (ApplicationMenuItem) item;
+         playable = menuItem.isPlayable();
+      }
+      return playable;
+   }
    private void handleListSelection()
    {
       final ApplicationMenuItem applicationMenuItem = getLastSelectedItem();

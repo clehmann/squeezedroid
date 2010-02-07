@@ -103,7 +103,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern countPattern = Pattern.compile( " count%3A([^ ]*)" );
    private Pattern artistsResponsePattern = Pattern.compile( "id%3A([^ ]*) artist%3A([^ ]*)" );
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
-   private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) .*?name%3A([^ ]*) .*?(type%3A([^ ]*) )*.*?(image%3A([^ ]*) )*.*?isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
+   private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) name%3A([^ ]*) .*?(type%3A([^ ]*) )*.*?(image%3A([^ ]*) )*.*?isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
    
    private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
