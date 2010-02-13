@@ -34,7 +34,7 @@ public abstract class ItemListAdapter extends PagableAdapter
            ImageView icon = (ImageView) view.findViewById(R.id.icon);
 
            if (item.getImageThumbnailUrl() != null) {
-               ImageLoader.getInstance().load(icon, item.getImageThumbnailUrl(), true);
+               ImageLoader.getInstance().load(icon, item.getImageThumbnailUrl());
            }
            
            TextView label = (TextView) view.findViewById(R.id.label);

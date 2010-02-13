@@ -55,7 +55,7 @@ public class AlbumListAdapter extends PagableAdapter {
 			ImageView coverArt = (ImageView) view.findViewById(R.id.album_thumbnail);
 
 			if (album.getCoverThumbnailUrl() != null) {
-				ImageLoader.getInstance().load(coverArt, album.getCoverThumbnailUrl(), true);
+				ImageLoader.getInstance().load(coverArt, album.getCoverThumbnailUrl());
 			}
 			
 			TextView albumNameText = (TextView) view.findViewById(R.id.album_name_text);

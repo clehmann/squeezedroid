@@ -429,7 +429,7 @@ public class MainActivity extends SqueezedroidActivitySupport
             if( status.getCurrentSong().getImageUrl() != null )
             {
                nextView.setImageBitmap( null );
-               ImageLoader.getInstance().load( nextView, status.getCurrentSong().getImageUrl(), true );
+               ImageLoader.getInstance().load( nextView, status.getCurrentSong().getImageUrl() );
             }
             else
             {
@@ -523,7 +523,7 @@ public class MainActivity extends SqueezedroidActivitySupport
                updateSongDisplay( status );
                if ( playlist.getResutls().size() > 1 && playlist.getResutls().get( 1 ).getImageUrl() != null )
                {
-                  ImageLoader.getInstance().load( null, playlist.getResutls().get( 1 ).getImageUrl(), true );
+                  ImageLoader.getInstance().load( null, playlist.getResutls().get( 1 ).getImageUrl() );
                }
             }
          } );

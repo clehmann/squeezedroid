@@ -68,7 +68,7 @@ public class SongListAdapter extends PagableAdapter
             }
             else
             {
-               ImageLoader.getInstance().load( coverImage, item.getImageThumbnailUrl(), true );
+               ImageLoader.getInstance().load( coverImage, item.getImageThumbnailUrl() );
             }
 
             nameText.setText( item.getName() );
