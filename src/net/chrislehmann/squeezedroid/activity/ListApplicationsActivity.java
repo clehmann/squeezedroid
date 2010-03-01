@@ -65,6 +65,7 @@ public class ListApplicationsActivity extends SqueezedroidActivitySupport
    {
       if( resultCode == SqueezeDroidConstants.ResultCodes.RESULT_DONE )
       {
+         setResult( resultCode );
          finish();
       } else
       {
