@@ -498,7 +498,7 @@ public class CliSqueezeService implements SqueezeService
       }
       else if ( parent instanceof Album )
       {
-         command += " album_id:" + parent.getId();
+         command += " album_id:" + parent.getId() + " sort:tracknum";
       }
 
       BrowseResult<Song> browseResult = new BrowseResult<Song>();
