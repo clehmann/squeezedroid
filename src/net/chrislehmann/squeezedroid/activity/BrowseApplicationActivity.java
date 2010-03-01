@@ -34,7 +34,6 @@ public class BrowseApplicationActivity extends ItemListActivity {
            getListView().setAdapter( listAdapter );
         }
      });
-     
      getListView().setOnItemClickListener( onItemClick );
    }
    

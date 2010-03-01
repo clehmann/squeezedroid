@@ -11,15 +11,19 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
 public class FileImageCache implements ImageCache
 {
+   private static Object cleanupMutex = new Object();
+   
    private static final String LOGTAG = "FileImageCache";
    private File rootDir;
-   private long maxCacheSize = 5;
+   private long maxCacheSize = 50;
+
 
    public FileImageCache(String prefix)
    {
@@ -28,10 +32,12 @@ public class FileImageCache implements ImageCache
 
    public void load(String name, ImageView view)
    {
-      if ( has( name ) )
-      {
-         view.setImageURI( Uri.parse( getFileName( name ) ) );
-      }
+         if ( has( name ) && view != null )
+         {
+            String fileName = getFileName( name );
+            Bitmap bitmap = BitmapFactory.decodeFile( fileName );
+            view.setImageBitmap( bitmap );
+         }
    }
 
    public boolean has(String name)
@@ -64,28 +70,33 @@ public class FileImageCache implements ImageCache
    private void ensureCacheBelowLimit()
    {
       long dirSize = FileUtils.sizeOfDirectory( rootDir );
-      
-      if( dirSize > maxCacheSize * FileUtils.ONE_MB )
+
+      if ( dirSize > maxCacheSize * FileUtils.ONE_MB )
       {
-         List<File> files = new ArrayList<File>(FileUtils.listFiles( rootDir, FileFilterUtils.fileFileFilter(), null ));
-         Comparator<File> isOlderComparator = new Comparator<File>()
+         synchronized ( cleanupMutex )
          {
-            public int compare(File arg0, File arg1)
-            {
-               int compareToValue = -1;
-               if( FileUtils.isFileNewer( arg0, arg1 ) );
-               {
-                  compareToValue = 1;
-               }
-               return compareToValue;
-            }
-         };
-         Collections.sort( files, isOlderComparator );
-         while ( dirSize > maxCacheSize * FileUtils.ONE_MB && !files.isEmpty())
-         {
-            File nextFile = files.remove( 0 );
-            nextFile.delete();
             dirSize = FileUtils.sizeOfDirectory( rootDir );
+            List<File> files = new ArrayList<File>( FileUtils.listFiles( rootDir, FileFilterUtils.fileFileFilter(), null ) );
+            Comparator<File> isOlderComparator = new Comparator<File>()
+            {
+               public int compare(File arg0, File arg1)
+               {
+                  int compareToValue = -1;
+                  if ( FileUtils.isFileNewer( arg0, arg1 ) )
+                     ;
+                  {
+                     compareToValue = 1;
+                  }
+                  return compareToValue;
+               }
+            };
+            Collections.sort( files, isOlderComparator );
+            while ( dirSize > maxCacheSize * FileUtils.ONE_MB && !files.isEmpty() )
+            {
+               File nextFile = files.remove( 0 );
+               nextFile.delete();
+               dirSize = FileUtils.sizeOfDirectory( rootDir );
+            }
          }
       }
    }

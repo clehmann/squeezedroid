@@ -27,26 +27,37 @@ public enum ImageLoader
    
    private BlockingQueue<Group> _queue;
    private List<DownloadThread> _threads;
-   private int numThreads = 10;
+   private int numThreads = 1;
    ImageCache _cache;
 
    /**
     * Group passed to Downlad queue to indicate that the Thread should be stopped
     */
-   static final Group STOP_GROUP = new Group(null, null, null);
+   public static final Group STOP_GROUP = new Group(null, null, null);
 
+   
+   private class UsernamePasswordAuthenticator extends Authenticator
+   {
+      String username;
+      String password;
+      public UsernamePasswordAuthenticator(String username, String password)
+      {
+         this.username = username;
+         this.password = password;
+      }
+      
+      public PasswordAuthentication getPasswordAuthentication()
+      {
+         return new PasswordAuthentication( username, password.toCharArray() );
+      }
+   };
+
+
+   
    public void setCredentials(final String username, final String password)
    {
 
-      Authenticator authenticator = new Authenticator()
-      {
-         public PasswordAuthentication getPasswordAuthentication()
-         {
-            return new PasswordAuthentication( username, password.toCharArray() );
-         }
-      };
-
-      Authenticator.setDefault( authenticator );
+      Authenticator.setDefault( new UsernamePasswordAuthenticator( username, password ));
 
    }
 

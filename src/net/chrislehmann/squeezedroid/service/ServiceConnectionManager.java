@@ -119,7 +119,10 @@ public class ServiceConnectionManager
             {
                for ( SqueezeServiceAwareThread thread : onConnectQueue )
                {
-                  thread.runWithService( service );
+                  if( thread != null )
+                  {
+                     thread.runWithService( service );
+                  }
                }
                onConnectQueue.clear();
             }

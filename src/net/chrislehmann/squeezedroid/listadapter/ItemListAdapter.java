@@ -19,32 +19,49 @@ import android.widget.TextView;
  */
 public abstract class ItemListAdapter extends PagableAdapter
 {
+
+   private class ViewInfo
+   {
+
+   }
+
    public ItemListAdapter(Activity parent)
    {
       super( parent );
    }
-   
+
    @Override
-   public View getView(int position, View convertView, ViewGroup parent) {
-       View view = null;
+   public View getView(int position, View convertView, ViewGroup parent)
+   {
+      View view = null;
 
-       Item item = (Item) getItem(position);
-       if (item != null) {
-           view = _parent.getLayoutInflater().inflate(R.layout.icon_row_layout, null);
-           ImageView icon = (ImageView) view.findViewById(R.id.icon);
+      Item item = (Item) getItem( position );
+      if ( item != null )
+      {
+         if ( convertView == null || convertView.getId() == R.id.loading_row_layout )
+         {
+            view = _parent.getLayoutInflater().inflate( R.layout.icon_row_layout, null );
+         }
+         else
+         {
+            view = convertView;
+         }
+         ImageView icon = (ImageView) view.findViewById( R.id.icon );
 
-           if (item.getImageThumbnailUrl() != null) {
-               ImageLoader.getInstance().load(icon, item.getImageThumbnailUrl());
-           }
-           
-           TextView label = (TextView) view.findViewById(R.id.label);
-           label.setText(item.getName());
-       }
-       else 
-       {
-           view = super.getView(position, convertView, parent);
-       }
-       return view;
+         icon.setImageResource( R.drawable.default_album_thumb );
+         if ( item.getImageThumbnailUrl() != null )
+         {
+            ImageLoader.getInstance().load( icon, item.getImageThumbnailUrl() );
+         }
+
+         TextView label = (TextView) view.findViewById( R.id.label );
+         label.setText( item.getName() );
+      }
+      else
+      {
+         view = super.getView( position, convertView, parent );
+      }
+      return view;
    }
 
 }

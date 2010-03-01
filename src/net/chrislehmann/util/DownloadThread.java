@@ -40,13 +40,16 @@ class DownloadThread extends Thread
             }
             
             Runnable threadCallback = new OnDownloadCompleteHandler( this.groupCache, this.currentGroup );
-
+            this.groupCache.load( this.currentGroup.url, this.currentGroup.image );
             currentGroup.handler.post( threadCallback );
-            currentGroup = null;
          }
          catch ( Exception ex )
          {
             Log.e( ImageLoader.LOGTAG, "Error fetching image", ex );
+         }
+         finally
+         {
+            currentGroup = null;
          }
       }
    }

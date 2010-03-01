@@ -54,7 +54,11 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
    {
       View view;
       Item item = (Item) getChild( groupPosition, childPosition );
-      TextView tv = new TextView( parent.getContext() );
+      TextView tv = (TextView) convertView;
+      if( tv == null )
+      {
+         tv = new TextView( parent.getContext() );
+      }
       tv.setText( item.getName() );
       tv.setTextSize( 19 );
       view = tv;
@@ -109,7 +113,11 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
    {
       View view;
       String item = (String) getGroup( groupPosition );
-      TextView tv = new TextView( parent.getContext() );
+      TextView tv = (TextView) convertView;
+      if( tv == null )
+      {
+         tv = new TextView( parent.getContext() );
+      }
       tv.setText( item );
       tv.setTextSize( 19 );
       view = tv;

@@ -51,9 +51,18 @@ public class AlbumListAdapter extends PagableAdapter {
 
 		Album album = (Album) getItem(position);
 		if (album != null) {
-			view = _parent.getLayoutInflater().inflate(R.layout.album_row_layout, null);
+		    if( convertView == null || convertView.getId() == R.id.loading_row_layout )
+		    {
+		       view = _parent.getLayoutInflater().inflate(R.layout.album_row_layout, null);
+		    }
+		    else
+		    {
+		       view = convertView;
+		    }
+		    
 			ImageView coverArt = (ImageView) view.findViewById(R.id.album_thumbnail);
 
+			coverArt.setImageResource( R.drawable.default_album_thumb );
 			if (album.getCoverThumbnailUrl() != null) {
 				ImageLoader.getInstance().load(coverArt, album.getCoverThumbnailUrl());
 			}

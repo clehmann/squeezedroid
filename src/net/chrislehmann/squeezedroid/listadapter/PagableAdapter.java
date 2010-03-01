@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.Item;
 import android.app.Activity;
 import android.view.View;
@@ -22,6 +23,8 @@ public abstract class PagableAdapter extends BaseAdapter
    
    protected Map<Integer, List<? extends Object> > _pages = new HashMap<Integer, List<? extends Object> >();
    protected int _count = 1;
+
+   protected View loadingView;
    
 
    public PagableAdapter(Activity parent)
@@ -79,18 +82,29 @@ public abstract class PagableAdapter extends BaseAdapter
    public View getView(int position, View convertView, ViewGroup parent)
    {
       //TODO - Load this as a resource
-      View view;
+      View view = convertView;
       Item item = (Item) getItem( position );
       if( item != null )
       {
-         TextView tv = new TextView( parent.getContext() );
+         TextView tv;
+         if( view != null && view instanceof TextView )
+         {
+            tv = (TextView) view;
+         }
+         else
+         {
+            tv = new TextView( parent.getContext() );
+         }
          tv.setText( item.getName() );
          tv.setTextSize( 19 );
          view = tv;
       }
       else
       {
-         view = _parent.getLayoutInflater().inflate( net.chrislehmann.squeezedroid.R.layout.loading_row_layout, null );
+         if( convertView == null || convertView.getId() != R.id.loading_row_layout )
+         {
+            view = _parent.getLayoutInflater().inflate( net.chrislehmann.squeezedroid.R.layout.loading_row_layout, null );
+         }
       }
       view.setPadding( 10, 10, 10, 10 );
       return view;

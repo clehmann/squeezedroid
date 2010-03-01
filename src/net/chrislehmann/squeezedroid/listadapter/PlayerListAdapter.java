@@ -35,7 +35,12 @@ public class PlayerListAdapter extends ArrayAdapter<Player>
 
       Player player = getItem( position );
       
-      View view = _parent.getLayoutInflater().inflate( net.chrislehmann.squeezedroid.R.layout.player_row_layout , null );
+      View view = convertView;
+      if( view == null )
+      {
+         view = _parent.getLayoutInflater().inflate( net.chrislehmann.squeezedroid.R.layout.player_row_layout , null );
+      }
+      
       TextView nameView = (TextView) view.findViewById( net.chrislehmann.squeezedroid.R.id.player_name_text );
       nameView.setText( player.getName() );
       

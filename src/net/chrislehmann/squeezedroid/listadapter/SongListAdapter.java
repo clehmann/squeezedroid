@@ -52,7 +52,11 @@ public class SongListAdapter extends PagableAdapter
       else
       {
 
-         view = _parent.getLayoutInflater().inflate( R.layout.song_row_layout, null );
+         view = convertView;
+         if( view == null || convertView.getId() == R.id.loading_row_layout )
+         {
+            view = _parent.getLayoutInflater().inflate( R.layout.song_row_layout, null );
+         }
 
          if ( item != null )
          {
