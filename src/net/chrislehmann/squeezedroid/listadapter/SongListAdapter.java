@@ -65,7 +65,8 @@ public class SongListAdapter extends PagableAdapter
             TextView albumNameText = (TextView) view.findViewById( R.id.song_album_name_text );
 
             ImageView coverImage = (ImageView) view.findViewById( R.id.song_thumbnail );
-
+            
+            coverImage.setImageResource( R.drawable.default_album_thumb );
             if ( item.getImageThumbnailUrl() == null )
             {
                coverImage.setImageResource( R.drawable.default_album_thumb );
