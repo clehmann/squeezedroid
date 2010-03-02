@@ -29,11 +29,8 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
    private ExpandableListView listView;
 
    private static final int MENU_DONE = 801;
-   private static final int MENU_PLAY_ALL = 802;
-   private static final int MENU_PLAY_NEXT = 803;
-   private static final int MENU_ENQUE_ALL = 804;
 
-   public static final int DIALOG_CHOOSE_ACTION = 901;
+   public static final int DIALOG_CHOOSE_ACTION = 800;
    private static final int CONTEXTMENU_ADD_ITEM = 801;
    private static final int CONTEXTMENU_PLAY_ITEM = 802;
    private static final int CONTEXTMENU_PLAY_NEXT = 803;
@@ -128,9 +125,6 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
    public boolean onCreateOptionsMenu(Menu menu)
    {
       menu.add( 0, MENU_DONE, 0, "Done" );
-      menu.add( 0, MENU_PLAY_ALL, 0, "Play All" );
-      menu.add( 0, MENU_PLAY_NEXT, 0, "Play All Next" );
-      menu.add( 0, MENU_ENQUE_ALL, 0, "Enqueue All" );
       return super.onCreateOptionsMenu( menu );
    }
 
@@ -147,18 +141,6 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
             case MENU_DONE :
                setResult( SqueezeDroidConstants.ResultCodes.RESULT_DONE );
                finish();
-               break;
-            case MENU_ENQUE_ALL :
-               service.addItem( getSelectedPlayer(), parentItem );
-               Toast.makeText( this, parentItem.getName() + " added to playlist.", Toast.LENGTH_SHORT );
-               break;
-            case MENU_PLAY_ALL :
-               service.playItem( getSelectedPlayer(), parentItem );
-               Toast.makeText( this, "Now playing " + parentItem.getName(), Toast.LENGTH_SHORT );
-               break;
-            case MENU_PLAY_NEXT:
-               service.playItemNext( getSelectedPlayer(), parentItem );
-               Toast.makeText( this, "Now playing " + parentItem.getName(), Toast.LENGTH_SHORT );
                break;
             default :
                handled = false;

@@ -36,6 +36,7 @@ public class SearchActivity extends SqueezedroidActivitySupport
    private static final int MENU_DONE = 838;
    private static final int CONTEXTMENU_ADD_ITEM = 121;
    private static final int CONTEXTMENU_PLAY_ITEM = 122;
+   protected static final int CONTEXTMENU_PLAY_NEXT = 123;
 
    protected ExpandableListView resultsExpandableListView;
    protected EditText searchCriteriaText;
@@ -70,6 +71,7 @@ public class SearchActivity extends SqueezedroidActivitySupport
             {
                menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
                menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+               menu.add( Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next" );
             }
          }
       } );
@@ -187,6 +189,10 @@ public class SearchActivity extends SqueezedroidActivitySupport
                case CONTEXTMENU_PLAY_ITEM :
                   service.playItem( getSelectedPlayer(), selectedItem );
                   Toast.makeText( this, "Now playing " + selectedItem.getName(), Toast.LENGTH_SHORT );
+                  break;
+               case CONTEXTMENU_PLAY_NEXT :
+                  service.playItemNext( getSelectedPlayer(), selectedItem );
+                  Toast.makeText( this, "Playing " + selectedItem.getName() + " next", Toast.LENGTH_SHORT );
                   break;
                default :
                   handled = false;
