@@ -65,6 +65,8 @@ public interface SqueezeService
 
    public void playItem(Player player, Item item);
 
+   public void playItemNext(Player player, Item item);
+
    public void removeItem(Player selectedPlayer, int playlistIndex);
    
    public void removeAllItemsByArtist(Player player, String artistId);

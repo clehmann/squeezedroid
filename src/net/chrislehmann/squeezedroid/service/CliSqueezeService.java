@@ -35,6 +35,7 @@ import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import android.util.Log;
 
@@ -892,64 +893,61 @@ public class CliSqueezeService implements SqueezeService
 
    public void addItem(Player player, Item item)
    {
-      
-      if( item instanceof ApplicationMenuItem )
-      {
-         playApplicationItem( player, item, "add" );
-         return;
-      }
-
-      String extraParams = getParamName( item );
-      if ( extraParams != null )
-      {
-         String command = player.getId() + " playlist addtracks " + extraParams + "=" + item.getId();
-         executeAsyncCommand( command );
-      }
-      else
-      {
-         String path = getPath( item );
-         if( path != null )
-         {
-            String command = player.getId() + " playlist add " + path;
-            executeAsyncCommand( command );
-         }
-      }
+      addToPlaylist( player, item, "add" );
    }
 
    public void playItem(Player player, Item item)
    {
+      addToPlaylist( player, item, "play" );
+   }
+
+   public void playItemNext(Player player, Item item )
+   {
+      addToPlaylist( player, item, "insert" );
+   }
+
+   private void addToPlaylist(Player player, Item item, String action )
+   {
+      //The action for multiple items.  Play is different...
+      String multipleItemAction = action + "tracks";
+      if( "play".equals( action ) )
+      {
+         multipleItemAction = "loadtracks";
+      }
+      
+      String command = "";
+      
+      //Handle applications - use the 'application' command
       if( item instanceof ApplicationMenuItem )
       {
-         playApplicationItem( player, item, "play" );
-         return;
+         ApplicationMenuItem applicationMenuItem = (ApplicationMenuItem) item;
+         command = player.getId() + " " + applicationMenuItem.getApplication().getCmd() + " playlist " + action + " item_id:" + item.getId();
       }
       
       String extraParams = getParamName( item );
+      //Handle multiple items (i.e. albums, artists, etc).  Use the 'playlist loadx' command
       if ( extraParams != null )
       {
-         String command = player.getId() + " playlist loadtracks " + extraParams + "=" + item.getId();
+         command = player.getId() + " playlist " + multipleItemAction + " " + extraParams + "=" + item.getId();
          executeAsyncCommand( command );
       }
       else
       {
+         //Fall back to the 'play' command
          String path = getPath( item );
          if( path != null )
          {
-            String command = player.getId() + " playlist play " + path;
-            executeAsyncCommand( command );
+            command = player.getId() + " playlist " + action + " " + path;
          }
       }
 
+      //If it's not empty, execute the command...
+      if( StringUtils.isNotEmpty(  command ) )
+      {
+         executeAsyncCommand( command );
+      }
    }
 
-   private void playApplicationItem(Player player, Item item, String action)
-   {
-      ApplicationMenuItem applicationMenuItem = (ApplicationMenuItem) item;
-
-      String command = player.getId() + " " + applicationMenuItem.getApplication().getCmd() + " playlist " + action + " item_id:" + item.getId();
-      executeAsyncCommand( command );
-      
-   }
 
    private String getParamName(Item item)
    {
