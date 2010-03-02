@@ -24,9 +24,11 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    static final int MENU_DONE = 111;
    static final int MENU_PLAY_ALL = 112;
    static final int MENU_ENQUE_ALL = 113;
+   static final int MENU_PLAY_ALL_NEXT = 114;
 
    private static final int CONTEXTMENU_PLAY_ITEM = 7070;
    private static final int CONTEXTMENU_ADD_ITEM = 7080;
+   private static final int CONTEXTMENU_PLAY_NEXT = 7090;
 
    protected Activity context = this;
 
@@ -63,6 +65,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
             {
                menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
                menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+               menu.add( Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next" );
             }
          }
       } );
@@ -76,6 +79,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
       if ( isItemPlayable( getParentItem() ) )
       {
          menu.add( 0, MENU_PLAY_ALL, 0, "Play All" );
+         menu.add( 0, MENU_PLAY_ALL_NEXT, 0, "Play All Next" );
          menu.add( 0, MENU_ENQUE_ALL, 0, "Enqueue All" );
       }
       return super.onCreateOptionsMenu( menu );
@@ -103,6 +107,10 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
             case MENU_PLAY_ALL :
                service.playItem( getSelectedPlayer(), parentItem );
                message = "Now playing " + parentItem.getName();
+               break;
+            case MENU_PLAY_ALL_NEXT :
+               service.playItemNext( getSelectedPlayer(), parentItem );
+               message = "Playing " + parentItem.getName() + " next";
                break;
             default :
                handled = false;
@@ -153,31 +161,20 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
 
       if ( selectedItem != null && service != null )
       {
+         handled = true;
          switch ( item.getItemId() )
          {
             case CONTEXTMENU_ADD_ITEM :
                service.addItem( getSelectedPlayer(), selectedItem );
-               runOnUiThread( new Runnable()
-               {
-                  public void run()
-                  {
-                     Toast.makeText( context, selectedItem.getName() + " added to playlist.", Toast.LENGTH_LONG );
-                  }
-               } );
-               handled = true;
                break;
             case CONTEXTMENU_PLAY_ITEM :
                service.playItem( getSelectedPlayer(), selectedItem );
-               runOnUiThread( new Runnable()
-               {
-                  public void run()
-                  {
-                     Toast.makeText( context, "Now playing " + selectedItem.getName(), Toast.LENGTH_LONG );
-                  }
-               } );
-               handled = true;
+               break;
+            case CONTEXTMENU_PLAY_NEXT:
+               service.playItemNext( getSelectedPlayer(), selectedItem );
                break;
             default :
+               handled = false;
                break;
          }
 

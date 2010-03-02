@@ -30,11 +30,13 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
 
    private static final int MENU_DONE = 801;
    private static final int MENU_PLAY_ALL = 802;
-   private static final int MENU_ENQUE_ALL = 803;
+   private static final int MENU_PLAY_NEXT = 803;
+   private static final int MENU_ENQUE_ALL = 804;
 
    public static final int DIALOG_CHOOSE_ACTION = 901;
    private static final int CONTEXTMENU_ADD_ITEM = 801;
    private static final int CONTEXTMENU_PLAY_ITEM = 802;
+   private static final int CONTEXTMENU_PLAY_NEXT = 803;
 
    @Override
    public void onCreate(Bundle savedInstanceState)
@@ -54,6 +56,7 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
          {
             menu.add( Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist" );
             menu.add( Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now" );
+            menu.add( Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next" );
          }
       } );
       listView.setOnChildClickListener( onChildClickListener );
@@ -109,6 +112,10 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
                service.playItem( getSelectedPlayer(), selectedItem );
                Toast.makeText( context, "Now playing " + selectedItem.getName(), Toast.LENGTH_SHORT );
                break;
+            case CONTEXTMENU_PLAY_NEXT :
+               service.playItemNext( getSelectedPlayer(), selectedItem );
+               Toast.makeText( context, "Now playing " + selectedItem.getName(), Toast.LENGTH_SHORT );
+               break;
             default :
                handled = false;
          }
@@ -122,6 +129,7 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
    {
       menu.add( 0, MENU_DONE, 0, "Done" );
       menu.add( 0, MENU_PLAY_ALL, 0, "Play All" );
+      menu.add( 0, MENU_PLAY_NEXT, 0, "Play All Next" );
       menu.add( 0, MENU_ENQUE_ALL, 0, "Enqueue All" );
       return super.onCreateOptionsMenu( menu );
    }
@@ -146,6 +154,10 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
                break;
             case MENU_PLAY_ALL :
                service.playItem( getSelectedPlayer(), parentItem );
+               Toast.makeText( this, "Now playing " + parentItem.getName(), Toast.LENGTH_SHORT );
+               break;
+            case MENU_PLAY_NEXT:
+               service.playItemNext( getSelectedPlayer(), parentItem );
                Toast.makeText( this, "Now playing " + parentItem.getName(), Toast.LENGTH_SHORT );
                break;
             default :
