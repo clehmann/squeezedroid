@@ -11,6 +11,7 @@ import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.Playlist;
 import net.chrislehmann.squeezedroid.model.RepeatMode;
 import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.ShuffleMode;
@@ -42,6 +43,8 @@ public interface SqueezeService
    public BrowseResult<Album> browseAlbums(Item parent, int start, int numberOfItems, Sort sort);
 
    public BrowseResult<Song> browseSongs(Item parent, int start, int numberOfItems);
+
+   public BrowseResult<Playlist> listPlaylists(int start, int numberOfItems);
 
    public BrowseResult<Application> listApplications(int start, int numberOfItems);
 

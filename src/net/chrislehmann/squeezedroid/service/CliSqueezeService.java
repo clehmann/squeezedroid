@@ -26,6 +26,7 @@ import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerIdEqualsPredicate;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.Playlist;
 import net.chrislehmann.squeezedroid.model.RepeatMode;
 import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.ShuffleMode;
@@ -106,7 +107,7 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genresResponsePattern = Pattern.compile( "id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern applicationItemPattern = Pattern.compile( "id%3A([^ ]*) name%3A([^ ]*) .*?(type%3A([^ ]*) )*.*?(image%3A([^ ]*) )*.*?isaudio%3A([^ ]*) hasitems%3A([^ ]*)" );
    
-   private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1} artist%3A([^ ]*)" );
+   private Pattern albumsResponsePattern = Pattern.compile( "id%3A([^ ]*) album%3A([^ ]*)( artwork_track_id%3A([0-9]+)){0,1}( artist%3A([^ ]*)){0,1}" );
    private Pattern playersResponsePattern = Pattern.compile( "playerid%3A([^ ]*) uuid%3A([^ ]*) ip%3A([^ ]*) name%3A([^ ]*)" );
    private Pattern songsResponsePattern = Pattern
          .compile( " id%3A([^ ]*) .*?title%3A([^ ]*) .*?artist%3A([^ ]*) .*?(artist_id%3A([^ ]*) )*.*?(album%3A([^ ]*) )*.*?(album_id%3A([^ ]*) )*.*?duration%3A([^ ]*).*?( remote%3A([^ ]*))*.*?( artwork_url%3A([^ ]*))*.*?( artwork_track_id%3A([^ ]*))*" );
@@ -126,6 +127,8 @@ public class CliSqueezeService implements SqueezeService
    private Pattern genreSearchResultResponsePattern = Pattern.compile( "genre_id%3A([^ ]*) genre%3A([^ ]*)" );
    private Pattern songSearchResultResponsePattern = Pattern.compile( "song_id%3A([^ ]*) song%3A([^ ]*)" );
 
+   private Pattern playlistResponsePattern = Pattern.compile( "id%3A([^ ]*) playlist%3A([^ ]*)" );
+   
    private Pattern urlPattern = Pattern.compile( "url%3A([^ ]*)" );
    
    private Unserializer<Song> songUnserializer = new SerializationUtils.Unserializer<Song>()
@@ -444,7 +447,7 @@ public class CliSqueezeService implements SqueezeService
                Album album = new Album();
                album.setId( matcher.group( 1 ) );
                album.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
-               album.setArtist( SerializationUtils.decode( matcher.group( 5 ) ) );
+               album.setArtist( SerializationUtils.decode( matcher.group( 6 ) ) );
                if( matcher.group(4) != null  )
                {
                   album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
@@ -501,13 +504,27 @@ public class CliSqueezeService implements SqueezeService
       {
          command += " album_id:" + parent.getId() + " sort:tracknum";
       }
+      else if ( parent instanceof Playlist )
+      {
+         command = "playlists tracks " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
+         command += " playlist_id:" + parent.getId();
+      }
 
       BrowseResult<Song> browseResult = new BrowseResult<Song>();
       String result = executeCommand( command );
       if ( result != null )
       {
          List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
-         browseResult.setTotalItems( unserializeCount( result ) );
+         Integer count = unserializeCount( result );
+         if( count >= 2 )
+         {
+            count -= 2; //Squeezecenter adds 2 for some reason...
+         }
+         else
+         {
+            count = 0;
+         }
+         browseResult.setTotalItems( count );
          browseResult.setResutls( songs );
       }
 
@@ -569,6 +586,34 @@ public class CliSqueezeService implements SqueezeService
       return browseResult;
    }
    
+   public BrowseResult<Playlist> listPlaylists(int start, int numberOfItems)
+   {
+      BrowseResult<Playlist> browseResult = new BrowseResult<Playlist>();
+      
+      String command = "playlists " + start + " " + numberOfItems;
+      String response = executeCommand( command );
+      if( response != null )
+      {
+
+         Unserializer<Playlist> playlistUnserializer = new Unserializer<Playlist>(){
+            public Playlist unserialize(Matcher matcher)
+            {
+               Playlist list = new Playlist();
+               list.setId( SerializationUtils.decode( matcher.group( 1 ) ) );
+               list.setName( SerializationUtils.decode( matcher.group( 2 ) ) );
+               return list;
+            }
+         };
+
+         List<Playlist> playlists = SerializationUtils.unserializeList( playlistResponsePattern, response, playlistUnserializer);
+         browseResult.setResutls( playlists );
+         browseResult.setTotalItems( unserializeCount( response ) );
+      }
+      
+      return browseResult;
+
+   }
+
    public BrowseResult<Application> listApplications(int start, int numberOfItems)
    {
       String command = "apps " + start + " " + numberOfItems;

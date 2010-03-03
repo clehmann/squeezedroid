@@ -20,11 +20,6 @@ import android.widget.TextView;
 public abstract class ItemListAdapter extends PagableAdapter
 {
 
-   private class ViewInfo
-   {
-
-   }
-
    public ItemListAdapter(Activity parent)
    {
       super( parent );

@@ -4,6 +4,7 @@ import net.chrislehmann.squeezedroid.listadapter.SongListAdapter;
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.model.Playlist;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
@@ -45,6 +46,10 @@ public class BrowseSongsActivity extends ItemListActivity {
          else if( "album".equalsIgnoreCase( type ) )
          {
             item = new Album();
+         }
+         else if( "playlist".equalsIgnoreCase( type ) )
+         {
+            item = new Playlist();
          }            
          item.setId( id );
       }

@@ -100,6 +100,12 @@
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
          </activity>
+         <activity android:name=".activity.ListPlaylistsActivity" android:label="Search" >
+           <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.ListPlaylists" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+         </activity>
          
     </application>
     <uses-sdk android:minSdkVersion="3" />
