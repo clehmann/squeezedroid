@@ -63,7 +63,7 @@
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseApplicationActivity" android:label="List Applications">
+        <activity android:name=".activity.BrowseApplicationActivity" android:label="Browse Applications">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseApplication" />
                <category android:name="android.intent.category.DEFAULT" />
@@ -100,7 +100,7 @@
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
          </activity>
-         <activity android:name=".activity.ListPlaylistsActivity" android:label="Search" >
+         <activity android:name=".activity.ListPlaylistsActivity" android:label="Playlists" >
            <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.ListPlaylists" />
                <category android:name="android.intent.category.DEFAULT" />
