@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import android.os.Handler;
 import android.util.Log;
@@ -77,7 +80,7 @@ public enum ImageLoader
          _cache = new MemoryImageCache();
          Log.i( LOGTAG, "Can't write to sd card, Using memory based image cache" );
       }
-      _queue = new SynchronousQueue<Group>();
+      _queue = new LinkedBlockingQueue<Group>();
       _threads = new ArrayList<DownloadThread>();
       for( int i = 0; i < numThreads; i++ )
       {
@@ -94,18 +97,19 @@ public enum ImageLoader
       {
          if ( image != null )
          {
+            Log.d( LOGTAG, "Loading image from cache: " +  url);
             _cache.load( url, image );
          }
       }
       else
-      {
+      {            
+         Log.d( LOGTAG, "Image not in cache, queuing to load: " +  url);
          queue( image, url );
       }
    }
 
    public void queue(ImageView image, String url)
    {
-
       if ( image != null )
       {
          Iterator<Group> it = _queue.iterator();
@@ -114,17 +118,21 @@ public enum ImageLoader
             Group group = it.next();
             if ( group != null && group.image != null && group.image.equals( image ) )
             {
+               Log.d( LOGTAG, "ImageView already in queue, removing and replacing with current url: " +  url);
                it.remove();
                break;
             }
          }
+         Log.d( LOGTAG, "Queue size before add: " +  _queue.size() );
          _queue.offer( new Group( image, url, new Handler() ) );
+         Log.d( LOGTAG, "Image added to queue: " +  url );
+
       }
    }
 
    public void clearQueue()
    {
-      _queue = new SynchronousQueue<Group>();
+      _queue.clear();
    }
 
    public void clearCache()
@@ -140,7 +148,7 @@ public enum ImageLoader
       }
    }
 
-   static class Group
+   static class Group implements Comparable<Group>
    {
       public Group(ImageView image, String url, Handler handler)
       {
@@ -152,7 +160,18 @@ public enum ImageLoader
       public ImageView image;
       public String url;
       public Handler handler;
-
+      
+      public int compareTo(Group rhs)
+      {
+         return CompareToBuilder.reflectionCompare( this, rhs );
+      }
+      
+      @Override
+      public int hashCode()
+      {
+         return HashCodeBuilder.reflectionHashCode( this );
+      }
    }
+   
    
 }

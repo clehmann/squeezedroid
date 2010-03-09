@@ -33,11 +33,16 @@ public class FileImageCache implements ImageCache
 
    public void load(String name, ImageView view)
    {
+         Log.d( LOGTAG, "Loading image from cache: " + name );
          if ( has( name ) && view != null )
          {
             String fileName = getFileName( name );
             Drawable d = Drawable.createFromPath( fileName );
             view.setImageDrawable( d );
+         }
+         else
+         {
+            Log.e( LOGTAG, "Image not in cache: " + name );
          }
    }
 
@@ -58,8 +63,10 @@ public class FileImageCache implements ImageCache
       {
          FileUtils.forceMkdir( rootDir );
          ensureCacheBelowLimit();
+         Log.d( LOGTAG, "Downloading image " + name );
          File f = new File( getFileName( name ) );
          FileUtils.copyURLToFile( image, f );
+         Log.d( LOGTAG, "Done Downloading image " + name );
       }
       catch ( IOException e )
       {
@@ -70,12 +77,13 @@ public class FileImageCache implements ImageCache
    @SuppressWarnings("unchecked")
    private void ensureCacheBelowLimit()
    {
+      Log.d( LOGTAG, "Checking cache size " );
       long dirSize = FileUtils.sizeOfDirectory( rootDir );
-
       if ( dirSize > maxCacheSize * FileUtils.ONE_MB )
       {
          synchronized ( cleanupMutex )
          {
+            Log.d( LOGTAG, "Cache over max size, cleaning up now" );
             dirSize = FileUtils.sizeOfDirectory( rootDir );
             List<File> files = new ArrayList<File>( FileUtils.listFiles( rootDir, FileFilterUtils.fileFileFilter(), null ) );
             Comparator<File> isOlderComparator = new Comparator<File>()
@@ -84,7 +92,6 @@ public class FileImageCache implements ImageCache
                {
                   int compareToValue = -1;
                   if ( FileUtils.isFileNewer( arg0, arg1 ) )
-                     ;
                   {
                      compareToValue = 1;
                   }
@@ -106,6 +113,7 @@ public class FileImageCache implements ImageCache
    {
       try
       {
+         Log.d( LOGTAG, "Clearing cache" );
          FileUtils.forceDelete( rootDir );
       }
       catch ( IOException e )
