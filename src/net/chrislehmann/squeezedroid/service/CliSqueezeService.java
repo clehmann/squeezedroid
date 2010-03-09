@@ -50,7 +50,7 @@ public class CliSqueezeService implements SqueezeService
 {
 
    private static final String LOGTAG = "SQUEEZE";
-   private static final String SONG_TAGS = "aslepPdxKJ";
+   private static final String SONG_TAGS = "aslepPdxKj";
    
    /**
     * Host to connect to
@@ -453,8 +453,8 @@ public class CliSqueezeService implements SqueezeService
                album.setArtist( SerializationUtils.decode( matcher.group( 6 ) ) );
                if( matcher.group(4) != null  )
                {
-                  album.setCoverThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
-                  album.setCoverUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320_o" );
+                  album.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
+                  album.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320_o" );
                }
                return album;
             }

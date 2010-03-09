@@ -13,22 +13,6 @@ public class Album extends Item {
 		super(id);
 	}
 
-	public String getCoverThumbnailUrl() {
-		return coverThumbnailUrl;
-	}
-
-	public void setCoverThumbnailUrl(String coverThumbnailUrl) {
-		this.coverThumbnailUrl = coverThumbnailUrl;
-	}
-
-	public String getCoverUrl() {
-		return coverUrl;
-	}
-
-	public void setCoverUrl(String coverUrl) {
-		this.coverUrl = coverUrl;
-	}
-
 	public String getArtist() {
 		return artist;
 	}
