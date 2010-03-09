@@ -17,7 +17,11 @@ import android.util.Log;
 import android.widget.ImageView;
 
 /**
- * Singleton that can load {@link ImageView}s with data from a Url and cache them
+ * Singleton that can load {@link ImageView}s with data from a Url and cache them.  The {@link ImageLoader}
+ * is backed by some {@link ImageCache} that will cache previously-downloaded images.  By default,
+ * the {@link ImageLoader} will try to use the {@link FileImageCache} (if the sd card is writeable), but will
+ * fall back on the {@link MemoryImageCache} if needed.
+ * 
  * @author lehmanc
  */
 public enum ImageLoader
@@ -56,7 +60,11 @@ public enum ImageLoader
    };
 
 
-   
+   /**
+    * Set the default credentials that all HTTP Requests will use when downloading images
+    * @param username
+    * @param password
+    */
    public void setCredentials(final String username, final String password)
    {
 
@@ -81,16 +89,14 @@ public enum ImageLoader
          Log.i( LOGTAG, "Can't write to sd card, Using memory based image cache" );
       }
       _queue = new LinkedBlockingQueue<Group>();
-      _threads = new ArrayList<DownloadThread>();
-      for( int i = 0; i < numThreads; i++ )
-      {
-         DownloadThread thread = new DownloadThread( _cache, _queue );
-         _threads.add( thread );
-         thread.start();
-      }
-         
    }
 
+   /**
+    * Load an image at url into the {@link ImageView} image.  if the image is already in the cache, it will be loaded
+    * from there.  If not, it will be downloaded and saved into the cache.
+    * @param image
+    * @param url
+    */
    public void load(ImageView image, String url)
    {
       if ( _cache.has( url ) )
@@ -108,7 +114,52 @@ public enum ImageLoader
       }
    }
 
-   public void queue(ImageView image, String url)
+   /**
+    * Empty the queue of items to be downloaded.  Any items cuurently being downloaded will finish.
+    */
+   public void clearQueue()
+   {
+      _queue.clear();
+   }
+
+   /**
+    * Clears out the Image Cache
+    */
+   public void clearCache()
+   {
+      _cache.clear();
+   }
+   
+   
+   /**
+    * Clear out the queue of items to be downloaded and stops all of the download threads.  Any calls to {@link ImageLoader#load(ImageView, String)}
+    * will do nothing until {@link ImageLoader#start()} is called
+    */
+   public void stop()
+   {
+      clearQueue();
+      for( int i = 0; i < numThreads; i++ )
+      {
+         _queue.offer( STOP_GROUP );
+      }
+   }
+
+   /**
+    * Starts all of the download threads.
+    */
+   public void start()
+   {
+      _threads = new ArrayList<DownloadThread>();
+      for( int i = 0; i < numThreads; i++ )
+      {
+         DownloadThread thread = new DownloadThread( _cache, _queue );
+         _threads.add( thread );
+         thread.start();
+      }
+      
+   }
+
+   protected void queue(ImageView image, String url)
    {
       if ( image != null )
       {
@@ -130,25 +181,11 @@ public enum ImageLoader
       }
    }
 
-   public void clearQueue()
-   {
-      _queue.clear();
-   }
-
-   public void clearCache()
-   {
-      _cache.clear();
-   }
-   
-   public void stop()
-   {
-      for( int i = 0; i < numThreads; i++ )
-      {
-         _queue.offer( STOP_GROUP );
-      }
-   }
-
-   static class Group implements Comparable<Group>
+   /**
+    * Class that contains information about an image to be downloaded and the {@link ImageView} it will
+    * be loaded into
+    */
+   public static class Group implements Comparable<Group>
    {
       public Group(ImageView image, String url, Handler handler)
       {
