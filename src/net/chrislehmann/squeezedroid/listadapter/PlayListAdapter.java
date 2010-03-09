@@ -73,6 +73,10 @@ public class PlayListAdapter extends SongListAdapter
       {
          v.setBackgroundColor( Color.YELLOW );
       }
+      else
+      {
+         v.setBackgroundColor( Color.TRANSPARENT );
+      }
       return v;
    }
 }
