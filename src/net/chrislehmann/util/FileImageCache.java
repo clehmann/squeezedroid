@@ -23,8 +23,7 @@ public class FileImageCache implements ImageCache
    
    private static final String LOGTAG = "FileImageCache";
    private File rootDir;
-   private long maxCacheSize = 50;
-
+   private long maxCacheSize = 20;
 
    public FileImageCache(String prefix)
    {

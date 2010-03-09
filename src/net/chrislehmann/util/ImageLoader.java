@@ -89,6 +89,7 @@ public enum ImageLoader
          Log.i( LOGTAG, "Can't write to sd card, Using memory based image cache" );
       }
       _queue = new LinkedBlockingQueue<Group>();
+      start();
    }
 
    /**
