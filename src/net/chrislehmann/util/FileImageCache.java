@@ -13,6 +13,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -35,8 +36,8 @@ public class FileImageCache implements ImageCache
          if ( has( name ) && view != null )
          {
             String fileName = getFileName( name );
-            Bitmap bitmap = BitmapFactory.decodeFile( fileName );
-            view.setImageBitmap( bitmap );
+            Drawable d = Drawable.createFromPath( fileName );
+            view.setImageDrawable( d );
          }
    }
 

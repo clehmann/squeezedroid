@@ -40,7 +40,6 @@ class DownloadThread extends Thread
             }
             
             Runnable threadCallback = new OnDownloadCompleteHandler( this.groupCache, this.currentGroup );
-            this.groupCache.load( this.currentGroup.url, this.currentGroup.image );
             currentGroup.handler.post( threadCallback );
          }
          catch ( Exception ex )

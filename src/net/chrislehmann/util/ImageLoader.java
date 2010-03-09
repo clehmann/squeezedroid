@@ -27,7 +27,7 @@ public enum ImageLoader
    
    private BlockingQueue<Group> _queue;
    private List<DownloadThread> _threads;
-   private int numThreads = 1;
+   private int numThreads = 4;
    ImageCache _cache;
 
    /**
@@ -105,10 +105,10 @@ public enum ImageLoader
 
    public void queue(ImageView image, String url)
    {
-      Iterator<Group> it = _queue.iterator();
 
       if ( image != null )
       {
+         Iterator<Group> it = _queue.iterator();
          while ( it.hasNext() )
          {
             Group group = it.next();
@@ -118,8 +118,8 @@ public enum ImageLoader
                break;
             }
          }
+         _queue.offer( new Group( image, url, new Handler() ) );
       }
-      _queue.offer( new Group( image, url, new Handler() ) );
    }
 
    public void clearQueue()
