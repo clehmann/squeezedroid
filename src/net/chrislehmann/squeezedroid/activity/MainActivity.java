@@ -1,8 +1,20 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
+import android.widget.ViewSwitcher;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.PlayListAdapter;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
@@ -13,28 +25,17 @@ import net.chrislehmann.squeezedroid.model.ShuffleMode;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 import net.chrislehmann.squeezedroid.view.PlayerSyncPanel;
 import net.chrislehmann.squeezedroid.view.TransparentPanel;
 import net.chrislehmann.squeezedroid.view.UpdatingSeekBar;
 import net.chrislehmann.util.ImageLoader;
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.view.View.OnClickListener;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.ViewSwitcher;
-import android.widget.SeekBar.OnSeekBarChangeListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main activity of the SqueezeDroid application.  This contains a view of the current player's status. 
@@ -64,9 +65,8 @@ public class MainActivity extends SqueezedroidActivitySupport
    private PlayListAdapter _playlistListAdapter;
    private ViewSwitcher _coverArtImageView;
 
-   private TextView _songLabel;
-   private TextView _artistLabel;
-   private TextView _albumLabel;
+   private NowPlayingInfoPanel _nowPlayingInfoPanel;
+    
    private TextView _noSongSelectedText;
 
    private ImageButton _prevButton;
@@ -95,11 +95,9 @@ public class MainActivity extends SqueezedroidActivitySupport
 
       _coverArtImageView = (ViewSwitcher) findViewById( R.id.cover_image );
 
-      _artistLabel = (TextView) findViewById( R.id.artist_label );
-      _albumLabel = (TextView) findViewById( R.id.album_label );
-      _songLabel = (TextView) findViewById( R.id.title_label );
+
       _noSongSelectedText = (TextView)findViewById( R.id.no_song_selected_text );
-      
+      _nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
       _playButton = (ImageButton) findViewById( R.id.playButton );
       _nextButton = (ImageButton) findViewById( R.id.nextButton );
       _prevButton = (ImageButton) findViewById( R.id.prevButton );
@@ -438,10 +436,9 @@ public class MainActivity extends SqueezedroidActivitySupport
             _coverArtImageView.showNext();
 
          }
-         _songLabel.setText( currentSong.getName() );
-         _artistLabel.setText( currentSong.getArtist() );
-         _albumLabel.setText( currentSong.getAlbum() );
-         
+
+         _nowPlayingInfoPanel.setSong(currentSong);
+
          if(status.isPlaying())
          {
             _playButton.setImageResource( R.drawable.pause );
@@ -468,9 +465,7 @@ public class MainActivity extends SqueezedroidActivitySupport
          nextView.setImageBitmap( null );
          _coverArtImageView.showNext();
          
-         _songLabel.setText( "" );
-         _artistLabel.setText( "" );
-         _albumLabel.setText( "" );
+         _nowPlayingInfoPanel.setSong(null);
          _timeSeekBar.pause();
          _timeSeekBar.setProgress( 0 );
          _coverArtImageView.setVisibility( View.INVISIBLE );
