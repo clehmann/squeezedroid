@@ -63,7 +63,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
     *    from ther server
     * 3) Start an activity that will prompt the user to choose a player
     */
-   protected Player getSelectedPlayer()
+   public Player getSelectedPlayer()
    {
       Player selectedPlayer = getSqueezeDroidApplication().getSelectedPlayer();
       if ( selectedPlayer == null )
