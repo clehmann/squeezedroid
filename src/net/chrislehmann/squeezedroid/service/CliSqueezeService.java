@@ -1,19 +1,6 @@
 package net.chrislehmann.squeezedroid.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import android.util.Log;
 import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
 import net.chrislehmann.squeezedroid.model.Album;
@@ -34,11 +21,22 @@ import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.util.ImageLoader;
 import net.chrislehmann.util.SerializationUtils;
 import net.chrislehmann.util.SerializationUtils.Unserializer;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import android.util.Log;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of {@link SqueezeService} that uses the SqueezeCenter command
@@ -519,14 +517,6 @@ public class CliSqueezeService implements SqueezeService
       {
          List<Song> songs = SerializationUtils.unserializeList( songsResponsePattern, result, songUnserializer );
          Integer count = unserializeCount( result );
-         if( count >= 2 )
-         {
-            count -= 2; //Squeezecenter adds 2 for some reason...
-         }
-         else
-         {
-            count = 0;
-         }
          browseResult.setTotalItems( count );
          browseResult.setResutls( songs );
       }
