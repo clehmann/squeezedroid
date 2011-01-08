@@ -1,16 +1,17 @@
 package net.chrislehmann.squeezedroid.listadapter;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import net.chrislehmann.squeezedroid.model.Item;
 import android.app.Activity;
 import android.database.DataSetObserver;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import net.chrislehmann.squeezedroid.model.Item;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BaseCompositeExpandableListAdapter extends BaseExpandableListAdapter
 {
@@ -122,8 +123,11 @@ public abstract class BaseCompositeExpandableListAdapter extends BaseExpandableL
 
    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
    {
+
+      int pixels10 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 10,  parent.getResources().getDisplayMetrics());
+      int pixels40 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 40,  parent.getResources().getDisplayMetrics());
       View view = _groupsListAdapter.getView( groupPosition, convertView, parent );
-      view.setPadding( 40, 10, 10, 10 );
+      view.setPadding( pixels40, pixels10, pixels10, pixels10);
       return view;
    }
 

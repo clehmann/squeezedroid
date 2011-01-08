@@ -452,7 +452,7 @@ public class CliSqueezeService implements SqueezeService
                if( matcher.group(4) != null  )
                {
                   album.setImageThumbnailUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_50x50_o" );
-                  album.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_320x320_o" );
+                  album.setImageUrl( "http://" + host + ":" + httpPort + "/music/" + matcher.group( 4 ) + "/cover_480x480_o" );
                }
                return album;
             }

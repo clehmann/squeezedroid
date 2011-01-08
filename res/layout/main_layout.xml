@@ -5,31 +5,31 @@
 		<RelativeLayout android:id="@+id/song_info"
 			android:orientation="vertical" android:layout_width="fill_parent"
 			android:gravity="center_horizontal" android:background="@drawable/player_panel_bg"
-			android:layout_alignParentTop="true" android:layout_height="60px">
+			android:layout_alignParentTop="true" android:layout_height="60dip">
 			<LinearLayout
                 android:id="@+id/song_info_container"
 				android:layout_height="wrap_content"
-				android:layout_width="260px"
+				android:layout_width="260dip"
 				android:layout_alignParentTop="true"
 				android:layout_centerHorizontal="true" 
                 android:orientation="vertical"
-                android:paddingLeft="17px"
+                android:paddingLeft="17dip"
             >
 			
 				<TextView android:id="@+id/artist_label"
-					android:layout_height="17px" android:textSize="14px"
+					android:layout_height="17dip" android:textSize="14dip"
 					android:layout_width="fill_parent" android:gravity="center"
 					android:textColor="@color/text_color"
 					 />
 				<TextView android:id="@+id/title_label"
-					android:layout_height="22px" android:textSize="15px"
+					android:layout_height="22dip" android:textSize="15dip"
 					android:layout_width="fill_parent" android:gravity="center"
-					android:padding="1px"
+					android:padding="1dip"
 					android:textColor="@color/text_color"
 					android:textStyle="bold"
 					 />
 				<TextView android:id="@+id/album_label"
-					android:layout_height="17px" android:textSize="12px"
+					android:layout_height="17dip" android:textSize="12dip"
 					android:layout_width="fill_parent" android:gravity="center"
 					/>
 				
@@ -43,7 +43,7 @@
 				android:id="@+id/toggleVolumeButton" 
 				android:background="@drawable/button_background"
                 android:baselineAlignBottom="true"
-				android:keepScreenOn="true" android:layout_alignParentRight="true" android:layout_marginRight="-17px"/>
+				android:keepScreenOn="true" android:layout_alignParentRight="true" android:layout_marginRight="-17dip"/>
 		</RelativeLayout>
 
          <net.chrislehmann.squeezedroid.view.TransparentPanel
@@ -51,31 +51,31 @@
             android:layout_alignParentRight="true"
             android:layout_below="@id/song_info"
             android:layout_width="fill_parent" android:layout_height="wrap_content"
-            android:paddingTop="5px" android:paddingLeft="5px"
-            android:paddingBottom="5px" android:paddingRight="5px"
+            android:paddingTop="5dip" android:paddingLeft="5dip"
+            android:paddingBottom="5dip" android:paddingRight="5dip"
             android:visibility="invisible"
          >
          </net.chrislehmann.squeezedroid.view.TransparentPanel>
 
 		<LinearLayout android:orientation="horizontal"
 			android:id="@+id/cover_image_container" android:layout_width="fill_parent"
-			android:layout_height="310px" android:gravity="center"
+			android:layout_height="310dip" android:gravity="center"
 			android:layout_below="@id/song_info"
 			>
 			<ViewSwitcher android:id="@+id/cover_image"
-				android:layout_height="310px" android:layout_width="310px"
+				android:layout_height="310dip" android:layout_width="310dip"
 				android:layout_gravity="center">
 				<ImageView 
-					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310px" android:minWidth="310px"/>
+					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310dip" android:minWidth="310dip"/>
 				<ImageView 
-					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310px" android:minWidth="310px"/>
+					android:layout_width="wrap_content" android:layout_height="fill_parent" android:minHeight="310dip" android:minWidth="310dip"/>
 			</ViewSwitcher>
 
 		</LinearLayout>
         <TextView
             android:text="The current playlist is empty. You can add some music by selecting the library button under the options menu (menu -> library)"
             android:id="@+id/no_song_selected_text" android:layout_width="fill_parent"
-            android:layout_height="310px" android:gravity="center"
+            android:layout_height="310dip" android:gravity="center"
             android:layout_below="@id/song_info"
             android:visibility="invisible"
             />
@@ -84,33 +84,33 @@
 		android:layout_width="fill_parent" android:layout_gravity="bottom"
 		android:gravity="bottom" android:layout_height="wrap_content">
 		<SeekBar android:id="@+id/timeSeekBar" android:layout_width="fill_parent"
-			android:paddingBottom="3px" android:layout_height="wrap_content" />
+			android:paddingBottom="3dip" android:layout_height="wrap_content" />
 		<RelativeLayout android:id="@+id/media_controls"
 			android:orientation="horizontal" android:layout_width="fill_parent"
-			android:gravity="center_horizontal" android:layout_height="50px">
+			android:gravity="center_horizontal" android:layout_height="50dip">
 			<ImageButton android:scaleType="fitCenter"
-				android:layout_width="50px" android:layout_height="50px"
+				android:layout_width="50dip" android:layout_height="50dip"
 				android:layout_alignParentLeft="true"
 				android:background="@drawable/button_background"
 				android:id="@+id/shuffleButton" />
 			<ImageButton android:src="@drawable/play" 
-				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter"  android:id="@+id/playButton"
+				android:layout_width="50dip" android:layout_height="50dip" android:scaleType="fitCenter"  android:id="@+id/playButton"
 				android:layout_centerInParent="true"
 				android:background="@drawable/button_background" />
 			<!-- ImageButton android:src="@drawable/stop"
-				android:layout_width="50px" android:layout_height="50px" android:id="@+id/stopButton" /-->
+				android:layout_width="50dip" android:layout_height="50dip" android:id="@+id/stopButton" /-->
 			<ImageButton android:src="@drawable/prev"
-				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/prevButton" 
+				android:layout_width="50dip" android:layout_height="50dip" android:scaleType="fitCenter" android:id="@+id/prevButton"
 				android:background="@drawable/button_background"
 				android:layout_toLeftOf="@id/playButton"
 				/>
 			<ImageButton android:src="@drawable/next"
-				android:layout_width="50px" android:layout_height="50px" android:scaleType="fitCenter" android:id="@+id/nextButton" 
+				android:layout_width="50dip" android:layout_height="50dip" android:scaleType="fitCenter" android:id="@+id/nextButton"
 				android:background="@drawable/button_background"
 				android:layout_toRightOf="@id/playButton"
 				/>
 			<ImageButton android:scaleType="fitCenter"
-				android:layout_width="50px" android:layout_height="50px"
+				android:layout_width="50dip" android:layout_height="50dip"
 				android:id="@+id/repeatButton" android:layout_gravity="right" 
 				android:layout_alignParentRight="true"
 				android:background="@drawable/button_background"

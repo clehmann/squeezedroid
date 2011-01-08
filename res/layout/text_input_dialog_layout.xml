@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="wrap_content"
 	android:orientation="vertical"
-    android:padding="10px"
+    android:padding="10dip"
     android:gravity="center"
    >
    	  <EditText android:id="@+id/editText" 
-        android:layout_width="200px" 
-        android:layout_height="40px" 
+        android:layout_width="200dip"
+        android:layout_height="40dip"
         />
    
    <LinearLayout 
@@ -17,11 +17,11 @@
       >
       	<Button android:id="@+id/okButton" 
          android:text="OK"         
-         android:layout_width="80px" 
+         android:layout_width="80dip"
          android:layout_height="wrap_content" 
         />
       	<Button android:id="@+id/cancelButton" 
-         android:layout_width="80px" 
+         android:layout_width="80dip"
          android:layout_height="wrap_content" 
          android:text="Cancel"
         />

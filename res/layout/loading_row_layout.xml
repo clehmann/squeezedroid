@@ -4,15 +4,15 @@
    android:layout_height="fill_parent" android:layout_weight="1">
        <ProgressBar 
         style="?android:attr/progressBarStyleSmall"
-        android:layout_width="30px"
+        android:layout_width="30dip"
         android:layout_height="30dip" 
-        android:paddingTop="5px"
-        android:paddingBottom="5px"
+        android:paddingTop="5dip"
+        android:paddingBottom="5dip"
         />
    
    <TextView 
                android:text="Loading..."
-               android:layout_width="fill_parent" android:layout_height="30px" android:paddingTop="10px" android:paddingLeft="20px" />
+               android:layout_width="fill_parent" android:layout_height="30dip" android:paddingTop="10dip" android:paddingLeft="20dip" />
                
 
 
