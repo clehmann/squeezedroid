@@ -1,14 +1,15 @@
 package net.chrislehmann.squeezedroid.listadapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.chrislehmann.squeezedroid.model.Item;
-import net.chrislehmann.squeezedroid.model.SearchResult;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.model.SearchResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
 {
@@ -52,7 +53,6 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
 
    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
    {
-      View view;
       Item item = (Item) getChild( groupPosition, childPosition );
       TextView tv = (TextView) convertView;
       if( tv == null )
@@ -60,10 +60,12 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
          tv = new TextView( parent.getContext() );
       }
       tv.setText( item.getName() );
-      tv.setTextSize( 19 );
-      view = tv;
-      view.setPadding( 10, 10, 10, 10 );
-      return view;
+      tv.setTextSize( TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 12, parent.getResources().getDisplayMetrics()) );
+
+      int pixels10 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 10, parent.getResources().getDisplayMetrics());
+      int pixels40 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 40,  parent.getResources().getDisplayMetrics());
+      tv.setPadding( pixels40, pixels10, pixels10, pixels10);
+      return tv;
    }
 
    private List<? extends Item> getGroup( String groupName )
@@ -111,7 +113,6 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
 
    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
    {
-      View view;
       String item = (String) getGroup( groupPosition );
       TextView tv = (TextView) convertView;
       if( tv == null )
@@ -119,10 +120,12 @@ public class SearchResultExpandableListAdapter extends BaseExpandableListAdapter
          tv = new TextView( parent.getContext() );
       }
       tv.setText( item );
-      tv.setTextSize( 19 );
-      view = tv;
-      view.setPadding( 40, 10, 10, 10 );
-      return view;
+      tv.setTextSize( TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 12, parent.getResources().getDisplayMetrics()) );
+
+      int pixels10 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 10, parent.getResources().getDisplayMetrics());
+      int pixels40 =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) 40,  parent.getResources().getDisplayMetrics());
+      tv.setPadding( pixels40, pixels10, pixels10, pixels10);
+      return tv;
    }
 
    public boolean hasStableIds()
