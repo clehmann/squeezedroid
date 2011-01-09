@@ -1,9 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
-import net.chrislehmann.squeezedroid.model.Player;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +8,9 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
 
 /**
  * Base activity that contains some methods to manage the {@link SqueezeService} and the 
@@ -22,6 +21,7 @@ import android.preference.PreferenceManager;
 public class SqueezedroidActivitySupport extends ActivitySupport
 {
    //private static final String LOGTAG = "SqueezeDroidActivitySupport";
+
 
    /**
     * {@link BroadcastReceiver} to listen for connection changes and re-connect the service.
@@ -40,7 +40,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       }
    };
 
-   @Override
+    @Override
    protected void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
@@ -53,6 +53,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport
       {
          setTitle( dialogName );
       }
+
    }
 
    /**
@@ -109,7 +110,6 @@ public class SqueezedroidActivitySupport extends ActivitySupport
 
    /**
     * Helper method to simply get the application and cast it to a {@link SqueezeDroidApplication}
-    * @param context
     * @return
     */
    public SqueezeDroidApplication getSqueezeDroidApplication()
@@ -174,8 +174,6 @@ public class SqueezedroidActivitySupport extends ActivitySupport
    /**
     * Gets the {@link SqueezeService}.  If the {@link SqueezeService} is not connected, 
     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
-    * 
-    * @param connect If true, try and connect to the service if it is not connected
     */
    public SqueezeService getService()
    {

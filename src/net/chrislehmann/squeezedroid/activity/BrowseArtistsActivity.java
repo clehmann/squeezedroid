@@ -19,6 +19,7 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
+import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 
 public class BrowseArtistsActivity extends SqueezedroidActivitySupport
 {
@@ -57,6 +58,9 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport
          }
       } );
       listView.setOnChildClickListener( onChildClickListener );
+
+      NowPlayingInfoPanel nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
+      if( nowPlayingInfoPanel != null ) { nowPlayingInfoPanel.setParent(this); }
 
    };
 

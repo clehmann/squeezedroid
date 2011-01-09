@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="fill_parent"
-        android:layout_width="fill_parent"
-        android:orientation="vertical"
-        >
+        android:layout_width="fill_parent">
 
-    <TextView android:id="@+id/artist_label"
-              android:layout_height="17dip" android:textSize="14dip"
-              android:layout_width="fill_parent" android:gravity="center"
-              android:textColor="@color/text_color"
-            />
-    <TextView android:id="@+id/title_label"
-              android:layout_height="22dip" android:textSize="15dip"
-              android:layout_width="fill_parent" android:gravity="center"
-              android:padding="1dip"
-              android:textColor="@color/text_color"
-              android:textStyle="bold"
-            />
-    <TextView android:id="@+id/album_label"
-              android:layout_height="17dip" android:textSize="12dip"
-              android:layout_width="fill_parent" android:gravity="center"
-            />
+        <TextView android:id="@+id/artist_label"
+                  android:layout_height="17dip" android:textSize="14dip"
+                  android:layout_width="wrap_content" android:gravity="center"
+                  android:textColor="@color/text_color"
+                  android:layout_centerHorizontal="true"
+                  android:layout_alignParentTop="true"
+                />
+        <TextView android:id="@+id/title_label"
+                  android:layout_height="22dip" android:textSize="15dip"
+                  android:layout_width="wrap_content" android:gravity="center"
+                  android:padding="1dip"
+                  android:textColor="@color/text_color"
+                  android:textStyle="bold"
+                  android:layout_centerHorizontal="true"
+                  android:layout_below="@id/artist_label"
+                />
+        <TextView android:id="@+id/album_label"
+                  android:layout_height="17dip" android:textSize="12dip"
+                  android:layout_width="wrap_content" android:gravity="center"
+                  android:layout_centerHorizontal="true"
+                  android:layout_below="@id/title_label"
+                />
 
-</LinearLayout>
-
-
+</RelativeLayout>

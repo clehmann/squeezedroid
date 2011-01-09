@@ -18,6 +18,7 @@ import android.view.View.OnCreateContextMenuListener;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 
 public abstract class ItemListActivity extends SqueezedroidActivitySupport
 {
@@ -31,8 +32,9 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    private static final int CONTEXTMENU_PLAY_NEXT = 7090;
 
    protected Activity context = this;
+    private NowPlayingInfoPanel _nowPlayingInfoPanel;
 
-   protected abstract Item getParentItem();
+    protected abstract Item getParentItem();
 
    protected ListView listView;
 
@@ -51,7 +53,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
    @Override
    protected void onCreate(Bundle savedInstanceState)
    {
-      setContentView( R.layout.list_layout );
+      setContentView( R.layout.list_with_status_layout );
 
       listView = (ListView) findViewById( R.id.list );
       listView.setFastScrollEnabled( true );
@@ -69,6 +71,9 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport
             }
          }
       } );
+
+      _nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
+      if( _nowPlayingInfoPanel != null ) { _nowPlayingInfoPanel.setParent(this); }
       super.onCreate( savedInstanceState );
    }
 

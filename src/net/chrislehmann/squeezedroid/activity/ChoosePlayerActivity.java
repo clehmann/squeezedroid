@@ -1,25 +1,23 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import java.util.List;
-
-import net.chrislehmann.squeezedroid.R;
-import net.chrislehmann.squeezedroid.listadapter.PlayerListAdapter;
-import net.chrislehmann.squeezedroid.model.Player;
-import net.chrislehmann.squeezedroid.model.PlayerIdEqualsPredicate;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.functors.NotPredicate;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
+import net.chrislehmann.squeezedroid.R;
+import net.chrislehmann.squeezedroid.listadapter.PlayerListAdapter;
+import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.model.PlayerIdEqualsPredicate;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.functors.NotPredicate;
+
+import java.util.List;
 
 
 /**

@@ -87,8 +87,8 @@ public class MainActivity extends SqueezedroidActivitySupport {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         this.setContentView(R.layout.main_layout);
 
         _coverArtImageView = (ViewSwitcher) findViewById(R.id.cover_image);

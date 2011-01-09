@@ -1,17 +1,17 @@
 package net.chrislehmann.squeezedroid.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.chrislehmann.squeezedroid.activity.ConnectToServerActivity;
-import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
-import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
-import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import net.chrislehmann.squeezedroid.activity.ActivitySupport.IntentResultCallback;
+import net.chrislehmann.squeezedroid.activity.ConnectToServerActivity;
+import net.chrislehmann.squeezedroid.activity.SqueezeDroidConstants;
+import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceConnectionManager
 {
@@ -29,7 +29,7 @@ public class ServiceConnectionManager
       public void runWithService(SqueezeService service);
    }
 
-   private static final String LOGTAG = null;
+   private static final String LOGTAG = "SqueezeServiceAwareThread";
 
    private SqueezeService service;
    
