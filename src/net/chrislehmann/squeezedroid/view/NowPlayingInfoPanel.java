@@ -11,6 +11,7 @@ import android.widget.TextView;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
+import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
@@ -75,9 +76,13 @@ public class NowPlayingInfoPanel extends RelativeLayout {
 
         _parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
             public void runWithService(SqueezeService service) {
-                service.subscribe(_parent.getSelectedPlayer(), onPlayerStatusChanged);
-                PlayerStatus status = service.getPlayerStatus(_parent.getSelectedPlayer());
-                updateStatus(status);
+                Player selectedPlayer = _parent.getSelectedPlayer();
+                if( selectedPlayer != null )
+                {
+                    service.subscribe(selectedPlayer, onPlayerStatusChanged);
+                    PlayerStatus status = service.getPlayerStatus(_parent.getSelectedPlayer());
+                    updateStatus(status);
+                }
             }
         });
     }
