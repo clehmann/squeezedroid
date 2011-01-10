@@ -1,16 +1,16 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import net.chrislehmann.squeezedroid.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.PreferenceActivity;
 import android.widget.Toast;
+import net.chrislehmann.squeezedroid.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EditPrefrencesActivity extends PreferenceActivity
 {
@@ -37,7 +37,7 @@ public class EditPrefrencesActivity extends PreferenceActivity
             matches = false;
             _parent.runOnUiThread( new Thread()
             {
-               public void run(){ Toast.makeText( _parent, _errorMessage, Toast.LENGTH_SHORT );}
+               public void run(){ Toast.makeText( _parent, _errorMessage, Toast.LENGTH_SHORT ).show();}
             } );
          }
          

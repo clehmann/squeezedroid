@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+       <item android:id="@+id/menuItem_itemlistDone" android:title="Done" android:icon="@drawable/icon_done" />
+    <item android:id="@+id/menuItem_itemlistPlay" android:title="Play All" android:icon="@drawable/icon_play" android:visible="false"/>
+    <item android:id="@+id/menuItem_itemlistPlayNext" android:title="Play All Next" android:icon="@drawable/icon_playnext" android:visible="false"/>
+    <item android:id="@+id/menuItem_itemlistEnqueue" android:title="Enqueue All" android:icon="@drawable/icon_add" android:visible="false"/>
+
+</menu>

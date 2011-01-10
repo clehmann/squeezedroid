@@ -1,6 +1,7 @@
 package net.chrislehmann.squeezedroid.activity;
 
 import android.content.Context;
+import android.view.MenuInflater;
 import android.view.inputmethod.InputMethodManager;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.SearchResultExpandableListAdapter;
@@ -175,15 +176,15 @@ public class SearchActivity extends SqueezedroidActivitySupport {
                 switch (item.getItemId()) {
                     case CONTEXTMENU_ADD_ITEM:
                         service.addItem(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, selectedItem.getName() + " added to playlist.", Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Added to playlist.", Toast.LENGTH_SHORT).show();
                         break;
                     case CONTEXTMENU_PLAY_ITEM:
                         service.playItem(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, "Now playing " + selectedItem.getName(), Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Now playing.", Toast.LENGTH_SHORT).show();
                         break;
                     case CONTEXTMENU_PLAY_NEXT:
                         service.playItemNext(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, "Playing " + selectedItem.getName() + " next", Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Playing next.", Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         handled = false;
@@ -195,10 +196,11 @@ public class SearchActivity extends SqueezedroidActivitySupport {
         return handled;
     }
 
-    @Override
+     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_DONE, 0, "Done");
-        return super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_itemlist, menu);
+        return true;
     }
 
     @Override
@@ -208,7 +210,7 @@ public class SearchActivity extends SqueezedroidActivitySupport {
         if (service != null) {
 
             switch (item.getItemId()) {
-                case MENU_DONE:
+                case R.id.menuItem_itemlistDone:
                     setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
                     finish();
                     break;

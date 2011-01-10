@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -113,24 +114,23 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_LIBRARY, 0, "Add");
-        menu.add(0, MENU_CLEAR_ALL, 0, "Clear");
-        menu.add(0, MENU_DONE, 0, "Done");
-        return super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_playlist, menu);
+        return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case MENU_LIBRARY:
+            case R.id.menuItem_playlistAdd:
                 launchSubActivity(BrowseRootActivity.class, null);
                 return true;
-            case MENU_CLEAR_ALL:
+            case R.id.menuItem_playlistClear:
                 runWithService(new SqueezeServiceAwareThread() {
                     public void runWithService(SqueezeService service) {
                         service.clearPlaylist(getSelectedPlayer());
                     }
                 });
-            case MENU_DONE:
+            case R.id.menuItem_playlistDone:
                 finish();
         }
         return false;

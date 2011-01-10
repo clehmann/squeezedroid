@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -153,33 +154,30 @@ public class MainActivity extends SqueezedroidActivitySupport {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_LIBRARY, 0, "Library");
-        menu.add(0, MENU_PLAYLIST, 0, "Playlist");
-        menu.add(0, MENU_SETTINGS, 0, "Settings");
-        menu.add(0, MENU_SYNC_PLAYER, 0, "Sync Player");
-        menu.add(0, MENU_CHOOSE_PLAYER, 0, "Choose Player");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate( R.menu.menu_main, menu );
         return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent i = new Intent();
         switch (item.getItemId()) {
-            case MENU_LIBRARY:
+            case R.id.menuItem_Library:
                 launchSubActivity(BrowseRootActivity.class, null);
                 return true;
-            case MENU_PLAYLIST:
+            case R.id.menuItem_Playlist:
                 launchSubActivity(PlayListActivity.class, null);
                 return true;
-            case MENU_SETTINGS:
+            case R.id.menuItem_Settings:
                 launchSubActivity(EditPrefrencesActivity.class, editSettingsIntentCallback);
                 return true;
-            case MENU_CHOOSE_PLAYER:
+            case R.id.menuItem_Choose:
                 i.setAction(SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER);
                 i.putExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, true);
                 i.putExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, false);
                 launchSubActivity(i, choosePlayerIntentCallback);
                 return true;
-            case MENU_SYNC_PLAYER:
+            case R.id.menuItem_Sync:
                 i.setAction(SqueezeDroidConstants.Actions.ACTION_CHOOSE_PLAYER);
                 i.putExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, false);
                 i.putExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, true);

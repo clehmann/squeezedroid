@@ -152,7 +152,7 @@ public class PlayerSyncPanel extends LinearLayout
 
       public void onClick(View v)
       {
-         Toast.makeText( getContext(), player.getName() + " unsynchronized.", Toast.LENGTH_LONG );
+         Toast.makeText( getContext(), player.getName() + " unsynchronized.", Toast.LENGTH_LONG ).show();
          service.unsynchronize( player );
       }
    }

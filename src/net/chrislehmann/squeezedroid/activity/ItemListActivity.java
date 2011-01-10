@@ -1,23 +1,24 @@
 package net.chrislehmann.squeezedroid.activity;
 
 
-import net.chrislehmann.squeezedroid.R;
-import net.chrislehmann.squeezedroid.model.Item;
-import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.AdapterView.AdapterContextMenuInfo;
+import net.chrislehmann.squeezedroid.R;
+import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 
 public abstract class ItemListActivity extends SqueezedroidActivitySupport {
@@ -74,13 +75,16 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_DONE, 0, "Done");
-        if (isItemPlayable(getParentItem())) {
-            menu.add(0, MENU_PLAY_ALL, 0, "Play All");
-            menu.add(0, MENU_PLAY_ALL_NEXT, 0, "Play All Next");
-            menu.add(0, MENU_ENQUE_ALL, 0, "Enqueue All");
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_itemlist, menu);
+        if( getParentItem() != null && getParentItem().getId() != null )
+        {
+            menu.findItem(R.id.menuItem_itemlistEnqueue).setVisible(true);
+            menu.findItem(R.id.menuItem_itemlistPlay).setVisible(true);
+            menu.findItem(R.id.menuItem_itemlistPlayNext).setVisible(true);
         }
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -91,21 +95,21 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
             Item parentItem = getParentItem();
             String message = null;
             switch (item.getItemId()) {
-                case MENU_DONE:
+                case R.id.menuItem_itemlistDone:
                     setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
                     finish();
                     break;
-                case MENU_ENQUE_ALL:
+                case R.id.menuItem_itemlistEnqueue:
                     service.addItem(getSelectedPlayer(), parentItem);
-                    message = parentItem.getName() + " added to playlist.";
+                    message = "Added to playlist.";
                     break;
-                case MENU_PLAY_ALL:
+                case R.id.menuItem_itemlistPlay:
                     service.playItem(getSelectedPlayer(), parentItem);
-                    message = "Now playing " + parentItem.getName();
+                    message = "Now playing.";
                     break;
-                case MENU_PLAY_ALL_NEXT:
+                case R.id.menuItem_itemlistPlayNext:
                     service.playItemNext(getSelectedPlayer(), parentItem);
-                    message = "Playing " + parentItem.getName() + " next";
+                    message = "Playing next.";
                     break;
                 default:
                     handled = false;
@@ -115,7 +119,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
                 final String messageForClosure = message;
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT);
+                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -147,19 +151,32 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
         if (selectedItem != null && service != null) {
             handled = true;
+            String message = null;
             switch (item.getItemId()) {
                 case CONTEXTMENU_ADD_ITEM:
                     service.addItem(getSelectedPlayer(), selectedItem);
+                    message = "Added to playlist.";
                     break;
                 case CONTEXTMENU_PLAY_ITEM:
                     service.playItem(getSelectedPlayer(), selectedItem);
+                    message = "Now playing.";
                     break;
                 case CONTEXTMENU_PLAY_NEXT:
                     service.playItemNext(getSelectedPlayer(), selectedItem);
+                    message = "Playing next.";
                     break;
                 default:
                     handled = false;
                     break;
+            }
+            if (message != null) {
+                //I hate java...
+                final String messageForClosure = message;
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
         }

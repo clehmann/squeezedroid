@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menuItem_Library" android:title="Library" android:icon="@drawable/icon_library" />
+    <item android:id="@+id/menuItem_Playlist" android:title="Playlist" android:icon="@drawable/icon_playlist" />
+    <item android:id="@+id/menuItem_Settings" android:title="Settings" android:icon="@drawable/icon_settings" />
+    <item android:id="@+id/menuItem_Sync" android:title="Sync Player" android:icon="@drawable/icon_sync" />
+    <item android:id="@+id/menuItem_Choose" android:title="Choose Player" android:icon="@drawable/icon_choose" />
+
+</menu>
