@@ -1,8 +1,10 @@
 package net.chrislehmann.squeezedroid.listadapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
@@ -10,10 +12,9 @@ import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
-import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayListAdapter extends SongListAdapter
 {
@@ -26,13 +27,17 @@ public class PlayListAdapter extends SongListAdapter
       public void onSongChanged(PlayerStatus status)
       {
          _currentStatus = status;
-         notifyChange();
+         _parent.runOnUiThread(new Runnable() {
+             public void run() {
+                 notifyChange();
+             }
+         });
       }
 
       public void onPlaylistChanged(PlayerStatus status)
       {
          _currentStatus = status;
-         numItems = 1;
+         _numItems = 1;
          resetPages();
       }
 
@@ -41,7 +46,7 @@ public class PlayListAdapter extends SongListAdapter
    public void setPlayer(Player player)
    {
       _player = player;
-      numItems = 1;
+      _numItems = 1;
       resetPages();
    }
 
@@ -53,6 +58,11 @@ public class PlayListAdapter extends SongListAdapter
       service.subscribe( player, onPlayerStatusChanged );
    }
 
+   public void updateCount()
+   {
+       createPage(0, _pageSize);
+   }
+
    protected List<? extends Object> createPage(int start, int pageSize)
    {
       List<Song> playlist = new ArrayList<Song>();
@@ -60,7 +70,7 @@ public class PlayListAdapter extends SongListAdapter
       {
          BrowseResult<Song> result = _service.getCurrentPlaylist( _player, start, pageSize );
          playlist = result.getResutls();
-         numItems = result.getTotalItems();
+         _numItems = result.getTotalItems();
       }
       return playlist;
    }
@@ -71,11 +81,11 @@ public class PlayListAdapter extends SongListAdapter
       View v = super.getView( position, convertView, parent );
       if ( _currentStatus != null && position == _currentStatus.getCurrentIndex() )
       {
-         v.setBackgroundColor( Color.YELLOW );
-      }
-      else
-      {
-         v.setBackgroundColor( Color.TRANSPARENT );
+          TextView titleTextView = (TextView) v.findViewById(R.id.song_name_text);
+          if( titleTextView != null )
+          {
+              titleTextView.setText( "* " + titleTextView.getText() );
+          }
       }
       return v;
    }

@@ -132,7 +132,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
     @Override
     protected void onResume() {
         if (!closing) {
-            if (getSelectedPlayer() != null) {
+            if (getSelectedPlayer(true) != null) {
                 onPlayerChanged();
                 runWithService(new SqueezeServiceAwareThread() {
                     public void runWithService(SqueezeService service) {
@@ -144,6 +144,8 @@ public class MainActivity extends SqueezedroidActivitySupport {
         super.onResume();
     }
 
+
+    
     @Override
     protected void onPause() {
         SqueezeService service = getService(false);

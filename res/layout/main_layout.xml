@@ -25,7 +25,7 @@
 				android:id="@+id/toggleVolumeButton" 
 				android:background="@drawable/button_background"
                 android:baselineAlignBottom="true"
-				android:keepScreenOn="true" android:layout_alignParentRight="true" android:layout_marginRight="-17dip"/>
+				android:layout_alignParentRight="true" android:layout_marginRight="-17dip"/>
 		</RelativeLayout>
 
          <net.chrislehmann.squeezedroid.view.TransparentPanel

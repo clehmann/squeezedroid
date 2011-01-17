@@ -1,5 +1,13 @@
 package net.chrislehmann.squeezedroid.service;
 
+import android.util.Log;
+import net.chrislehmann.squeezedroid.exception.ApplicationException;
+import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.model.RepeatMode;
+import net.chrislehmann.squeezedroid.model.ShuffleMode;
+import net.chrislehmann.util.SerializationUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,14 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.chrislehmann.squeezedroid.exception.ApplicationException;
-import net.chrislehmann.squeezedroid.model.Player;
-import net.chrislehmann.squeezedroid.model.PlayerStatus;
-import net.chrislehmann.squeezedroid.model.RepeatMode;
-import net.chrislehmann.squeezedroid.model.ShuffleMode;
-import net.chrislehmann.util.SerializationUtils;
-import android.util.Log;
 
 public class EventThread extends Thread
 {

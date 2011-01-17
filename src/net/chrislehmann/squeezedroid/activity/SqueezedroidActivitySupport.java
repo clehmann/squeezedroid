@@ -60,8 +60,12 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
      * 3) Start an activity that will prompt the user to choose a player
      */
     public Player getSelectedPlayer() {
+        return getSelectedPlayer(false);
+    }
+
+    public Player getSelectedPlayer(boolean forceUpdate) {
         Player selectedPlayer = getSqueezeDroidApplication().getSelectedPlayer();
-        if (selectedPlayer == null) {
+        if (selectedPlayer == null || forceUpdate) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
             String lastPlayerId = prefs.getString(SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, null);
             SqueezeService service = getService();

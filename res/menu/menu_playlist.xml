@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menuItem_playlistAdd" android:title="Add" android:icon="@drawable/icon_add" />
     <item android:id="@+id/menuItem_playlistClear" android:title="Clear" android:icon="@drawable/icon_playlist_clear" />
+    <item android:id="@+id/menuItem_playlistNowPlaying" android:title="Now Playing" android:icon="@drawable/icon_play" />
     <item android:id="@+id/menuItem_playlistDone" android:title="Done" android:icon="@drawable/icon_done" />
-
 </menu>

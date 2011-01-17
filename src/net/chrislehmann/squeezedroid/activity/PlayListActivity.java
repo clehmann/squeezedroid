@@ -26,9 +26,6 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
     private static final int CONTEXTMENU_REMOVE_ALBUM = 422;
     private static final int CONTEXTMENU_REMOVE_ARTIST = 423;
     private static final int CONTEXTMENU_GROUP_REMOVE = 100;
-    private static final int MENU_CLEAR_ALL = 1;
-    private static final int MENU_LIBRARY = 2;
-    private static final int MENU_DONE = 0;
 
     protected ListView listView;
     private NowPlayingInfoPanel _nowPlayingInfoPanel;
@@ -43,20 +40,26 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
         listView.setOnCreateContextMenuListener(onCreateContextMenu);
         listView.setOnItemClickListener(onItemClick);
 
-        SqueezeService service = getService();
+
+        final SqueezeService service = getService();
         if (service != null) {
-            listView.setAdapter(new PlayListAdapter(service, this, getSelectedPlayer()));
-            PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
-            if (status != null && status.getCurrentIndex() <= listView.getCount()) {
-                listView.setSelection(status.getCurrentIndex());
-            }
+            final PlayListAdapter playListAdapter = new PlayListAdapter(service, this, getSelectedPlayer());
+            playListAdapter.setOnFirstPageLoadedListener(new Runnable() {
+                public void run() {
+                    PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
+                    listView.setSelection(status.getCurrentIndex());
+                }
+            });
+            listView.setAdapter(playListAdapter);
         }
+
 
         _nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
         if (_nowPlayingInfoPanel != null) {
             _nowPlayingInfoPanel.setParent(this);
         }
     }
+
 
 
     OnCreateContextMenuListener onCreateContextMenu = new OnCreateContextMenuListener() {
@@ -130,8 +133,18 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
                         service.clearPlaylist(getSelectedPlayer());
                     }
                 });
+                break;
             case R.id.menuItem_playlistDone:
                 finish();
+                break;
+            case R.id.menuItem_playlistNowPlaying:
+                runWithService(new SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
+                        listView.setSelection(status.getCurrentIndex());
+                    }
+                });
+                break;
         }
         return false;
     }

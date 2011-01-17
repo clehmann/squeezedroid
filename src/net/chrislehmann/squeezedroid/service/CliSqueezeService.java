@@ -230,7 +230,6 @@ public class CliSqueezeService implements SqueezeService
       eventThread.setPassword( password );
       eventThread.setService( this );
       eventThread.start();
-
       commandThread.start();
    }
 
