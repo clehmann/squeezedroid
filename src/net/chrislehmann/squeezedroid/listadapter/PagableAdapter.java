@@ -1,6 +1,7 @@
 package net.chrislehmann.squeezedroid.listadapter;
 
 import android.app.Activity;
+import android.graphics.drawable.AnimationDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -96,6 +97,7 @@ public abstract class PagableAdapter extends BaseAdapter {
         } else {
             if (convertView == null || convertView.getId() != R.id.loading_row_layout) {
                 view = _parent.getLayoutInflater().inflate(net.chrislehmann.squeezedroid.R.layout.loading_row_layout, null);
+                ((AnimationDrawable)view.findViewById(R.id.loading_image).getBackground()).start();
             }
         }
         view.setPadding(10, 10, 10, 10);

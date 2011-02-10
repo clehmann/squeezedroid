@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout android:id="@+id/loading_row_layout" xmlns:android="http://schemas.android.com/apk/res/android"
-   android:orientation="horizontal" android:layout_width="fill_parent"
-   android:layout_height="fill_parent" android:layout_weight="1">
-       <ProgressBar 
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_width="30dip"
-        android:layout_height="30dip" 
-        android:paddingTop="5dip"
-        android:paddingBottom="5dip"
-        />
-   
-   <TextView 
-               android:text="Loading..."
-               android:layout_width="fill_parent" android:layout_height="30dip" android:paddingTop="10dip" android:paddingLeft="20dip" />
-               
+              android:orientation="horizontal" android:layout_width="fill_parent"
+              android:layout_height="fill_parent" android:layout_weight="1">
+    <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="30dip"
+            android:layout_height="30dip"
+            android:paddingTop="5dip"
+            android:layout_marginBottom="10dip"
+            />
+    <ImageView
+            android:id="@+id/loading_image"
+            android:layout_width="30dip"
+            android:layout_height="30dip"
+            android:paddingTop="5dip"
+            android:paddingBottom="5dip"
+            android:background="@drawable/loading"
+            />
 
+    <TextView
+            android:text="Loading..."
+            android:layout_width="fill_parent" android:layout_height="30dip" android:paddingTop="10dip"
+            android:paddingLeft="20dip"/>
 
 
 </LinearLayout>

@@ -1,7 +1,5 @@
 package net.chrislehmann.squeezedroid.service;
 
-import java.util.List;
-
 import net.chrislehmann.squeezedroid.model.Album;
 import net.chrislehmann.squeezedroid.model.ApplicationMenuItem;
 import net.chrislehmann.squeezedroid.model.Artist;
@@ -17,6 +15,8 @@ import net.chrislehmann.squeezedroid.model.SearchResult;
 import net.chrislehmann.squeezedroid.model.ShuffleMode;
 import net.chrislehmann.squeezedroid.model.Song;
 
+import java.util.List;
+
 /**
  * Interface that that provides a connection to the Squeezebox Server.  This allows 
  * you to control {@link Player}s, query for information and Subscribe to Events.
@@ -25,7 +25,8 @@ import net.chrislehmann.squeezedroid.model.Song;
  */
 public interface SqueezeService
 {
-   /**
+
+    /**
     * Enum representing the possible sort states for various browse methods.
     */
    enum Sort {
@@ -117,5 +118,7 @@ public interface SqueezeService
    public SearchResult search( String searchTerms, int numResults);
 
    public void clearPlaylist(Player selectedPlayer);
+
+   List<Song> getSongsForItem(Item selectedItem);
 
 }

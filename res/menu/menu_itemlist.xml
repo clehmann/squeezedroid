@@ -3,5 +3,6 @@
     <item android:id="@+id/menuItem_itemlistPlay" android:title="Play All" android:icon="@drawable/icon_play" android:visible="false"/>
     <item android:id="@+id/menuItem_itemlistPlayNext" android:title="Play All Next" android:icon="@drawable/icon_playnext" android:visible="false"/>
     <item android:id="@+id/menuItem_itemlistEnqueue" android:title="Enqueue All" android:icon="@drawable/icon_add" android:visible="false"/>
+    <item android:id="@+id/menuItem_itemlistDownload" android:title="Download All" android:icon="@android:drawable/ic_menu_save" android:visible="false"/>
 
 </menu>

@@ -3,11 +3,11 @@
  */
 package net.chrislehmann.util;
 
+import android.util.Log;
+import net.chrislehmann.util.ImageLoader.Group;
+
 import java.net.URL;
 import java.util.concurrent.BlockingQueue;
-
-import net.chrislehmann.util.ImageLoader.Group;
-import android.util.Log;
 
 class DownloadThread extends Thread
 {
@@ -43,7 +43,7 @@ class DownloadThread extends Thread
             }
             
             Runnable threadCallback = new OnDownloadCompleteHandler( this.groupCache, this.currentGroup );
-            Log.d( LOGTAG, "Donwnload finished for image " + currentGroup.url + ", Executing callback" );
+            Log.d( LOGTAG, "Download finished for image " + currentGroup.url + ", Executing callback" );
             currentGroup.handler.post( threadCallback );
             Log.d( LOGTAG, "Callback finished for url " + currentGroup.url );
          }

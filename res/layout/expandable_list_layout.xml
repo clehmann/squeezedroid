@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res/net.chrislehmann.squeezedroid"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:orientation="vertical"
         >
 
     <ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/expandable_list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:drawSelectorOnTop="false"
+        android:layout_weight="1"
         />
 
 
@@ -17,10 +19,8 @@
             android:id="@+id/song_info_container"
             android:layout_height="70dip"
             android:layout_width="fill_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
             android:orientation="vertical"
             android:background="@drawable/player_panel_bg"
             app:show_controls="true"
             />
-</RelativeLayout>
+</LinearLayout>

@@ -4,6 +4,7 @@ package net.chrislehmann.squeezedroid.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -16,10 +17,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
+
+import java.util.List;
 
 public abstract class ItemListActivity extends SqueezedroidActivitySupport {
     static final int MENU_DONE = 111;
@@ -30,6 +34,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
     private static final int CONTEXTMENU_PLAY_ITEM = 7070;
     private static final int CONTEXTMENU_ADD_ITEM = 7080;
     private static final int CONTEXTMENU_PLAY_NEXT = 7090;
+    private static final int CONTEXTMENU_DOWNLOAD = 8000;
 
     protected Activity context = this;
 
@@ -62,6 +67,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
                     menu.add(Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist");
                     menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now");
                     menu.add(Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next");
+                    menu.add(Menu.NONE, CONTEXTMENU_DOWNLOAD, 1, "Download");
                 }
             }
         });
@@ -78,11 +84,11 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_itemlist, menu);
-        if( getParentItem() != null && getParentItem().getId() != null )
-        {
+        if (getParentItem() != null && getParentItem().getId() != null) {
             menu.findItem(R.id.menuItem_itemlistEnqueue).setVisible(true);
             menu.findItem(R.id.menuItem_itemlistPlay).setVisible(true);
             menu.findItem(R.id.menuItem_itemlistPlayNext).setVisible(true);
+            menu.findItem(R.id.menuItem_itemlistDownload).setVisible(true);
         }
         return true;
     }
@@ -110,6 +116,9 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
                 case R.id.menuItem_itemlistPlayNext:
                     service.playItemNext(getSelectedPlayer(), parentItem);
                     message = "Playing next.";
+                    break;
+                case R.id.menuItem_itemlistDownload:
+                    addDownloadsForItem(parentItem);
                     break;
                 default:
                     handled = false;
@@ -165,6 +174,10 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
                     service.playItemNext(getSelectedPlayer(), selectedItem);
                     message = "Playing next.";
                     break;
+                case CONTEXTMENU_DOWNLOAD:
+                    addDownloadsForItem(selectedItem);
+                    break;
+
                 default:
                     handled = false;
                     break;
@@ -185,6 +198,23 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         }
         return handled;
     }
+
+    private void addDownloadsForItem(final Item selectedItem) {
+        new Thread() {
+            public void run() {
+                runWithService(new SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        List<Song> songs = service.getSongsForItem(selectedItem);
+                        for (Song song : songs) {
+                            addDownload(song.getUrl(), Environment.getExternalStorageDirectory() + "/music/" + song.getLocalPath());
+
+                        }
+                    }
+                });
+            }
+        }.start();
+    }
+
 
     public ListView getListView() {
         return listView;
