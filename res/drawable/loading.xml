@@ -1,5 +1,0 @@
-<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
-    android:oneshot="true">
-    <item android:drawable="@drawable/icon_add" android:duration="200" />
-    <item android:drawable="@drawable/icon_choose" android:duration="200" />
-</animation-list>
