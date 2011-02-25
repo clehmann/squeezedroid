@@ -1,4 +1,4 @@
-Android program to control a SqueezeBox? from your phone via SqueezeServer?.
+Android program to control a SqueezeBox from your phone via SqueezeServer.
 
 Current (semi) implemented features include:
 
@@ -15,4 +15,4 @@ Current (semi) implemented features include:
 
 This is still in early development, it can/will break you phone, burn down your house, etc (but probably just won't work in the worst possible case). Patches/bug reports/better graphics/suggestions are much welcomed.
 
-You can install from the android market by searching for 'SqueezeDroid?'
+You can install from the android market by searching for 'SqueezeDroid'
