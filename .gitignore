@@ -1,0 +1,8 @@
+build
+gen
+out
+**/*.swp
+**/*.iws
+**/*.iml
+**/*.ipr
+temp
