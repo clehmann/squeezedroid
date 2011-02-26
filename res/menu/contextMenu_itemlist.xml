@@ -1,0 +1,6 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/contextMenuItem_itemlistPlay" android:title="Play" android:icon="@drawable/icon_play"/>
+    <item android:id="@+id/contextMenuItem_itemlistPlayNext" android:title="Play Next" android:icon="@drawable/icon_playnext"/>
+    <item android:id="@+id/contextMenuItem_itemlistEnqueue" android:title="Enqueue" android:icon="@drawable/icon_add"/>
+    <item android:id="@+id/contextMenuItem_itemlistDownload" android:title="Download" android:icon="@android:drawable/ic_menu_save"/>
+</menu>
