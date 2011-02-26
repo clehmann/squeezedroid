@@ -21,9 +21,9 @@ BUILDING
 
 Squeezedroid uses maven as the build system. To build from source:
 
-1) Download and install the android sdk following the instructions at http://developer.android.com/sdk/installing.html.  You don't need the adt, but you will need to install at least one SDK platform.
-2) Download and install maven2 following the instructions at http://maven.apache.org/.  If you're using a macintosh, it's already installed.
-3) type ANDROID_HOME=<PATH/TO/ANDROID/SDK> mvn package.  This will generate a signed apk in the target folder.
+* Download and install the android sdk following the instructions at http://developer.android.com/sdk/installing.html. You don't need the adt, but you will need to install at least one SDK platform.
+* Download and install maven2 following the instructions at http://maven.apache.org/.  If you're using a macintosh, it's already installed.
+* type ANDROID_HOME=<PATH/TO/ANDROID/SDK> mvn package.  This will generate a signed apk in the target folder.
 
 
 You're on your own as far as IDE support goes.  For intellij,  you can simply import the pom.xml as an external model, configure the android sdk and you're good to go.
