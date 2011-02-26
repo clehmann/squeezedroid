@@ -29,13 +29,6 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
 
     private ExpandableListView listView;
 
-    private static final int MENU_DONE = 801;
-
-    public static final int DIALOG_CHOOSE_ACTION = 800;
-    private static final int CONTEXTMENU_ADD_ITEM = 801;
-    private static final int CONTEXTMENU_PLAY_ITEM = 802;
-    private static final int CONTEXTMENU_PLAY_NEXT = 803;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,13 +40,12 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
         listView.setAdapter(new ArtistExpandableListAdapter(getService(), this, parentItem));
         listView.setFastScrollEnabled(true);
         listView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-                menu.add(Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist");
-                menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now");
-                menu.add(Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next");
+                MenuInflater inflater = getMenuInflater();
+                inflater.inflate(R.menu.contextmenu_itemlist, menu);
             }
         });
+
         listView.setOnChildClickListener(onChildClickListener);
 
         NowPlayingInfoPanel nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
@@ -98,17 +90,20 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
 
             String message = null;
             switch (item.getItemId()) {
-                case CONTEXTMENU_ADD_ITEM:
+                case R.id.contextMenuItem_itemlistEnqueue:
                     service.addItem(getSelectedPlayer(), selectedItem);
                     message = "Added to playlist.";
                     break;
-                case CONTEXTMENU_PLAY_ITEM:
+                case R.id.contextMenuItem_itemlistPlay:
                     service.playItem(getSelectedPlayer(), selectedItem);
                     message = "Now playing.";
                     break;
-                case CONTEXTMENU_PLAY_NEXT:
+                case R.id.contextMenuItem_itemlistPlayNext:
                     service.playItemNext(getSelectedPlayer(), selectedItem);
                     message = "Playing next.";
+                    break;
+                case R.id.contextMenuItem_itemlistDownload:
+                    addDownloadsForItem(selectedItem);
                     break;
                 default:
                     handled = false;

@@ -7,11 +7,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.DownloadService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
+
+import java.util.List;
 
 /**
  * Base activity that contains some methods to manage the {@link SqueezeService} and the
@@ -192,39 +197,29 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
         }
     };
 
+    protected void addDownloadsForItem(final Item selectedItem) {
+        new Thread() {
+            public void run() {
+                runWithService(new SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        List<Song> songs = service.getSongsForItem(selectedItem);
+                        for (Song song : songs) {
+                            addDownload(song.getUrl(), Environment.getExternalStorageDirectory() + "/music/" + song.getLocalPath());
 
-//    private DownloadService _downloadService;
-//    private boolean _isBound;
-//
-//    private ServiceConnection _connection = new ServiceConnection() {
-//        public void onServiceConnected(ComponentName className, IBinder service) {
-//            _downloadService = ((DownloadService.LocalBinder) service).getService();
-//        }
-//
-//        public void onServiceDisconnected(ComponentName className) {
-//            _downloadService = null;
-//        }
-//    };
+                        }
+                    }
+                });
+            }
+        }.start();
+    }
 
-    protected void addDownload( String url, String path) {
+
+    protected void addDownload(String url, String path) {
         Intent i = new Intent(this, DownloadService.class);
         i.putExtra(DownloadService.DOWNLOAD_SERVICE_REQUESTED_URL, url);
         i.putExtra(DownloadService.DOWNLOAD_SERVICE_REQUESTED_PATH, path);
         startService(i);
-//        bindService(i, _connection, Context.BIND_AUTO_CREATE);
     }
-//
-//    private void doUnbindService() {
-//        if (_isBound) {
-//            unbindService(_connection);
-//            _isBound = false;
-//        }
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        doUnbindService();
-//    }
+
 
 }

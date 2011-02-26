@@ -1,10 +1,5 @@
 package net.chrislehmann.squeezedroid.activity;
 
-import net.chrislehmann.squeezedroid.listadapter.FolderListAdapter;
-import net.chrislehmann.squeezedroid.model.Folder;
-import net.chrislehmann.squeezedroid.model.Item;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import net.chrislehmann.squeezedroid.listadapter.FolderListAdapter;
+import net.chrislehmann.squeezedroid.model.Folder;
+import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
 
 public class BrowseFoldersActivity extends ItemListActivity {
    private Activity context = this;
@@ -38,7 +38,7 @@ public class BrowseFoldersActivity extends ItemListActivity {
          if( item instanceof Folder )
          {
             Intent i = new Intent();
-            i.setAction( "net.chrislehmann.squeezedroid.action.BrowseFolder" );
+            i.setAction( SqueezeDroidConstants.Actions.BROWSE_FOLDER_ACTION );
             i.setData( Uri.parse( "squeeze:///folder/" + item.getId() ) );
             startActivityForResult( i, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE );
          }
@@ -62,4 +62,5 @@ public class BrowseFoldersActivity extends ItemListActivity {
       }
       return item;
    }
+
 }

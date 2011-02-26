@@ -10,6 +10,8 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.RemoteViews;
+import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.activity.MainActivity;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -36,48 +38,55 @@ public class DownloadService extends Service {
     private BlockingQueue<DownloadRequest> _queue = new LinkedBlockingQueue<DownloadRequest>();
 
 
+    private String _currentFileName;
     private Thread _downloaderThread = new Thread() {
+
+
         @Override
         public void run() {
+            createOngoingNotification();
             while (true) {
                 try {
                     DownloadRequest request = _queue.poll();
                     if (request != null) {
 
-                        String notificationTitle = "Downloading... (" + (_numberDownloaded + 1) + "/" + _numberQueued + ")";
-                        String notificationMessage = "Downloading " + FilenameUtils.getName(request.getFile());
 
-                        showNotification(notificationTitle, notificationMessage, true);
                         try {
-                            Log.d( LOGTAG, "External Storage State: " + Environment.getExternalStorageState());
+                            Log.d(LOGTAG, "External Storage State: " + Environment.getExternalStorageState());
                             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
 
                                 File file = new File(FilenameUtils.normalize(request.getFile()));
+
+                                _currentFileName = FilenameUtils.getName(request.getFile());
+                                updateOngoingNotification();
+
                                 Log.d(LOGTAG, "Downloading " + request.getUrl() + " to " + file.toString());
 
                                 File directory = new File(file.getParent());
                                 FileUtils.forceMkdir(directory);
                                 FileUtils.copyURLToFile(new URL(request.getUrl()), file);
                                 _numberDownloaded++;
-                            }
-                            else
-                            {
-                                showNotification("Error", "External storage not available", false);
+                                _currentFileName = null;
+                            } else {
+                                showNotification("Error", "External storage not available");
                             }
 
                         } catch (IOException e) {
                             Log.e(LOGTAG, "Error copying file", e);
-                            showNotification("Error", "Error copying file", false);
+                            showNotification("Error", "Error copying file");
+                            _currentFileName = null;
                         }
                         stopSelf(request.getRequestId());
                         sleep(3000);
                     }
                 } catch (InterruptedException e) {
+                    //Will be thrown when the activity is stopped (i.e. either the user has canceled or all downloads are finished)
                     sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
 
-                    showNotification("Download Complete", "Downloaded " + _numberDownloaded + " file(s)", false);
-                    _notificationManager.cancel(NOTIFICATION_DOWNLOAD);
+                    showNotification("Download Complete", "Downloaded " + _numberDownloaded + " file(s)");
+                    _notificationManager.cancel(NOTIFICATION_DOWNLOAD_ONGOING);
+                    _currentFileName = null;
                     break;
                 }
 
@@ -85,6 +94,9 @@ public class DownloadService extends Service {
 
         }
     };
+    private Notification _notification;
+
+
 
     public class LocalBinder extends Binder {
         public DownloadService getService() {
@@ -113,6 +125,9 @@ public class DownloadService extends Service {
         _numberQueued++;
         String url = intent.getStringExtra(DOWNLOAD_SERVICE_REQUESTED_URL);
         String path = intent.getStringExtra(DOWNLOAD_SERVICE_REQUESTED_PATH);
+        if (_notification != null) {
+            updateOngoingNotification();
+        }
         _queue.add(new DownloadRequest(url, path, startId));
         Log.d(LOGTAG, "Added " + url + " to queue!");
         return START_STICKY;
@@ -128,15 +143,36 @@ public class DownloadService extends Service {
     /**
      * Show a notification while this service is running.
      */
-    private void showNotification(String label, String message, boolean ongoing) {
-        Notification notification = new Notification(android.R.drawable.stat_notify_sync, message, System.currentTimeMillis());
-        if (ongoing) {
-            notification.flags = Notification.FLAG_ONGOING_EVENT;
-        }
-
+    private void showNotification(String label, String message) {
+        Notification notification = null;
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+        notification = new Notification(android.R.drawable.stat_notify_sync, message, System.currentTimeMillis());
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
         notification.setLatestEventInfo(this, label, message, contentIntent);
-        _notificationManager.notify(ongoing ? NOTIFICATION_DOWNLOAD_ONGOING : NOTIFICATION_DOWNLOAD, notification);
+        _notificationManager.notify(NOTIFICATION_DOWNLOAD, notification);
+
+    }
+
+    private void createOngoingNotification() {
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        _notification = new Notification(android.R.drawable.stat_notify_sync, "Downloading Music", System.currentTimeMillis());
+        _notification.flags = _notification.flags | Notification.FLAG_ONGOING_EVENT;
+        _notification.contentView = new RemoteViews(getApplicationContext().getPackageName(), R.layout.layout_download_progress);
+        _notification.contentIntent = contentIntent;
+        _notification.contentView.setImageViewResource(R.id.status_icon, android.R.drawable.ic_menu_save);
+        _notification.contentView.setTextViewText(R.id.status_text, "Downloading Music" );
+        _notification.contentView.setProgressBar(R.id.status_progress, _numberQueued, _numberDownloaded, false);
+        _notificationManager.notify(NOTIFICATION_DOWNLOAD_ONGOING, _notification);
+    }
+
+
+
+    private void updateOngoingNotification()
+    {
+        _notification.contentView.setTextViewText(R.id.status_text, "Downloading " + _currentFileName + " (" + (_numberDownloaded + 1) + "/" + _numberQueued + ")" );
+        _notification.contentView.setProgressBar(R.id.status_progress, _numberQueued, _numberDownloaded, false);
+        _notificationManager.notify(NOTIFICATION_DOWNLOAD_ONGOING, _notification);
     }
 
     private class DownloadRequest {

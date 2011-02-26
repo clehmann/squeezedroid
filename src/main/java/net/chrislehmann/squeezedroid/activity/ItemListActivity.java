@@ -4,7 +4,6 @@ package net.chrislehmann.squeezedroid.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -16,34 +15,32 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.Toast;
 import net.chrislehmann.squeezedroid.R;
+import net.chrislehmann.squeezedroid.model.Album;
+import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.model.Playlist;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.ServerStatusHandler;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 
+import java.util.Arrays;
 import java.util.List;
 
-public abstract class ItemListActivity extends SqueezedroidActivitySupport {
-    static final int MENU_DONE = 111;
-    static final int MENU_PLAY_ALL = 112;
-    static final int MENU_ENQUE_ALL = 113;
-    static final int MENU_PLAY_ALL_NEXT = 114;
+/**
+ * Base class for all @{Activity}s that allow the user to browse a list of @{Item}s.
+ */
 
-    private static final int CONTEXTMENU_PLAY_ITEM = 7070;
-    private static final int CONTEXTMENU_ADD_ITEM = 7080;
-    private static final int CONTEXTMENU_PLAY_NEXT = 7090;
-    private static final int CONTEXTMENU_DOWNLOAD = 8000;
+public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
     protected Activity context = this;
-
-
-    protected abstract Item getParentItem();
 
     protected ListView listView;
 
     protected SqueezeService service;
+
+    protected abstract Item getParentItem();
 
     public ItemListActivity() {
         super();
@@ -51,6 +48,13 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
     protected boolean isItemPlayable(Item item) {
         return item != null;
+    }
+
+
+    List<Class<? extends Item>> DOWNLOADABLE_TYPES = Arrays.asList(Song.class, Album.class, Genre.class, Playlist.class);
+
+    protected boolean isItemDownloadable(Item item) {
+        return item != null && DOWNLOADABLE_TYPES.contains(item.getClass());
     }
 
     @Override
@@ -61,14 +65,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         listView.setFastScrollEnabled(true);
         getListView().setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-                AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) menuInfo;
-                final Item selectedItem = (Item) listView.getAdapter().getItem(adapterMenuInfo.position);
-                if (isItemPlayable(selectedItem)) {
-                    menu.add(Menu.NONE, CONTEXTMENU_ADD_ITEM, 0, "Add To Playlist");
-                    menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, "Play Now");
-                    menu.add(Menu.NONE, CONTEXTMENU_PLAY_NEXT, 1, "Play Next");
-                    menu.add(Menu.NONE, CONTEXTMENU_DOWNLOAD, 1, "Download");
-                }
+               context.onCreateContextMenu(menu, v, menuInfo);
             }
         });
 
@@ -84,11 +81,13 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_itemlist, menu);
-        if (getParentItem() != null && getParentItem().getId() != null) {
-            menu.findItem(R.id.menuItem_itemlistEnqueue).setVisible(true);
-            menu.findItem(R.id.menuItem_itemlistPlay).setVisible(true);
-            menu.findItem(R.id.menuItem_itemlistPlayNext).setVisible(true);
-            menu.findItem(R.id.menuItem_itemlistDownload).setVisible(true);
+        final Item parentItem = getParentItem();
+        if (parentItem != null && parentItem.getId() != null) {
+            boolean itemPlayable = isItemPlayable(parentItem);
+            menu.findItem(R.id.menuItem_itemlistEnqueue).setVisible(itemPlayable);
+            menu.findItem(R.id.menuItem_itemlistPlay).setVisible(itemPlayable);
+            menu.findItem(R.id.menuItem_itemlistPlayNext).setVisible(itemPlayable);
+            menu.findItem(R.id.menuItem_itemlistDownload).setVisible(isItemDownloadable(parentItem));
         }
         return true;
     }
@@ -162,22 +161,21 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
             handled = true;
             String message = null;
             switch (item.getItemId()) {
-                case CONTEXTMENU_ADD_ITEM:
+                case R.id.contextMenuItem_itemlistEnqueue:
                     service.addItem(getSelectedPlayer(), selectedItem);
                     message = "Added to playlist.";
                     break;
-                case CONTEXTMENU_PLAY_ITEM:
+                case R.id.contextMenuItem_itemlistPlay:
                     service.playItem(getSelectedPlayer(), selectedItem);
                     message = "Now playing.";
                     break;
-                case CONTEXTMENU_PLAY_NEXT:
+                case R.id.contextMenuItem_itemlistPlayNext:
                     service.playItemNext(getSelectedPlayer(), selectedItem);
                     message = "Playing next.";
                     break;
-                case CONTEXTMENU_DOWNLOAD:
+                case R.id.contextMenuItem_itemlistDownload:
                     addDownloadsForItem(selectedItem);
                     break;
-
                 default:
                     handled = false;
                     break;
@@ -198,23 +196,6 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         }
         return handled;
     }
-
-    private void addDownloadsForItem(final Item selectedItem) {
-        new Thread() {
-            public void run() {
-                runWithService(new SqueezeServiceAwareThread() {
-                    public void runWithService(SqueezeService service) {
-                        List<Song> songs = service.getSongsForItem(selectedItem);
-                        for (Song song : songs) {
-                            addDownload(song.getUrl(), Environment.getExternalStorageDirectory() + "/music/" + song.getLocalPath());
-
-                        }
-                    }
-                });
-            }
-        }.start();
-    }
-
 
     public ListView getListView() {
         return listView;
@@ -249,6 +230,19 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         }
         super.onPause();
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) menuInfo;
+        final Item selectedItem = (Item) listView.getAdapter().getItem(adapterMenuInfo.position);
+        if (isItemPlayable(selectedItem)) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.contextmenu_itemlist, menu);
+            menu.findItem(R.id.contextMenuItem_itemlistDownload).setVisible(isItemDownloadable(selectedItem));
+        }
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
 
 
 }
