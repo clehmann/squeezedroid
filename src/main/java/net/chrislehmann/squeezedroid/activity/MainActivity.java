@@ -187,6 +187,12 @@ public class MainActivity extends SqueezedroidActivitySupport {
                 i.putExtra(SqueezeDroidConstants.IntentDataKeys.KEY_DIALOG_NAME, "Choose Player to Synchronize With");
                 launchSubActivity(i, choosePlayerForSyncCallback);
                 return true;
+            case R.id.menuItem_Power:
+                runWithService(new SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        service.togglePower(getSelectedPlayer());
+                    }
+                });
         }
         return false;
     }

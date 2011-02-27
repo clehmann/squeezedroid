@@ -78,6 +78,8 @@ public interface SqueezeService {
 
     public void removeAllItemsInAlbum(Player player, String albumId);
 
+    public void togglePower( Player player );
+
     public void play(Player player);
 
     public void pause(Player player);

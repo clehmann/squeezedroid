@@ -905,6 +905,11 @@ public class CliSqueezeService implements SqueezeService {
         executeAsyncCommand(player.getId() + " playlist clear");
     }
 
+    public void togglePower( Player player )
+    {
+        executeAsyncCommand(player.getId() + " power");
+    }
+
 
     public void subscribe(final Player player, final PlayerStatusHandler handler) {
         Runnable r = new Runnable() {
