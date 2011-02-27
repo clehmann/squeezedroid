@@ -16,60 +16,78 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.PlayListActivity"
-                  android:label="Current Playlist">
+                  android:label="Current Playlist"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                >
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.PlayList" />
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity> 
         <activity android:name=".activity.BrowseRootActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
                   android:label="Browse">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.Browse" />
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity> 
-        <activity android:name=".activity.BrowseArtistsActivity" android:label="Browse Artists">
+        <activity
+                android:name=".activity.BrowseArtistsActivity"
+                android:theme="@android:style/Theme.NoTitleBar"
+                android:label="Browse Artists">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseArtist" />
                <category android:name="android.intent.category.DEFAULT" />
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseSongsActivity" android:label="Browse Songs">
+        <activity android:name=".activity.BrowseSongsActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="Browse Songs">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseSong" />
                <category android:name="android.intent.category.DEFAULT" />
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseAlbumsActivity" android:label="Browse Album">
+        <activity android:name=".activity.BrowseAlbumsActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="Browse Album">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseAlbum" />
                <category android:name="android.intent.category.DEFAULT" />
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseFoldersActivity" android:label="Browse Music Folder">
+        <activity android:name=".activity.BrowseFoldersActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="Browse Music Folder">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseFolder" />
                <category android:name="android.intent.category.DEFAULT" />
                <data android:scheme="squeeze" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ListApplicationsActivity" android:label="List Applications">
+        <activity android:name=".activity.ListApplicationsActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="List Applications">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.ListApplications" />
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseApplicationActivity" android:label="Browse Applications">
+        <activity android:name=".activity.BrowseApplicationActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="Browse Applications">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseApplication" />
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowseGenresActivity" android:label="Browse Genres">
+        <activity android:name=".activity.BrowseGenresActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="Browse Genres">
             <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.BrowseGenre" />
                <category android:name="android.intent.category.DEFAULT" />
@@ -94,13 +112,17 @@
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
          </activity>
-         <activity android:name=".activity.SearchActivity" android:label="Search" >
+         <activity android:name=".activity.SearchActivity"
+                   android:theme="@android:style/Theme.NoTitleBar"
+                   android:label="Search" >
            <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.Search" />
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
          </activity>
-         <activity android:name=".activity.ListPlaylistsActivity" android:label="Playlists" >
+         <activity android:name=".activity.ListPlaylistsActivity"
+                   android:theme="@android:style/Theme.NoTitleBar"                   
+                   android:label="Playlists" >
            <intent-filter>
                <action android:name="net.chrislehmann.squeezedroid.action.ListPlaylists" />
                <category android:name="android.intent.category.DEFAULT" />
