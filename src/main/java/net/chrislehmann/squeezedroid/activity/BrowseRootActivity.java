@@ -29,11 +29,11 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
         setContentView(R.layout.list_with_status_layout);
         listView = (ListView) findViewById(R.id.list);
 
-        String[] values = new String[]{"Artists", "Albums", "Genres", "Music Folder", "New Music", "Search", "Applications", "Playlists"};
+        String[] values = new String[]{"Artists", "Albums", "Genres", "Music Folder", "New Music", "Search", "Applications", "Internet Radio", "Playlists"};
         int[] icons = new int[]{
                 R.drawable.artists, R.drawable.albums_25x25_f, R.drawable.genres_25x25_f, R.drawable.musicfolder_25x25_f,
                 R.drawable.newmusic_25x25_f, R.drawable.squeeze_search, R.drawable.appsfolder_25x25_f,
-                R.drawable.playlists_25x25_f
+                R.drawable.radio_25x25_f, R.drawable.playlists_25x25_f
         };
         listView.setAdapter(new IconicAdapter<String>(this, R.layout.icon_row_layout, values, icons));
         listView.setOnItemClickListener(onItemClick);
@@ -78,6 +78,9 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
             }
             if (item.equals("Playlists")) {
                 intent.setAction("net.chrislehmann.squeezedroid.action.ListPlaylists");
+            }
+            if (item.equals("Internet Radio")) {
+                intent.setAction("net.chrislehmann.squeezedroid.action.ListRadio");
             }
 
             startActivityForResult(intent, SqueezeDroidConstants.RequestCodes.REQUEST_BROWSE);

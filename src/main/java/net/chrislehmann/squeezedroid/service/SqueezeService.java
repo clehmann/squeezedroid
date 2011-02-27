@@ -18,107 +18,108 @@ import net.chrislehmann.squeezedroid.model.Song;
 import java.util.List;
 
 /**
- * Interface that that provides a connection to the Squeezebox Server.  This allows 
+ * Interface that that provides a connection to the Squeezebox Server.  This allows
  * you to control {@link Player}s, query for information and Subscribe to Events.
- * 
+ *
  * @author lehmanc
  */
-public interface SqueezeService
-{
+public interface SqueezeService {
 
     /**
-    * Enum representing the possible sort states for various browse methods.
-    */
-   enum Sort {
-      TITLE, NEW
-   }
-   
-   public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems);
-   
-   public BrowseResult<Item> browseFolders( Folder parent, int start, int numberOfItems );
+     * Enum representing the possible sort states for various browse methods.
+     */
+    enum Sort {
+        TITLE, NEW
+    }
 
-   public BrowseResult<Artist> browseArtists(Item parent, int start, int numberOfItems);
+    public BrowseResult<Genre> browseGenres(Item parent, int start, int numberOfItems);
 
-   public BrowseResult<Album> browseAlbums(Item parent, int start, int numberOfItems);
+    public BrowseResult<Item> browseFolders(Folder parent, int start, int numberOfItems);
 
-   public BrowseResult<Album> browseAlbums(Item parent, int start, int numberOfItems, Sort sort);
+    public BrowseResult<Artist> browseArtists(Item parent, int start, int numberOfItems);
 
-   public BrowseResult<Song> browseSongs(Item parent, int start, int numberOfItems);
+    public BrowseResult<Album> browseAlbums(Item parent, int start, int numberOfItems);
 
-   public BrowseResult<Playlist> listPlaylists(int start, int numberOfItems);
+    public BrowseResult<Album> browseAlbums(Item parent, int start, int numberOfItems, Sort sort);
 
-   public BrowseResult<Application> listApplications(int start, int numberOfItems);
+    public BrowseResult<Song> browseSongs(Item parent, int start, int numberOfItems);
 
-   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, int start, int numberOfItems);
+    public BrowseResult<Playlist> listPlaylists(int start, int numberOfItems);
 
-   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, ApplicationMenuItem parent, int start, int numberOfItems);
+    public BrowseResult<Application> listApplications(int start, int numberOfItems);
 
-   public BrowseResult<ApplicationMenuItem> browseApplication( Player player, Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems);
+    public BrowseResult<Application> listRadioStations(int start, int numberOfItems);
 
-   public PlayerStatus getPlayerStatus(Player player);
+    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, int start, int numberOfItems);
 
-   public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, ApplicationMenuItem parent, int start, int numberOfItems);
 
-   public List<Player> getPlayers();
+    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems);
 
-   public List<Player> getPlayers(boolean removeDuplicatePlayers);
+    public PlayerStatus getPlayerStatus(Player player);
 
-   public Player getPlayer(String playerId);
+    public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems);
 
-   public void addItem(Player player, Item item);
+    public List<Player> getPlayers();
 
-   public void playItem(Player player, Item item);
+    public List<Player> getPlayers(boolean removeDuplicatePlayers);
 
-   public void playItemNext(Player player, Item item);
+    public Player getPlayer(String playerId);
 
-   public void removeItem(Player selectedPlayer, int playlistIndex);
-   
-   public void removeAllItemsByArtist(Player player, String artistId);
-   
-   public void removeAllItemsInAlbum(Player player, String albumId);
+    public void addItem(Player player, Item item);
 
-   public void play(Player player);
+    public void playItem(Player player, Item item);
 
-   public void pause(Player player);
+    public void playItemNext(Player player, Item item);
 
-   public void togglePause(Player player);
+    public void removeItem(Player selectedPlayer, int playlistIndex);
 
-   public void stop(Player player);
+    public void removeAllItemsByArtist(Player player, String artistId);
 
-   public void jump(Player player, String position);
+    public void removeAllItemsInAlbum(Player player, String albumId);
 
-   public void connect();
+    public void play(Player player);
 
-   public void disconnect();
+    public void pause(Player player);
 
-   public boolean isConnected();
+    public void togglePause(Player player);
 
-   public void subscribe(ServerStatusHandler handler);
+    public void stop(Player player);
 
-   public void unsubscribe(ServerStatusHandler onServiceStatusChanged);
+    public void jump(Player player, String position);
 
-   public void subscribe(Player player, PlayerStatusHandler handler);
+    public void connect();
 
-   public void unsubscribe(Player player, PlayerStatusHandler handler);
+    public void disconnect();
 
-   public void unsubscribeAll(PlayerStatusHandler onPlayerStatusChanged);
+    public boolean isConnected();
 
-   public void seekTo(Player player, int time);
+    public void subscribe(ServerStatusHandler handler);
 
-   public void changeVolume(Player player, int volumeLevel);
+    public void unsubscribe(ServerStatusHandler onServiceStatusChanged);
 
-   public void unsynchronize( Player player );
+    public void subscribe(Player player, PlayerStatusHandler handler);
 
-   public void synchronize( Player player, Player playerToSyncTo );
+    public void unsubscribe(Player player, PlayerStatusHandler handler);
 
-   public void setShuffleMode( Player player, ShuffleMode mode );
-   
-   public void setRepeatMode( Player player, RepeatMode mode );
-   
-   public SearchResult search( String searchTerms, int numResults);
+    public void unsubscribeAll(PlayerStatusHandler onPlayerStatusChanged);
 
-   public void clearPlaylist(Player selectedPlayer);
+    public void seekTo(Player player, int time);
 
-   List<Song> getSongsForItem(Item selectedItem);
+    public void changeVolume(Player player, int volumeLevel);
+
+    public void unsynchronize(Player player);
+
+    public void synchronize(Player player, Player playerToSyncTo);
+
+    public void setShuffleMode(Player player, ShuffleMode mode);
+
+    public void setRepeatMode(Player player, RepeatMode mode);
+
+    public SearchResult search(String searchTerms, int numResults);
+
+    public void clearPlaylist(Player selectedPlayer);
+
+    List<Song> getSongsForItem(Item selectedItem);
 
 }

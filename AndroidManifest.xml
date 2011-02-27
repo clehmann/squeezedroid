@@ -77,6 +77,14 @@
                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.ListRadioStationsActivity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:label="List Radio Stations">
+            <intent-filter>
+               <action android:name="net.chrislehmann.squeezedroid.action.ListRadio" />
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activity.BrowseApplicationActivity"
                   android:theme="@android:style/Theme.NoTitleBar"
                   android:label="Browse Applications">

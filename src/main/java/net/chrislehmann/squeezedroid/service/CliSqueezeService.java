@@ -521,7 +521,15 @@ public class CliSqueezeService implements SqueezeService {
     }
 
     public BrowseResult<Application> listApplications(int start, int numberOfItems) {
-        String command = "apps " + start + " " + numberOfItems;
+        return listRadioStationsOrApplications(start, numberOfItems, "apps");
+    }
+
+    public BrowseResult<Application> listRadioStations(int start, int numberOfItems) {
+        return  listRadioStationsOrApplications(start, numberOfItems, "radios");
+    }
+
+    private BrowseResult<Application> listRadioStationsOrApplications(int start, int numberOfItems, String type) {
+        String command = type + " " + start + " " + numberOfItems;
         String response = executeCommand(command);
         BrowseResult<Application> browseResult = new BrowseResult<Application>();
         if (response != null) {
@@ -539,7 +547,6 @@ public class CliSqueezeService implements SqueezeService {
             browseResult.setTotalItems(unserializeCount(response));
             browseResult.setResutls(applications);
         }
-
         return browseResult;
     }
 
