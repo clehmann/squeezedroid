@@ -15,6 +15,7 @@ import java.util.List;
 
 public class ServiceConnectionManager {
 
+
     public enum Status {CONNECTED, CONNECTING, DISCONNECTED, CLOSED}
 
     private Status currentStatus = Status.DISCONNECTED;
@@ -138,4 +139,7 @@ public class ServiceConnectionManager {
         return service;
     }
 
+    public boolean isConnecting() {
+        return Status.CONNECTING.equals(currentStatus);
+    }
 }

@@ -298,7 +298,13 @@ public class EventThread extends Thread
                if ( handler != null && _commandHandlers.containsKey( event ) )
                {
                   Log.v( LOGTAG, "Using CommandHandler " + _commandHandlers.get( event ) + "' to handle event" );
-                  _commandHandlers.get( event ).handleCommand( playerId, data, handler );
+                  try
+                  {
+                      _commandHandlers.get( event ).handleCommand( playerId, data, handler );
+                  } catch (Exception e)
+                  {
+                      Log.e(LOGTAG, "Error calling handler: ", e);
+                  }
                }
             }
          }
@@ -326,7 +332,7 @@ public class EventThread extends Thread
             _eventWriter.write( "login " + username + " " + password + "\n" );
             _eventWriter.flush();
             String result = _eventReader.readLine();
-            result.toString();
+//            result.toString();
          }
          
          _eventWriter.write( "listen 1\n" );

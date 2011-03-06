@@ -116,13 +116,12 @@ public class MainActivity extends SqueezedroidActivitySupport {
         _shuffleButton.setOnClickListener(onShuffleButtonPressed);
         _repeatButton.setOnClickListener(onRepeatButtonPressed);
         _toggleSyncPanelButton.setOnClickListener(onToggleSyncPanelButtonPressed);
-
-
     }
 
     @Override
     protected void onResume() {
         if (!closing) {
+            forceConnect();
             if (getSelectedPlayer() != null) {
                 onPlayerChanged();
                 runWithService(new SqueezeServiceAwareThread() {

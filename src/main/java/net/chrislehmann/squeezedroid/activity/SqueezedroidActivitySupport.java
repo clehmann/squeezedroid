@@ -69,7 +69,7 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
     public String getSelectedPlayer() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
         String selectedPlayerId = prefs.getString(SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, null);
-        if (!lookingForPlayer && selectedPlayerId == null) {
+        if (!lookingForPlayer && selectedPlayerId == null && !getSqueezeDroidApplication().getConnectionManager().isConnecting()) {
             launchSubActivity(ChoosePlayerActivity.class, choosePlayerIntentCallback);
             lookingForPlayer = true;
         }
@@ -116,12 +116,18 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
      * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
      */
     public void runWithService(final SqueezeServiceAwareThread onConnect) {
-        getSqueezeDroidApplication().getConnectionManager().getService(this, true, onConnect);
+        if( !closing )
+        {
+            getSqueezeDroidApplication().getConnectionManager().getService(this, true, onConnect);
+        }
     }
 
 
     protected void runWithService(SqueezeServiceAwareThread onConnect, boolean connectIfDisconnected) {
-        getSqueezeDroidApplication().getConnectionManager().getService(this, connectIfDisconnected, onConnect);
+        if( !closing )
+        {
+            getSqueezeDroidApplication().getConnectionManager().getService(this, connectIfDisconnected, onConnect);
+        }
     }
 
 

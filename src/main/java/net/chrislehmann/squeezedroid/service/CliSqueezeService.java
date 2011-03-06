@@ -68,7 +68,9 @@ public class CliSqueezeService implements SqueezeService {
 
     private EventThread eventThread;
     private BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
-    private Thread commandThread = new Thread() {
+
+
+    private class CommandThread extends Thread {
         public void run() {
             try {
                 while (!isInterrupted()) {
@@ -84,7 +86,11 @@ public class CliSqueezeService implements SqueezeService {
         }
 
         ;
-    };
+    }
+
+    ;
+
+    private CommandThread commandThread;
 
     public CliSqueezeService(String host, int cliPort, int httpPort) {
         super();
@@ -205,8 +211,13 @@ public class CliSqueezeService implements SqueezeService {
         eventThread.setUsername(username);
         eventThread.setPassword(password);
         eventThread.setService(this);
+
+        commandThread = new CommandThread();
+
+
         eventThread.start();
         commandThread.start();
+
     }
 
     /**
@@ -240,10 +251,10 @@ public class CliSqueezeService implements SqueezeService {
 
     synchronized private String executeCommand(String command) {
         String response = null;
-        Log.d( LOGTAG, "Sending command: " + command );
+        Log.d(LOGTAG, "Sending command: " + command);
         if (writeCommand(command)) {
             response = readResponse();
-            Log.d( LOGTAG, "Response from squeezeserver: " + response );
+            Log.d(LOGTAG, "Response from squeezeserver: " + response);
         }
         return response;
     }
@@ -527,7 +538,7 @@ public class CliSqueezeService implements SqueezeService {
     }
 
     public BrowseResult<Application> listRadioStations(int start, int numberOfItems) {
-        return  listRadioStationsOrApplications(start, numberOfItems, "radios");
+        return listRadioStationsOrApplications(start, numberOfItems, "radios");
     }
 
     private BrowseResult<Application> listRadioStationsOrApplications(int start, int numberOfItems, String type) {
@@ -907,8 +918,7 @@ public class CliSqueezeService implements SqueezeService {
         executeAsyncCommand(playerId + " playlist clear");
     }
 
-    public void togglePower( String playerId )
-    {
+    public void togglePower(String playerId) {
         executeAsyncCommand(playerId + " power");
     }
 

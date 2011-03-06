@@ -109,7 +109,7 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
          }
          
          Intent intent = new Intent();
-         intent.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER, player.getId() );
+         intent.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER, player == null ? null : player.getId() );
          setResult( RESULT_OK, intent );
          finish();
       }
