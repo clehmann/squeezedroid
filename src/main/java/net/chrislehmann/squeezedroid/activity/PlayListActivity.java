@@ -51,7 +51,12 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
                         listView.setSelection(status.getCurrentIndex());
                     }
                 });
-                listView.setAdapter(playListAdapter);
+
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        listView.setAdapter(playListAdapter);
+                    }
+                });
             }
         });
 

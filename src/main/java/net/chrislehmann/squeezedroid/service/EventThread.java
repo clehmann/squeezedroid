@@ -356,7 +356,10 @@ public class EventThread extends Thread
             _playerHandlers.put( playerId, Collections.synchronizedList( new ArrayList<PlayerStatusHandler>() ) );
          }
          List<PlayerStatusHandler> handlers = _playerHandlers.get( playerId );
-         handlers.add( handler );
+         if( !handlers.contains(handler))
+         {
+             handlers.add( handler );
+         }
          Log.v( LOGTAG, "Done subscribing to notifications for player " + playerId + " with handler " + handler );
       }
    }

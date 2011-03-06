@@ -96,7 +96,7 @@ public class NowPlayingInfoPanel extends RelativeLayout {
         if (status != null) {
             _parent.runOnUiThread(new Runnable() {
                 public void run() {
-                    if (status.getCurrentSong() != null) {
+                        if (status.getCurrentSong() != null) {
                         setSong(status.getCurrentSong());
                     } else {
                         setSong(null);
