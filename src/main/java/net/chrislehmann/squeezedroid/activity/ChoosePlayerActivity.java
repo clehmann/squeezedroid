@@ -63,38 +63,36 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
    
    private void createList()
    {
-      runWithService( new SqueezeServiceAwareThread()
-      {
-         public void runWithService(SqueezeService service)
-         {
-            boolean removeDuplicatePlayers = getIntent().getBooleanExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, false );
-            List<Player> players = service.getPlayers( removeDuplicatePlayers );
-            
-            //Remove the currently selected player if KEY_INCLUDE_SELECTED_PLAYER is set to true
-            boolean includeSelectedPlayer = getIntent().getBooleanExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, true );
-            if( !includeSelectedPlayer )
-            {
-               Player selectedPlayer = getSqueezeDroidApplication().getSelectedPlayer();
-               if( selectedPlayer != null && selectedPlayer.getId() != null )
-               {
-                  CollectionUtils.filter( players, new NotPredicate( new PlayerIdEqualsPredicate( selectedPlayer.getId() ) ) );
-               }
-            }
-            
-            //If the caller specifies an empty_key_name, add an extra player to use at the 'null' player
-            String emptyPlayerName = getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_EMPTY_PLAYER_NAME );
-            if( emptyPlayerName != null )
-            {
-               Player emptyPlayer = new Player();
-               emptyPlayer.setName( emptyPlayerName );
-               players.add( emptyPlayer );
-            }
-            
-            ArrayAdapter<Player> playersAdapter = new PlayerListAdapter( context, players, context );
-            listView.setAdapter( playersAdapter );
-            playersAdapter.notifyDataSetChanged();
-         }
-      } );
+      runWithService(new SqueezeServiceAwareThread() {
+          public void runWithService(SqueezeService service) {
+              boolean removeDuplicatePlayers = getIntent().getBooleanExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_REMOVE_DUPLICATE_PLAYERS, false);
+              final List<Player> players = service.getPlayers(removeDuplicatePlayers);
+
+              //Remove the currently selected player if KEY_INCLUDE_SELECTED_PLAYER is set to fa;se
+              boolean includeSelectedPlayer = getIntent().getBooleanExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_INCLUDE_SELECTED_PLAYER, true);
+              if (!includeSelectedPlayer) {
+                  String selectedPlayer = getSelectedPlayer();
+                  if (selectedPlayer != null ) {
+                      CollectionUtils.filter(players, new NotPredicate(new PlayerIdEqualsPredicate(selectedPlayer)));
+                  }
+              }
+
+              //If the caller specifies an empty_key_name, add an extra player to use at the 'null' player
+              String emptyPlayerName = getIntent().getStringExtra(SqueezeDroidConstants.IntentDataKeys.KEY_PLAYERLIST_EMPTY_PLAYER_NAME);
+              if (emptyPlayerName != null) {
+                  Player emptyPlayer = new Player();
+                  emptyPlayer.setName(emptyPlayerName);
+                  players.add(emptyPlayer);
+              }
+              runOnUiThread(new Runnable() {
+                  public void run() {
+                      ArrayAdapter<Player> playersAdapter = new PlayerListAdapter(context, players, context);
+                      listView.setAdapter(playersAdapter);
+                      playersAdapter.notifyDataSetChanged();
+                  }
+              });
+          }
+      });
    }
 
    private OnItemClickListener onItemClicked = new OnItemClickListener()
@@ -111,7 +109,7 @@ public class ChoosePlayerActivity extends SqueezedroidActivitySupport
          }
          
          Intent intent = new Intent();
-         intent.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER, player );
+         intent.putExtra( SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER, player.getId() );
          setResult( RESULT_OK, intent );
          finish();
       }

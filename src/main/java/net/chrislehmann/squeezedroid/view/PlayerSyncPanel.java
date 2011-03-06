@@ -1,16 +1,5 @@
 package net.chrislehmann.squeezedroid.view;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import net.chrislehmann.squeezedroid.R;
-import net.chrislehmann.squeezedroid.model.Player;
-import net.chrislehmann.squeezedroid.model.PlayerStatus;
-import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
-import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
-import android.app.Activity;
-import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,242 +7,229 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.SeekBar.OnSeekBarChangeListener;
+import net.chrislehmann.squeezedroid.R;
+import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
+import net.chrislehmann.squeezedroid.model.Player;
+import net.chrislehmann.squeezedroid.model.PlayerStatus;
+import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager;
+import net.chrislehmann.squeezedroid.service.SimplePlayerStatusHandler;
+import net.chrislehmann.squeezedroid.service.SqueezeService;
 
-public class PlayerSyncPanel extends LinearLayout
-{
+import java.util.HashMap;
+import java.util.Map;
 
-   private static final String LOGTAG = "PlayerSyncPanel";
+public class PlayerSyncPanel extends LinearLayout {
 
-   private class Syncronization
-   {
-      public Syncronization(View view, PlayerStatusHandler volumeHandler, PlayerStatusHandler syncHandler)
-      {
-         this.view = view;
-         this.volumeHandler = volumeHandler;
-         this.syncHandler = syncHandler;
-      }
+    private static final String LOGTAG = "PlayerSyncPanel";
 
-      public View view;
-      public PlayerStatusHandler volumeHandler;
-      public PlayerStatusHandler syncHandler;
-   }
+    private class Syncronization {
+        public Syncronization(View view, PlayerStatusHandler volumeHandler, PlayerStatusHandler syncHandler) {
+            this.view = view;
+            this.volumeHandler = volumeHandler;
+            this.syncHandler = syncHandler;
+        }
 
-   private Map<String, Syncronization> syncronizations = new HashMap<String, Syncronization>();
-   private Player player;
-   private SqueezeService service;
-   
-   private Activity parent;
-   
-   
-   public PlayerSyncPanel(Context context, SqueezeService service, Activity parent)
-   {
-      super( context );
-      this.setOrientation( LinearLayout.VERTICAL );
-      setBaselineAligned( false ); 
-      this.service = service;
-      this.parent = parent;
-   }
+        public View view;
+        public PlayerStatusHandler volumeHandler;
+        public PlayerStatusHandler syncHandler;
+    }
 
-   public PlayerSyncPanel(Context context, AttributeSet attrs)
-   {
-      super( context, attrs );
-   }
+    private Map<String, Syncronization> syncronizations = new HashMap<String, Syncronization>();
+    private String selectedPlayerId;
 
-   public Player getPlayer()
-   {
-      return player;
-   }
-   
-   
-   public void destroy()
-   {
-      for ( String id: syncronizations.keySet() )
-      {
-         removeSyncronization( id );
-      }
-   }
-   
-   private void removeSyncronization( String playerId  )
-   {
-      final Syncronization sync = syncronizations.get( playerId );
-      service.unsubscribeAll( sync.syncHandler );
-      service.unsubscribeAll( sync.volumeHandler );
-      parent.runOnUiThread( new Runnable()
-      {
-         public void run()
-         {
-            removeView( sync.view );
-         }
-      });
-   }
-   
-   public synchronized void setPlayer(Player player)
-   {
-      destroy();
-      
-      addSynchronization( player, true );
-      
-      for ( Player syncedPlayer : player.getSyncronizedPlayers() )
-      {
-         addSynchronization( syncedPlayer, false );
-      }
-      
-      this.player = player;
-      
-   }
+    private SqueezedroidActivitySupport parent;
 
-   private void addSynchronization(Player player, boolean isPrimary)
-   {
-      PlayerStatus status = service.getPlayerStatus( player );
-      View view = LayoutInflater.from( getContext() ).inflate( R.layout.player_sync_control_layout, null );
-      SeekBar volumeSeekBar = (SeekBar) view.findViewById( R.id.volume_seek_bar );
-      volumeSeekBar.setProgress( status.getVolume() );
-      volumeSeekBar.setOnSeekBarChangeListener( new OnVolumeChangedListener( player ) );
-      
-      ImageButton unsyncButton = (ImageButton) view.findViewById( R.id.unsync_button );
-      if( isPrimary )
-      {
-         unsyncButton.setVisibility( view.INVISIBLE );
-      }
-      else
-      {
-         unsyncButton.setOnClickListener( new OnUnsyncButtonPressedListener( player ) );
-      }
-      
-      PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler( volumeSeekBar );
-      service.subscribe( player, volumeHandler );
 
-      PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
-      syncronizations.put( player.getId(), new Syncronization( view, volumeHandler, syncHandler ) );
-      service.subscribe( player, syncHandler );
-      
-      TextView playerNameLabel = (TextView) view.findViewById( R.id.player_name_text );
-      playerNameLabel.setText( player.getName() );
+    public PlayerSyncPanel(SqueezedroidActivitySupport parent) {
+        super(parent);
+        this.setOrientation(LinearLayout.VERTICAL);
+        setBaselineAligned(false);
+        this.parent = parent;
+    }
 
-      this.addView( view );
-   }
+    public PlayerSyncPanel(SqueezedroidActivitySupport parent, AttributeSet attrs) {
+        super(parent, attrs);
+        this.parent = parent;
+    }
 
-   public SqueezeService getService()
-   {
-      return service;
-   }
+    public void destroy() {
+        for (String id : syncronizations.keySet()) {
+            removeSyncronization(id);
+        }
+    }
 
-   private class OnUnsyncButtonPressedListener implements OnClickListener
-   {
-      private Player player;
-
-      public OnUnsyncButtonPressedListener(Player player)
-      {
-         this.player = player;
-      }
-
-      public void onClick(View v)
-      {
-         Toast.makeText( getContext(), player.getName() + " unsynchronized.", Toast.LENGTH_LONG ).show();
-         service.unsynchronize( player );
-      }
-   }
-   
-   public void setService(SqueezeService service)
-   {
-      this.service = service;
-   }
-   
-   private class OnVolumeChangedListener implements OnSeekBarChangeListener
-   {
-      private Player _player;
-      private int volume = 0;
-      private boolean seeking = false;
-      
-      public OnVolumeChangedListener(Player player)
-      {
-         _player = player;
-      }
-      
-      public void onStartTrackingTouch(SeekBar seekBar){ seeking = true; }
-      
-      public void onStopTrackingTouch(SeekBar seekBar)
-      {
-         if ( seeking )
-         {
-            service.changeVolume( _player, volume );
-         }
-         seeking = false;
-      }
-      
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-      {
-         if( fromUser )
-         {
-            volume = progress;
-            //This will happen if the hardware buttons are used
-            if( !seeking )
-            {
-               service.changeVolume( _player, volume );
+    private void removeSyncronization(final String playerId) {
+        parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                final Syncronization sync = syncronizations.get(playerId);
+                service.unsubscribeAll(sync.syncHandler);
+                service.unsubscribeAll(sync.volumeHandler);
+                parent.runOnUiThread(new Runnable() {
+                    public void run() {
+                        removeView(sync.view);
+                    }
+                });
             }
-            
-         }
-      }
-   };
-  
-   private class VolumeChangedStatusHandler extends SimplePlayerStatusHandler
-   {
-      private SeekBar seekBar;
-      public VolumeChangedStatusHandler( SeekBar seekBar )
-      {
-         this.seekBar = seekBar;
-      }
-      
-      @Override
-      public void onVolumeChanged(int newVolume)
-      {
-         this.seekBar.setProgress( newVolume );
-      }
-   }
-   
-   private class MainPlayerOnSyncHandler extends SimplePlayerStatusHandler
-   {
+        });
+    }
 
-      @Override
-      public void onPlayerSynchronized(final Player mainPlayer, String newPlayerId)
-      {
-         Log.d( LOGTAG, "Got player sync event mainPlayer: " +  mainPlayer.getId() + ", new player: " + newPlayerId);
-         parent.runOnUiThread( new Runnable()
-         {
-            public void run()
-            {
-               setPlayer( mainPlayer );
+    public synchronized void setPlayer(final String playerId) {
+        destroy();
+
+        parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+            public void runWithService(final SqueezeService service) {
+                final Player newPlayer = service.getPlayer(playerId);
+
+                parent.runOnUiThread(new Runnable() {
+                    public void run() {
+                        addSynchronization(service, newPlayer, true);
+                        for (Player syncedPlayer : newPlayer.getSyncronizedPlayers()) {
+                            addSynchronization(service, syncedPlayer, false);
+                        }
+                    }
+                });
+
+
+                selectedPlayerId = newPlayer.getId();
             }
-         });
+        });
 
-      }
+    }
 
-      @Override
-      public void onPlayerUnsynchronized()
-      {
-         updatePlayer();
-      }
-      
-      @Override
-      public void onDisconnect()
-      {
-         updatePlayer();
-      }
+    private void addSynchronization(SqueezeService service, Player syncedPlayer, boolean isPrimary) {
 
-      private void updatePlayer()
-      {
-         final Player updatedPlayer = service.getPlayer( player.getId() );
-         parent.runOnUiThread( new Runnable()
-         {
-            public void run()
-            {
-               setPlayer( updatedPlayer );
+        PlayerStatus status = service.getPlayerStatus(syncedPlayer.getId());
+
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.player_sync_control_layout, null);
+        SeekBar volumeSeekBar = (SeekBar) view.findViewById(R.id.volume_seek_bar);
+        volumeSeekBar.setProgress(status.getVolume());
+        volumeSeekBar.setOnSeekBarChangeListener(new OnVolumeChangedListener(syncedPlayer.getId()));
+
+        ImageButton unsyncButton = (ImageButton) view.findViewById(R.id.unsync_button);
+        if (isPrimary) {
+            unsyncButton.setVisibility(view.INVISIBLE);
+        } else {
+            unsyncButton.setOnClickListener(new OnUnsyncButtonPressedListener(syncedPlayer));
+        }
+
+        PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler(volumeSeekBar);
+        service.subscribe(syncedPlayer.getId(), volumeHandler);
+
+        PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
+        syncronizations.put(syncedPlayer.getId(), new Syncronization(view, volumeHandler, syncHandler));
+        service.subscribe(syncedPlayer.getId(), syncHandler);
+
+        TextView playerNameLabel = (TextView) view.findViewById(R.id.player_name_text);
+        playerNameLabel.setText(syncedPlayer.getName());
+
+        this.addView(view);
+    }
+
+    private class OnUnsyncButtonPressedListener implements OnClickListener {
+        private Player player;
+
+        public OnUnsyncButtonPressedListener(Player player) {
+            this.player = player;
+        }
+
+        public void onClick(View v) {
+            Toast.makeText(getContext(), player.getName() + " unsynchronized.", Toast.LENGTH_LONG).show();
+            parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+                public void runWithService(SqueezeService service) {
+                    service.unsynchronize(player.getId());
+                }
+            });
+        }
+    }
+
+    private class OnVolumeChangedListener implements OnSeekBarChangeListener {
+        private String _player;
+        private int volume = 0;
+        private boolean seeking = false;
+
+        public OnVolumeChangedListener(String player) {
+            _player = player;
+        }
+
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            seeking = true;
+        }
+
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            if (seeking) {
+                parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        service.changeVolume(_player, volume);
+                    }
+                });
             }
-         });
-      }
-      
-   }
+            seeking = false;
+        }
+
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                volume = progress;
+                //This will happen if the hardware buttons are used
+                if (!seeking) {
+                    parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+                        public void runWithService(SqueezeService service) {
+                            service.changeVolume(_player, volume);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    ;
+
+    private class VolumeChangedStatusHandler extends SimplePlayerStatusHandler {
+        private SeekBar seekBar;
+
+        public VolumeChangedStatusHandler(SeekBar seekBar) {
+            this.seekBar = seekBar;
+        }
+
+        @Override
+        public void onVolumeChanged(int newVolume) {
+            this.seekBar.setProgress(newVolume);
+        }
+    }
+
+    private class MainPlayerOnSyncHandler extends SimplePlayerStatusHandler {
+
+        @Override
+        public void onPlayerSynchronized(final String mainPlayerId, String newPlayerId) {
+            Log.d(LOGTAG, "Got selectedPlayerId sync event mainPlayer: " + mainPlayerId + ", new selectedPlayerId: " + newPlayerId);
+            parent.runOnUiThread(new Runnable() {
+                public void run() {
+                    setPlayer(mainPlayerId);
+                }
+            });
+
+        }
+
+        @Override
+        public void onPlayerUnsynchronized() {
+            updatePlayer();
+        }
+
+        @Override
+        public void onDisconnect() {
+            updatePlayer();
+        }
+
+        private void updatePlayer() {
+            parent.runOnUiThread(new Runnable() {
+                public void run() {
+                    setPlayer(selectedPlayerId);
+                }
+            });
+        }
+
+    }
 }

@@ -1,6 +1,5 @@
 package net.chrislehmann.squeezedroid.service;
 
-import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.RepeatMode;
 import net.chrislehmann.squeezedroid.model.ShuffleMode;
@@ -22,7 +21,7 @@ public interface PlayerStatusHandler
 
    public void onStop();
 
-   public void onPlayerSynchronized( Player player, String syncronizedPlayerId );
+   public void onPlayerSynchronized( String playerId, String syncronizedPlayerId );
 
    public void onPlayerUnsynchronized();
 

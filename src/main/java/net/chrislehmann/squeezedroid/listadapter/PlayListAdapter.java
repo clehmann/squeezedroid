@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
-import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
@@ -18,7 +17,7 @@ import java.util.List;
 
 public class PlayListAdapter extends SongListAdapter
 {
-   private Player _player;
+   private String _player;
    private PlayerStatus _currentStatus;
 
    private PlayerStatusHandler onPlayerStatusChanged = new SimplePlayerStatusHandler()
@@ -43,14 +42,14 @@ public class PlayListAdapter extends SongListAdapter
 
    };
 
-   public void setPlayer(Player player)
+   public void setPlayer(String player)
    {
       _player = player;
       _numItems = 1;
       resetPages();
    }
 
-   public PlayListAdapter(SqueezeService service, Activity parent, Player player)
+   public PlayListAdapter(SqueezeService service, Activity parent, String player)
    {
       super( service, parent, null );
       _player = player;

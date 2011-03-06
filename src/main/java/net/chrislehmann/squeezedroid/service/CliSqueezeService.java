@@ -240,8 +240,10 @@ public class CliSqueezeService implements SqueezeService {
 
     synchronized private String executeCommand(String command) {
         String response = null;
+        Log.d( LOGTAG, "Sending command: " + command );
         if (writeCommand(command)) {
             response = readResponse();
+            Log.d( LOGTAG, "Response from squeezeserver: " + response );
         }
         return response;
     }
@@ -450,16 +452,16 @@ public class CliSqueezeService implements SqueezeService {
         return browseResult;
     }
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, final Application application, ApplicationMenuItem parent, int start, int numberOfItems) {
-        return this.browseApplication(player, application, parent, null, start, numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, final Application application, ApplicationMenuItem parent, int start, int numberOfItems) {
+        return this.browseApplication(playerId, application, parent, null, start, numberOfItems);
     }
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, final Application application, int start, int numberOfItems) {
-        return this.browseApplication(player, application, null, null, start, numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, final Application application, int start, int numberOfItems) {
+        return this.browseApplication(playerId, application, null, null, start, numberOfItems);
     }
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, final Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems) {
-        String command = player.getId() + " " + application.getCmd() + " items " + start + " " + numberOfItems;
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, final Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems) {
+        String command = playerId + " " + application.getCmd() + " items " + start + " " + numberOfItems;
 
         if (parent != null) {
             command += " item_id:" + parent.getId();
@@ -639,8 +641,8 @@ public class CliSqueezeService implements SqueezeService {
         return (Player) CollectionUtils.find(players, new PlayerIdEqualsPredicate(playerId));
     }
 
-    public PlayerStatus getPlayerStatus(Player player) {
-        String command = new String(player.getId() + " status - 1 tags:" + SONG_TAGS);
+    public PlayerStatus getPlayerStatus(String playerId) {
+        String command = new String(playerId + " status - 1 tags:" + SONG_TAGS);
         String result = executeCommand(command);
 
         PlayerStatus status = new PlayerStatus();
@@ -683,8 +685,8 @@ public class CliSqueezeService implements SqueezeService {
 
     }
 
-    public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems) {
-        String command = player.getId() + " status " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
+    public BrowseResult<Song> getCurrentPlaylist(String playerId, Integer start, Integer numberOfItems) {
+        String command = playerId + " status " + start + " " + numberOfItems + " tags:" + SONG_TAGS;
         String result = executeCommand(command);
 
         BrowseResult<Song> browseResult = new BrowseResult<Song>();
@@ -807,19 +809,19 @@ public class CliSqueezeService implements SqueezeService {
         return value;
     }
 
-    public void addItem(Player player, Item item) {
-        addToPlaylist(player, item, "add");
+    public void addItem(String playerId, Item item) {
+        addToPlaylist(playerId, item, "add");
     }
 
-    public void playItem(Player player, Item item) {
-        addToPlaylist(player, item, "play");
+    public void playItem(String playerId, Item item) {
+        addToPlaylist(playerId, item, "play");
     }
 
-    public void playItemNext(Player player, Item item) {
-        addToPlaylist(player, item, "insert");
+    public void playItemNext(String playerId, Item item) {
+        addToPlaylist(playerId, item, "insert");
     }
 
-    private void addToPlaylist(Player player, Item item, String action) {
+    private void addToPlaylist(String playerId, Item item, String action) {
         //The action for multiple items.  Play is different...
         String multipleItemAction = action + "tracks";
         if ("play".equals(action)) {
@@ -831,19 +833,19 @@ public class CliSqueezeService implements SqueezeService {
         //Handle applications - use the 'application' command
         if (item instanceof ApplicationMenuItem) {
             ApplicationMenuItem applicationMenuItem = (ApplicationMenuItem) item;
-            command = player.getId() + " " + applicationMenuItem.getApplication().getCmd() + " playlist " + action + " item_id:" + item.getId();
+            command = playerId + " " + applicationMenuItem.getApplication().getCmd() + " playlist " + action + " item_id:" + item.getId();
         }
 
         String extraParams = getParamName(item);
         //Handle multiple items (i.e. albums, artists, etc).  Use the 'playlist loadx' command
         if (extraParams != null) {
-            command = player.getId() + " playlist " + multipleItemAction + " " + extraParams + "=" + item.getId();
+            command = playerId + " playlist " + multipleItemAction + " " + extraParams + "=" + item.getId();
             executeAsyncCommand(command);
         } else {
             //Fall back to the 'play' command
             String path = getPath(item);
             if (path != null) {
-                command = player.getId() + " playlist " + action + " " + path;
+                command = playerId + " playlist " + action + " " + path;
             }
         }
 
@@ -869,62 +871,62 @@ public class CliSqueezeService implements SqueezeService {
         return extraParams;
     }
 
-    public void jump(Player player, String position) {
-        executeAsyncCommand(player.getId() + " playlist index " + position);
+    public void jump(String playerId, String position) {
+        executeAsyncCommand(playerId + " playlist index " + position);
     }
 
-    public void togglePause(Player player) {
-        executeAsyncCommand(player.getId() + " pause");
+    public void togglePause(String playerId) {
+        executeAsyncCommand(playerId + " pause");
     }
 
-    public void pause(Player player) {
-        executeAsyncCommand(player.getId() + " pause 1");
+    public void pause(String playerId) {
+        executeAsyncCommand(playerId + " pause 1");
     }
 
-    public void play(Player player) {
-        executeAsyncCommand(player.getId() + " play");
+    public void play(String playerId) {
+        executeAsyncCommand(playerId + " play");
     }
 
-    public void stop(Player player) {
-        executeAsyncCommand(player.getId() + " stop");
+    public void stop(String playerId) {
+        executeAsyncCommand(playerId + " stop");
     }
 
-    public void removeAllItemsByArtist(Player player, String artistId) {
-        executeAsyncCommand(player.getId() + " playlistcontrol cmd:delete artist_id:" + artistId);
+    public void removeAllItemsByArtist(String playerId, String artistId) {
+        executeAsyncCommand(playerId + " playlistcontrol cmd:delete artist_id:" + artistId);
     }
 
-    public void removeAllItemsInAlbum(Player player, String albumId) {
-        executeAsyncCommand(player.getId() + " playlistcontrol cmd:delete album_id:" + albumId);
+    public void removeAllItemsInAlbum(String playerId, String albumId) {
+        executeAsyncCommand(playerId + " playlistcontrol cmd:delete album_id:" + albumId);
     }
 
-    public void removeItem(Player player, int playlistIndex) {
-        executeAsyncCommand(player.getId() + " playlist delete " + playlistIndex);
+    public void removeItem(String playerId, int playlistIndex) {
+        executeAsyncCommand(playerId + " playlist delete " + playlistIndex);
     }
 
-    public void clearPlaylist(Player player) {
-        executeAsyncCommand(player.getId() + " playlist clear");
+    public void clearPlaylist(String playerId) {
+        executeAsyncCommand(playerId + " playlist clear");
     }
 
-    public void togglePower( Player player )
+    public void togglePower( String playerId )
     {
-        executeAsyncCommand(player.getId() + " power");
+        executeAsyncCommand(playerId + " power");
     }
 
 
-    public void subscribe(final Player player, final PlayerStatusHandler handler) {
+    public void subscribe(final String playerId, final PlayerStatusHandler handler) {
         Runnable r = new Runnable() {
             public void run() {
-                eventThread.subscribe(player, handler);
+                eventThread.subscribe(playerId, handler);
             }
         };
         commandQueue.add(r);
     }
 
-    public void unsubscribe(final Player player, final PlayerStatusHandler handler) {
+    public void unsubscribe(final String playerId, final PlayerStatusHandler handler) {
         Runnable r = new Runnable() {
             public void run() {
                 if (eventThread != null) {
-                    eventThread.unsubscribe(player, handler);
+                    eventThread.unsubscribe(playerId, handler);
                 }
             }
         };
@@ -942,28 +944,28 @@ public class CliSqueezeService implements SqueezeService {
         commandQueue.add(r);
     }
 
-    public void seekTo(Player player, int time) {
-        executeAsyncCommand(player.getId() + " time " + time);
+    public void seekTo(String playerId, int time) {
+        executeAsyncCommand(playerId + " time " + time);
     }
 
-    public void changeVolume(Player player, int volumeLevel) {
-        executeAsyncCommand(player.getId() + " mixer volume " + volumeLevel);
+    public void changeVolume(String playerId, int volumeLevel) {
+        executeAsyncCommand(playerId + " mixer volume " + volumeLevel);
     }
 
-    public void synchronize(Player player, Player playerToSyncTo) {
-        executeAsyncCommand(playerToSyncTo.getId() + " sync " + player.getId());
+    public void synchronize(String playerId, String playerIdToSyncTo) {
+        executeAsyncCommand(playerIdToSyncTo + " sync " + playerId);
     }
 
-    public void unsynchronize(Player player) {
-        executeAsyncCommand(player.getId() + " sync -");
+    public void unsynchronize(String playerId) {
+        executeAsyncCommand(playerId + " sync -");
     }
 
-    public void setShuffleMode(Player player, ShuffleMode mode) {
-        executeAsyncCommand(player.getId() + " playlist shuffle " + mode.getId());
+    public void setShuffleMode(String playerId, ShuffleMode mode) {
+        executeAsyncCommand(playerId + " playlist shuffle " + mode.getId());
     }
 
-    public void setRepeatMode(Player player, RepeatMode mode) {
-        executeAsyncCommand(player.getId() + " playlist repeat " + mode.getId());
+    public void setRepeatMode(String playerId, RepeatMode mode) {
+        executeAsyncCommand(playerId + " playlist repeat " + mode.getId());
     }
 
     public void unsubscribe(final ServerStatusHandler handler) {

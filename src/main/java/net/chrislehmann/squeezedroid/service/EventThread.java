@@ -2,7 +2,6 @@ package net.chrislehmann.squeezedroid.service;
 
 import android.util.Log;
 import net.chrislehmann.squeezedroid.exception.ApplicationException;
-import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.RepeatMode;
 import net.chrislehmann.squeezedroid.model.ShuffleMode;
@@ -243,8 +242,7 @@ public class EventThread extends Thread
          }
          else
          {
-            Player updatedPlayer = _service.getPlayer( playerId );
-            handler.onPlayerSynchronized( updatedPlayer, SerializationUtils.decode( data ) );
+            handler.onPlayerSynchronized( playerId, SerializationUtils.decode( data ) );
          }
       }
    };
@@ -311,7 +309,7 @@ public class EventThread extends Thread
 
    protected void updateStatus(String playerId)
    {
-      _status = _service.getPlayerStatus( new Player( playerId ) );
+      _status = _service.getPlayerStatus( playerId );
    }
 
    private void connect()
@@ -348,18 +346,18 @@ public class EventThread extends Thread
    
 
 
-   public void subscribe(final Player player, final PlayerStatusHandler handler)
+   public void subscribe(final String playerId, final PlayerStatusHandler handler)
    {
       synchronized ( _playerHandlersMutex )
       {
-         Log.v( LOGTAG, "Suscribing to notifications for player " + player.getId() + " with handler " + handler );
-         if ( !_playerHandlers.containsKey( player.getId() ) )
+         Log.v( LOGTAG, "Suscribing to notifications for player " + playerId + " with handler " + handler );
+         if ( !_playerHandlers.containsKey( playerId ) )
          {
-            _playerHandlers.put( player.getId(), Collections.synchronizedList( new ArrayList<PlayerStatusHandler>() ) );
+            _playerHandlers.put( playerId, Collections.synchronizedList( new ArrayList<PlayerStatusHandler>() ) );
          }
-         List<PlayerStatusHandler> handlers = _playerHandlers.get( player.getId() );
+         List<PlayerStatusHandler> handlers = _playerHandlers.get( playerId );
          handlers.add( handler );
-         Log.v( LOGTAG, "Done subscribing to notifications for player " + player.getId() + " with handler " + handler );
+         Log.v( LOGTAG, "Done subscribing to notifications for player " + playerId + " with handler " + handler );
       }
    }
 
@@ -379,20 +377,20 @@ public class EventThread extends Thread
       }
    }
 
-   public void unsubscribe(final Player player, final PlayerStatusHandler handler)
+   public void unsubscribe(final String playerId, final PlayerStatusHandler handler)
    {
       synchronized ( _playerHandlersMutex )
       {
-         Log.v( LOGTAG, "Unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
-         if ( _playerHandlers.containsKey( player.getId() ) )
+         Log.v( LOGTAG, "Unsubscribing from all notifactions handled by " + handler + " with player " + playerId );
+         if ( _playerHandlers.containsKey( playerId ) )
          {
-            List<PlayerStatusHandler> handlers = _playerHandlers.get( player.getId() );
+            List<PlayerStatusHandler> handlers = _playerHandlers.get( playerId );
             synchronized ( handlers )
             {
                handlers.remove( handler );
             }
          }
-         Log.v( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler + " with player " + player.getId() );
+         Log.v( LOGTAG, "Done unsubscribing from all notifactions handled by " + handler + " with player " + playerId );
 
       }
    }

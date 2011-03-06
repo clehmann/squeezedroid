@@ -25,14 +25,12 @@ public class BrowseApplicationActivity extends ItemListActivity {
    @Override
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
-     runWithService( new SqueezeServiceAwareThread()
-     {
-        public void runWithService(SqueezeService service)
-        {
-           ApplicationMenuItemListAdapter listAdapter = new ApplicationMenuItemListAdapter( service, context, getSelectedPlayer(), getSelectedApplication(), getParentItem()  );
-           listAdapter.setSearchText( getIntent().getStringExtra( SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_SEARCHTEXT ) );
-           getListView().setAdapter( listAdapter );
-        }
+     runWithService(new SqueezeServiceAwareThread() {
+         public void runWithService(SqueezeService service) {
+             ApplicationMenuItemListAdapter listAdapter = new ApplicationMenuItemListAdapter(service, context, getSelectedPlayer(), getSelectedApplication(), getParentItem());
+             listAdapter.setSearchText(getIntent().getStringExtra(SqueezeDroidConstants.IntentDataKeys.KEY_BROWSEAPPLICATION_SEARCHTEXT));
+             getListView().setAdapter(listAdapter);
+         }
      });
      getListView().setOnItemClickListener( onItemClick );
    }
@@ -127,13 +125,11 @@ public class BrowseApplicationActivity extends ItemListActivity {
       }
       else if ( applicationMenuItem.isPlayable() )
       {
-         runWithService( new SqueezeServiceAwareThread()
-         {
-            public void runWithService(SqueezeService service)
-            {
-               service.playItem( getSelectedPlayer(), applicationMenuItem );
-            }
-         } );
+         runWithService(new SqueezeServiceAwareThread() {
+             public void runWithService(SqueezeService service) {
+                 service.playItem(getSelectedPlayer(), applicationMenuItem);
+             }
+         });
       }
    }
 }

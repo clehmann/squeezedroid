@@ -50,15 +50,15 @@ public interface SqueezeService {
 
     public BrowseResult<Application> listRadioStations(int start, int numberOfItems);
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, int start, int numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, Application application, int start, int numberOfItems);
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, ApplicationMenuItem parent, int start, int numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, Application application, ApplicationMenuItem parent, int start, int numberOfItems);
 
-    public BrowseResult<ApplicationMenuItem> browseApplication(Player player, Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems);
+    public BrowseResult<ApplicationMenuItem> browseApplication(String playerId, Application application, ApplicationMenuItem parent, String query, int start, int numberOfItems);
 
-    public PlayerStatus getPlayerStatus(Player player);
+    public PlayerStatus getPlayerStatus(String playerId);
 
-    public BrowseResult<Song> getCurrentPlaylist(Player player, Integer start, Integer numberOfItems);
+    public BrowseResult<Song> getCurrentPlaylist(String playerId, Integer start, Integer numberOfItems);
 
     public List<Player> getPlayers();
 
@@ -66,29 +66,29 @@ public interface SqueezeService {
 
     public Player getPlayer(String playerId);
 
-    public void addItem(Player player, Item item);
+    public void addItem(String playerId, Item item);
 
-    public void playItem(Player player, Item item);
+    public void playItem(String playerId, Item item);
 
-    public void playItemNext(Player player, Item item);
+    public void playItemNext(String playerId, Item item);
 
-    public void removeItem(Player selectedPlayer, int playlistIndex);
+    public void removeItem(String playerId, int playlistIndex);
 
-    public void removeAllItemsByArtist(Player player, String artistId);
+    public void removeAllItemsByArtist(String playerId, String artistId);
 
-    public void removeAllItemsInAlbum(Player player, String albumId);
+    public void removeAllItemsInAlbum(String playerId, String albumId);
 
-    public void togglePower( Player player );
+    public void togglePower( String playerId );
 
-    public void play(Player player);
+    public void play(String playerId);
 
-    public void pause(Player player);
+    public void pause(String playerId);
 
-    public void togglePause(Player player);
+    public void togglePause(String playerId);
 
-    public void stop(Player player);
+    public void stop(String playerId);
 
-    public void jump(Player player, String position);
+    public void jump(String playerId, String position);
 
     public void connect();
 
@@ -100,27 +100,27 @@ public interface SqueezeService {
 
     public void unsubscribe(ServerStatusHandler onServiceStatusChanged);
 
-    public void subscribe(Player player, PlayerStatusHandler handler);
+    public void subscribe(String playerId, PlayerStatusHandler handler);
 
-    public void unsubscribe(Player player, PlayerStatusHandler handler);
+    public void unsubscribe(String playerId, PlayerStatusHandler handler);
 
     public void unsubscribeAll(PlayerStatusHandler onPlayerStatusChanged);
 
-    public void seekTo(Player player, int time);
+    public void seekTo(String playerId, int time);
 
-    public void changeVolume(Player player, int volumeLevel);
+    public void changeVolume(String playerId, int volumeLevel);
 
-    public void unsynchronize(Player player);
+    public void unsynchronize(String playerId);
 
-    public void synchronize(Player player, Player playerToSyncTo);
+    public void synchronize(String playerId, String playerIdToSyncTo);
 
-    public void setShuffleMode(Player player, ShuffleMode mode);
+    public void setShuffleMode(String playerId, ShuffleMode mode);
 
-    public void setRepeatMode(Player player, RepeatMode mode);
+    public void setRepeatMode(String playerId, RepeatMode mode);
 
     public SearchResult search(String searchTerms, int numResults);
 
-    public void clearPlaylist(Player selectedPlayer);
+    public void clearPlaylist(String selectedPlayer);
 
     List<Song> getSongsForItem(Item selectedItem);
 

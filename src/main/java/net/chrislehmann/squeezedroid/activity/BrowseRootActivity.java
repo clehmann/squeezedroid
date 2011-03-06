@@ -133,7 +133,7 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
         public void onDisconnect() {
             //Just try and reconnect...
             getSqueezeDroidApplication().resetService();
-            getService();
+            forceConnect();
         }
     };
 
@@ -152,10 +152,11 @@ public class BrowseRootActivity extends SqueezedroidActivitySupport {
 
     @Override
     protected void onPause() {
-        SqueezeService service = getService(false);
-        if (service != null) {
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
             service.unsubscribe(onServiceStatusChanged);
-        }
+            }
+        }, false);
         super.onPause();
     }
 

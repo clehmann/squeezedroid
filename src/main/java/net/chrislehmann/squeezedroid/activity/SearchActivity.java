@@ -1,8 +1,25 @@
 package net.chrislehmann.squeezedroid.activity;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.SearchResultExpandableListAdapter;
 import net.chrislehmann.squeezedroid.model.Album;
@@ -10,29 +27,10 @@ import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.model.SearchResult;
-import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.service.ServiceConnectionManager.SqueezeServiceAwareThread;
-
+import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 import org.apache.commons.lang.StringUtils;
-
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
-import android.view.View.OnCreateContextMenuListener;
-import android.widget.EditText;
-import android.widget.ExpandableListView;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
-import android.widget.ExpandableListView.OnChildClickListener;
 
 public class SearchActivity extends SqueezedroidActivitySupport {
 
@@ -48,6 +46,7 @@ public class SearchActivity extends SqueezedroidActivitySupport {
     protected TextView noResultsFoundText;
 
     protected SearchResultExpandableListAdapter adapter = new SearchResultExpandableListAdapter();
+    private Context context = this;
 
     /**
      * Called when the activity is first created.
@@ -148,55 +147,62 @@ public class SearchActivity extends SqueezedroidActivitySupport {
 
         public void onClick(View v) {
 
-            runWithService(doSearch, true);
+            runWithService(doSearch);
 
         }
     };
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(searchCriteriaText.getWindowToken(), 0);
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(final MenuItem item) {
         boolean handled = true;
         ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo) item.getMenuInfo();
-        int group = ExpandableListView.getPackedPositionGroup(menuInfo.packedPosition);
-        int child = ExpandableListView.getPackedPositionChild(menuInfo.packedPosition);
+        final int group = ExpandableListView.getPackedPositionGroup(menuInfo.packedPosition);
+        final int child = ExpandableListView.getPackedPositionChild(menuInfo.packedPosition);
 
-        SqueezeService service = getService();
-        if (service != null) {
 
-            Item selectedItem = null;
-            if (child >= 0) {
-                selectedItem = (Item) resultsExpandableListView.getExpandableListAdapter().getChild(group, child);
-            }
-            if (selectedItem != null) {
-                switch (item.getItemId()) {
-                    case CONTEXTMENU_ADD_ITEM:
-                        service.addItem(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, "Added to playlist.", Toast.LENGTH_SHORT).show();
-                        break;
-                    case CONTEXTMENU_PLAY_ITEM:
-                        service.playItem(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, "Now playing.", Toast.LENGTH_SHORT).show();
-                        break;
-                    case CONTEXTMENU_PLAY_NEXT:
-                        service.playItemNext(getSelectedPlayer(), selectedItem);
-                        Toast.makeText(this, "Playing next.", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        handled = false;
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                Item selectedItem = null;
+                if (child >= 0) {
+                    selectedItem = (Item) resultsExpandableListView.getExpandableListAdapter().getChild(group, child);
                 }
+
+                final StringBuffer message = new StringBuffer("");
+                if (selectedItem != null) {
+                    switch (item.getItemId()) {
+                        case CONTEXTMENU_ADD_ITEM:
+                            service.addItem(getSelectedPlayer(), selectedItem);
+                            message.append("Added to playlist");
+                            break;
+                        case CONTEXTMENU_PLAY_ITEM:
+                            service.playItem(getSelectedPlayer(), selectedItem);
+                            message.append("Now Playing");
+                            break;
+                        case CONTEXTMENU_PLAY_NEXT:
+                            service.playItemNext(getSelectedPlayer(), selectedItem);
+                            message.append("Playing next.");
+                            break;
+                    }
+                }
+
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
+        });
 
-        }
 
-        return handled;
+        return true;
     }
 
-     @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_itemlist, menu);
@@ -206,18 +212,17 @@ public class SearchActivity extends SqueezedroidActivitySupport {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean handled = true;
-        SqueezeService service = getService();
-        if (service != null) {
 
-            switch (item.getItemId()) {
-                case R.id.menuItem_itemlistDone:
-                    setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
-                    finish();
-                    break;
-                default:
-                    handled = false;
-            }
+
+        switch (item.getItemId()) {
+            case R.id.menuItem_itemlistDone:
+                setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
+                finish();
+                break;
+            default:
+                handled = false;
         }
+
         if (!handled) {
             handled = super.onOptionsItemSelected(item);
         }

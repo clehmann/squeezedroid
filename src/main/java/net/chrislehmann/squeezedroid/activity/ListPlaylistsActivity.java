@@ -19,13 +19,11 @@ public class ListPlaylistsActivity extends ItemListActivity {
    @Override
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
-     runWithService( new SqueezeServiceAwareThread()
-     {
-        public void runWithService(SqueezeService service)
-        {
-           PlaylistListAdapter listAdapter = new PlaylistListAdapter( service, context );
-           getListView().setAdapter( listAdapter );
-        }
+     runWithService(new SqueezeServiceAwareThread() {
+         public void runWithService(SqueezeService service) {
+             PlaylistListAdapter listAdapter = new PlaylistListAdapter(service, context);
+             getListView().setAdapter(listAdapter);
+         }
      });
      getListView().setOnItemClickListener( onItemClick );
    }

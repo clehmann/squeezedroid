@@ -16,7 +16,7 @@ public class SimplePlayerStatusHandler implements PlayerStatusHandler
 
    public void onVolumeChanged( int newVolume ){}
 
-   public void onPlayerSynchronized( Player player, String syncronizedPlayerId ){};
+   public void onPlayerSynchronized( String player, String syncronizedPlayerId ){};
 
    public void onPlayerUnsynchronized(){}
 

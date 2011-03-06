@@ -20,12 +20,10 @@ public class BrowseGenresActivity extends ItemListActivity
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate( savedInstanceState );
-      runWithService( new SqueezeServiceAwareThread()
-      {
-         public void runWithService(SqueezeService service)
-         {
-            listView.setAdapter( new GenreListAdapter( service, context, null ) );
-         }
+      runWithService(new SqueezeServiceAwareThread() {
+          public void runWithService(SqueezeService service) {
+              listView.setAdapter(new GenreListAdapter(service, context, null));
+          }
       });
       
       listView.setOnItemClickListener( onItemClick );

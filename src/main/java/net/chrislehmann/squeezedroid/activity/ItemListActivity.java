@@ -38,8 +38,6 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
     protected ListView listView;
 
-    protected SqueezeService service;
-
     protected abstract Item getParentItem();
 
     public ItemListActivity() {
@@ -65,7 +63,7 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         listView.setFastScrollEnabled(true);
         getListView().setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-               context.onCreateContextMenu(menu, v, menuInfo);
+                context.onCreateContextMenu(menu, v, menuInfo);
             }
         });
 
@@ -93,49 +91,45 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         boolean handled = true;
-        SqueezeService service = getService();
-        if (service != null) {
-            Item parentItem = getParentItem();
-            String message = null;
-            switch (item.getItemId()) {
-                case R.id.menuItem_itemlistDone:
-                    setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
-                    finish();
-                    break;
-                case R.id.menuItem_itemlistEnqueue:
-                    service.addItem(getSelectedPlayer(), parentItem);
-                    message = "Added to playlist.";
-                    break;
-                case R.id.menuItem_itemlistPlay:
-                    service.playItem(getSelectedPlayer(), parentItem);
-                    message = "Now playing.";
-                    break;
-                case R.id.menuItem_itemlistPlayNext:
-                    service.playItemNext(getSelectedPlayer(), parentItem);
-                    message = "Playing next.";
-                    break;
-                case R.id.menuItem_itemlistDownload:
-                    addDownloadsForItem(parentItem);
-                    break;
-                default:
-                    handled = false;
+        final Item parentItem = getParentItem();
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                String message = null;
+                switch (item.getItemId()) {
+                    case R.id.menuItem_itemlistDone:
+                        setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
+                        finish();
+                        break;
+                    case R.id.menuItem_itemlistEnqueue:
+                        service.addItem(getSelectedPlayer(), parentItem);
+                        message = "Added to playlist.";
+                        break;
+                    case R.id.menuItem_itemlistPlay:
+                        service.playItem(getSelectedPlayer(), parentItem);
+                        message = "Now playing.";
+                        break;
+                    case R.id.menuItem_itemlistPlayNext:
+                        service.playItemNext(getSelectedPlayer(), parentItem);
+                        message = "Playing next.";
+                        break;
+                    case R.id.menuItem_itemlistDownload:
+                        addDownloadsForItem(parentItem);
+                        break;
+                }
+                if (message != null) {
+                    //I hate java...
+                    final String messageForClosure = message;
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
-            if (message != null) {
-                //I hate java...
-                final String messageForClosure = message;
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        }
-        if (!handled) {
-            handled = super.onOptionsItemSelected(item);
-        }
-        return handled;
+        });
+        return true;
     }
 
     @Override
@@ -150,49 +144,45 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        SqueezeService service = getService();
+    public boolean onContextItemSelected(final MenuItem item) {
         boolean handled = false;
 
         AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
         final Item selectedItem = (Item) listView.getAdapter().getItem(menuInfo.position);
 
-        if (selectedItem != null && service != null) {
-            handled = true;
-            String message = null;
-            switch (item.getItemId()) {
-                case R.id.contextMenuItem_itemlistEnqueue:
-                    service.addItem(getSelectedPlayer(), selectedItem);
-                    message = "Added to playlist.";
-                    break;
-                case R.id.contextMenuItem_itemlistPlay:
-                    service.playItem(getSelectedPlayer(), selectedItem);
-                    message = "Now playing.";
-                    break;
-                case R.id.contextMenuItem_itemlistPlayNext:
-                    service.playItemNext(getSelectedPlayer(), selectedItem);
-                    message = "Playing next.";
-                    break;
-                case R.id.contextMenuItem_itemlistDownload:
-                    addDownloadsForItem(selectedItem);
-                    break;
-                default:
-                    handled = false;
-                    break;
-            }
-            if (message != null) {
-                //I hate java...
-                final String messageForClosure = message;
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
+        if (selectedItem != null) {
+            runWithService(new SqueezeServiceAwareThread() {
+                public void runWithService(SqueezeService service) {
+                    String message = null;
+                    switch (item.getItemId()) {
+                        case R.id.contextMenuItem_itemlistEnqueue:
+                            service.addItem(getSelectedPlayer(), selectedItem);
+                            message = "Added to playlist.";
+                            break;
+                        case R.id.contextMenuItem_itemlistPlay:
+                            service.playItem(getSelectedPlayer(), selectedItem);
+                            message = "Now playing.";
+                            break;
+                        case R.id.contextMenuItem_itemlistPlayNext:
+                            service.playItemNext(getSelectedPlayer(), selectedItem);
+                            message = "Playing next.";
+                            break;
+                        case R.id.contextMenuItem_itemlistDownload:
+                            addDownloadsForItem(selectedItem);
+                            break;
                     }
-                });
-            }
+                    if (message != null) {
+                        //I hate java...
+                        final String messageForClosure = message;
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
 
-        }
-        if (!handled) {
-            handled = super.onContextItemSelected(item);
+                }
+            });
         }
         return handled;
     }
@@ -205,9 +195,10 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         public void onDisconnect() {
             //Just try and reconnect...
             getSqueezeDroidApplication().resetService();
-            getService();
+            forceConnect();
         }
     };
+
 
     @Override
     protected void onResume() {
@@ -224,12 +215,17 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
 
     @Override
     protected void onPause() {
-        SqueezeService service = getService(false);
-        if (service != null) {
-            service.unsubscribe(onServiceStatusChanged);
-        }
+        runWithService(
+                new SqueezeServiceAwareThread() {
+                    public void runWithService(SqueezeService service) {
+                        service.unsubscribe(onServiceStatusChanged);
+                    }
+                }, false
+        );
+
         super.onPause();
     }
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -242,7 +238,6 @@ public abstract class ItemListActivity extends SqueezedroidActivitySupport {
         }
         super.onCreateContextMenu(menu, v, menuInfo);
     }
-
 
 
 }

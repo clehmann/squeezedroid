@@ -11,7 +11,6 @@ import android.widget.TextView;
 import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.activity.SqueezedroidActivitySupport;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
-import net.chrislehmann.squeezedroid.model.Player;
 import net.chrislehmann.squeezedroid.model.PlayerStatus;
 import net.chrislehmann.squeezedroid.model.Song;
 import net.chrislehmann.squeezedroid.service.PlayerStatusHandler;
@@ -76,9 +75,8 @@ public class NowPlayingInfoPanel extends RelativeLayout {
 
         _parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
             public void runWithService(SqueezeService service) {
-                Player selectedPlayer = _parent.getSelectedPlayer();
-                if( selectedPlayer != null )
-                {
+                String selectedPlayer = _parent.getSelectedPlayer();
+                if (selectedPlayer != null) {
                     service.subscribe(selectedPlayer, onPlayerStatusChanged);
                     PlayerStatus status = service.getPlayerStatus(_parent.getSelectedPlayer());
                     updateStatus(status);
@@ -94,15 +92,23 @@ public class NowPlayingInfoPanel extends RelativeLayout {
     }
 
 
-    private void updateStatus(PlayerStatus status) {
+    private void updateStatus(final PlayerStatus status) {
         if (status != null) {
-            if (status.getCurrentSong() != null) {
-                setSong(status.getCurrentSong());
-            } else {
-                setSong(null);
-            }
-            ImageButton playButton = (ImageButton) findViewById(R.id.play_button);
-            if( playButton != null ) { playButton.setImageResource( status.isPlaying() ? R.drawable.pause: R.drawable.play); };
+            _parent.runOnUiThread(new Runnable() {
+                public void run() {
+                    if (status.getCurrentSong() != null) {
+                        setSong(status.getCurrentSong());
+                    } else {
+                        setSong(null);
+                    }
+                    ImageButton playButton = (ImageButton) findViewById(R.id.play_button);
+                    if (playButton != null) {
+                        playButton.setImageResource(status.isPlaying() ? R.drawable.pause : R.drawable.play);
+                    }
+                    ;
+                }
+            });
+
         }
     }
 
@@ -113,12 +119,17 @@ public class NowPlayingInfoPanel extends RelativeLayout {
      */
     private PlayerStatusHandler onPlayerStatusChanged = new SimplePlayerStatusHandler() {
         public void onSongChanged(final PlayerStatus status) {
-            final BrowseResult<Song> playlist = _parent.getService().getCurrentPlaylist(_parent.getSelectedPlayer(), status.getCurrentIndex(), 2);
-            _parent.runOnUiThread(new Thread() {
-                public void run() {
-                    updateStatus(status);
+            _parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+                public void runWithService(SqueezeService service) {
+                    final BrowseResult<Song> playlist = service.getCurrentPlaylist(_parent.getSelectedPlayer(), status.getCurrentIndex(), 2);
+                    _parent.runOnUiThread(new Thread() {
+                        public void run() {
+                            updateStatus(status);
+                        }
+                    });
                 }
             });
+
         }
 
         public void onPlay() {

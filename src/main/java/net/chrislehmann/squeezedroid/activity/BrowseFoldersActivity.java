@@ -19,12 +19,10 @@ public class BrowseFoldersActivity extends ItemListActivity {
    @Override
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
-     runWithService( new SqueezeServiceAwareThread()
-     {
-        public void runWithService(SqueezeService service)
-        {
-           getListView().setAdapter( new FolderListAdapter( service, context, getParentItem()  ) );
-        }
+     runWithService(new SqueezeServiceAwareThread() {
+         public void runWithService(SqueezeService service) {
+             getListView().setAdapter(new FolderListAdapter(service, context, getParentItem()));
+         }
      });
      
      getListView().setOnItemClickListener( onItemClick );

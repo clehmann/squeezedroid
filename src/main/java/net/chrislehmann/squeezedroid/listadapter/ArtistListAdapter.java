@@ -1,12 +1,12 @@
 package net.chrislehmann.squeezedroid.listadapter;
 
-import java.util.List;
-
+import android.app.Activity;
 import net.chrislehmann.squeezedroid.model.Artist;
 import net.chrislehmann.squeezedroid.model.BrowseResult;
 import net.chrislehmann.squeezedroid.model.Item;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
-import android.app.Activity;
+
+import java.util.List;
 
 public class ArtistListAdapter extends PagableAdapter{
 	protected SqueezeService _service;

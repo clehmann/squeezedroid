@@ -66,40 +66,30 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
      * from ther server
      * 3) Start an activity that will prompt the user to choose a player
      */
-    public Player getSelectedPlayer() {
-        return getSelectedPlayer(false);
+    public String getSelectedPlayer() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
+        String selectedPlayerId = prefs.getString(SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, null);
+        if (!lookingForPlayer && selectedPlayerId == null) {
+            launchSubActivity(ChoosePlayerActivity.class, choosePlayerIntentCallback);
+            lookingForPlayer = true;
+        }
+        return selectedPlayerId;
     }
 
-    public Player getSelectedPlayer(boolean forceUpdate) {
-        Player selectedPlayer = getSqueezeDroidApplication().getSelectedPlayer();
-        if (selectedPlayer == null || forceUpdate) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
-            String lastPlayerId = prefs.getString(SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, null);
-            SqueezeService service = getService();
-            if (service != null) {
-                if (lastPlayerId != null) {
-                    selectedPlayer = service.getPlayer(lastPlayerId);
-                }
-                if (selectedPlayer == null) {
-                    if (!lookingForPlayer) {
-                        launchSubActivity(ChoosePlayerActivity.class, choosePlayerIntentCallback);
-                        lookingForPlayer = true;
-                    }
-                } else {
-                    getSqueezeDroidApplication().setSelectedPlayer(selectedPlayer);
-                }
-            }
-        }
-        return selectedPlayer;
-    }
 
     /**
      * Sets the currently selected player.
      *
      * @player the currently selected player
      */
-    protected void setSelectedPlayer(Player player) {
-        getSqueezeDroidApplication().setSelectedPlayer(player);
+    protected void setSelectedPlayer(String playerId) {
+        if (playerId != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(SqueezeDroidConstants.Preferences.LAST_SELECTED_PLAYER, playerId);
+            editor.commit();
+        }
+
     }
 
     /**
@@ -123,57 +113,24 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
      * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
      * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
      *
-     * @param onConnect   {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
-     * @param runOnThread If set to true, a new thread will be spawned to run the onConnect
-     */
-    public void runWithService(final SqueezeServiceAwareThread onConnect, boolean runOnThread) {
-
-        if (runOnThread) {
-            new SqueezeServiceAwareThread() {
-                public void runWithService(final SqueezeService service) {
-                    new Thread() {
-                        public void run() {
-                            onConnect.runWithService(service);
-                        }
-
-                        ;
-                    }.start();
-                }
-            };
-        }
-
-        getSqueezeDroidApplication().getConnectionManager().getService(this, true, onConnect);
-    }
-
-    /**
-     * Ensures that the {@link SqueezeService} is connected (possibly by forwarding to the {@link ConnectToServerActivity} and
-     * calls the {@link SqueezeServiceAwareThread#runWithService(SqueezeService)} with a connected {@link SqueezeService}
-     *
      * @param onConnect {@link SqueezeServiceAwareThread} to run after the server connection has been obtained.
      */
     public void runWithService(final SqueezeServiceAwareThread onConnect) {
-        runWithService(onConnect, false);
+        getSqueezeDroidApplication().getConnectionManager().getService(this, true, onConnect);
+    }
+
+
+    protected void runWithService(SqueezeServiceAwareThread onConnect, boolean connectIfDisconnected) {
+        getSqueezeDroidApplication().getConnectionManager().getService(this, connectIfDisconnected, onConnect);
     }
 
 
     /**
-     * Gets the {@link SqueezeService}.  If the connect parameter is set to true and the {@link SqueezeService} is not connected,
-     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
-     *
-     * @param connect If true, try and connect to the service if it is not connected
+     * Force a connection to the squeezeserver if we are not already connected
      */
-    public SqueezeService getService(boolean connect) {
-        return getSqueezeDroidApplication().getConnectionManager().getService(this, connect, null);
+    protected void forceConnect() {
+        runWithService(null);
     }
-
-    /**
-     * Gets the {@link SqueezeService}.  If the {@link SqueezeService} is not connected,
-     * this method will start the {@link ConnectToServerActivity} and return null.  Your code should take this into account.
-     */
-    public SqueezeService getService() {
-        return getService(true);
-    }
-
 
     /**
      * Child Activity callback {@link IntentResultCallback}s
@@ -181,16 +138,16 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
     protected IntentResultCallback choosePlayerIntentCallback = new IntentResultCallback() {
         public void resultOk(String resultString, Bundle resultMap) {
 
-            Player selectedPlayer = (Player) resultMap.getSerializable(SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER);
+            String selectedPlayer = (String) resultMap.getSerializable(SqueezeDroidConstants.IntentDataKeys.KEY_SELECTED_PLAYER);
             if (selectedPlayer == null) {
                 closeApplication();
             }
-            getSqueezeDroidApplication().setSelectedPlayer(selectedPlayer);
+            setSelectedPlayer(selectedPlayer);
             lookingForPlayer = false;
         }
 
         public void resultCancel(String resultString, Bundle resultMap) {
-            if (getSqueezeDroidApplication().getSelectedPlayer() == null) {
+            if (getSelectedPlayer() == null) {
                 closeApplication();
             }
 
@@ -198,19 +155,14 @@ public class SqueezedroidActivitySupport extends ActivitySupport {
     };
 
     protected void addDownloadsForItem(final Item selectedItem) {
-        new Thread() {
-            public void run() {
-                runWithService(new SqueezeServiceAwareThread() {
-                    public void runWithService(SqueezeService service) {
-                        List<Song> songs = service.getSongsForItem(selectedItem);
-                        for (Song song : songs) {
-                            addDownload(song.getUrl(), Environment.getExternalStorageDirectory() + "/music/" + song.getLocalPath());
-
-                        }
-                    }
-                });
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                List<Song> songs = service.getSongsForItem(selectedItem);
+                for (Song song : songs) {
+                    addDownload(song.getUrl(), Environment.getExternalStorageDirectory() + "/music/" + song.getLocalPath());
+                }
             }
-        }.start();
+        });
     }
 
 

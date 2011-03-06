@@ -29,6 +29,7 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
 
     protected ListView listView;
     private NowPlayingInfoPanel _nowPlayingInfoPanel;
+    private SqueezedroidActivitySupport _context = this;
 
 
     @Override
@@ -41,17 +42,18 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
         listView.setOnItemClickListener(onItemClick);
 
 
-        final SqueezeService service = getService();
-        if (service != null) {
-            final PlayListAdapter playListAdapter = new PlayListAdapter(service, this, getSelectedPlayer());
-            playListAdapter.setOnFirstPageLoadedListener(new Runnable() {
-                public void run() {
-                    PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
-                    listView.setSelection(status.getCurrentIndex());
-                }
-            });
-            listView.setAdapter(playListAdapter);
-        }
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(final SqueezeService service) {
+                final PlayListAdapter playListAdapter = new PlayListAdapter(service, _context, getSelectedPlayer());
+                playListAdapter.setOnFirstPageLoadedListener(new Runnable() {
+                    public void run() {
+                        PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
+                        listView.setSelection(status.getCurrentIndex());
+                    }
+                });
+                listView.setAdapter(playListAdapter);
+            }
+        });
 
 
         _nowPlayingInfoPanel = (NowPlayingInfoPanel) findViewById(R.id.song_info_container);
@@ -59,7 +61,6 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
             _nowPlayingInfoPanel.setParent(this);
         }
     }
-
 
 
     OnCreateContextMenuListener onCreateContextMenu = new OnCreateContextMenuListener() {
@@ -73,46 +74,41 @@ public class PlayListActivity extends SqueezedroidActivitySupport {
 
     private OnItemClickListener onItemClick = new OnItemClickListener() {
 
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            SqueezeService service = getService();
-            if (service != null) {
-                service.jump(getSelectedPlayer(), String.valueOf(position));
-            }
+        public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+            runWithService(new SqueezeServiceAwareThread() {
+                public void runWithService(SqueezeService service) {
+                    service.jump(getSelectedPlayer(), String.valueOf(position));
+                }
+            });
         }
     };
 
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(final MenuItem item) {
         boolean handled = false;
-        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
-        Song song = (Song) listView.getItemAtPosition(menuInfo.position);
+        final AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+        final Song song = (Song) listView.getItemAtPosition(menuInfo.position);
 
-        SqueezeService service = getService();
-        if (service != null) {
-
-            switch (item.getItemId()) {
-                case CONTEXTMENU_REMOVE_ITEM:
-                    service.removeItem(getSelectedPlayer(), menuInfo.position);
-                    handled = true;
-                    break;
-                case CONTEXTMENU_REMOVE_ARTIST:
-                    service.removeAllItemsByArtist(getSelectedPlayer(), song.getArtistId());
-                    handled = true;
-                    break;
-                case CONTEXTMENU_REMOVE_ALBUM:
-                    service.removeAllItemsInAlbum(getSelectedPlayer(), song.getAlbumId());
-                    handled = true;
-                    break;
-                default:
-                    break;
+        runWithService(new SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                switch (item.getItemId()) {
+                    case CONTEXTMENU_REMOVE_ITEM:
+                        service.removeItem(getSelectedPlayer(), menuInfo.position);
+                        break;
+                    case CONTEXTMENU_REMOVE_ARTIST:
+                        service.removeAllItemsByArtist(getSelectedPlayer(), song.getArtistId());
+                        break;
+                    case CONTEXTMENU_REMOVE_ALBUM:
+                        service.removeAllItemsInAlbum(getSelectedPlayer(), song.getAlbumId());
+                        break;
+                    default:
+                        break;
+                }
             }
+        });
 
-        }
-        if (!handled) {
-            handled = super.onContextItemSelected(item);
-        }
-        return handled;
+        return true;
     }
 
     @Override

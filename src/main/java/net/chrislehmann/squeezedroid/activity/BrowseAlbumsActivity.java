@@ -24,12 +24,10 @@ public class BrowseAlbumsActivity extends ItemListActivity
 
       final SqueezeService.Sort sort = getSort( getIntent().getData() );
       final Item parentItem = getParentItem();
-      runWithService( new SqueezeServiceAwareThread()
-      {
-         public void runWithService(SqueezeService service)
-         {
-            listView.setAdapter( new AlbumListAdapter( service, context, parentItem, sort ) );
-         }
+      runWithService(new SqueezeServiceAwareThread() {
+          public void runWithService(SqueezeService service) {
+              listView.setAdapter(new AlbumListAdapter(service, context, parentItem, sort));
+          }
       });
       listView.setOnItemClickListener( onListItemClick );
    };

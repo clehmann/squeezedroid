@@ -19,6 +19,7 @@ import net.chrislehmann.squeezedroid.R;
 import net.chrislehmann.squeezedroid.listadapter.ArtistExpandableListAdapter;
 import net.chrislehmann.squeezedroid.model.Genre;
 import net.chrislehmann.squeezedroid.model.Item;
+import net.chrislehmann.squeezedroid.service.ServiceConnectionManager;
 import net.chrislehmann.squeezedroid.service.SqueezeService;
 import net.chrislehmann.squeezedroid.view.NowPlayingInfoPanel;
 
@@ -37,7 +38,12 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
         listView = (ExpandableListView) findViewById(R.id.expandable_list);
 
         parentItem = getParentItem();
-        listView.setAdapter(new ArtistExpandableListAdapter(getService(), this, parentItem));
+        runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
+                listView.setAdapter(new ArtistExpandableListAdapter(service, context, parentItem));
+            }
+        });
+
         listView.setFastScrollEnabled(true);
         listView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -72,55 +78,55 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(final MenuItem item) {
         boolean handled = true;
         ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo) item.getMenuInfo();
-        int group = ExpandableListView.getPackedPositionGroup(menuInfo.packedPosition);
-        int child = ExpandableListView.getPackedPositionChild(menuInfo.packedPosition);
+        final int group = ExpandableListView.getPackedPositionGroup(menuInfo.packedPosition);
+        final int child = ExpandableListView.getPackedPositionChild(menuInfo.packedPosition);
 
-        SqueezeService service = getService();
-        if (service != null) {
+        runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+            public void runWithService(SqueezeService service) {
 
-            Item selectedItem = null;
-            if (child >= 0) {
-                selectedItem = (Item) listView.getExpandableListAdapter().getChild(group, child);
-            } else {
-                selectedItem = (Item) listView.getExpandableListAdapter().getGroup(group);
+
+                Item selectedItem = null;
+                if (child >= 0) {
+                    selectedItem = (Item) listView.getExpandableListAdapter().getChild(group, child);
+                } else {
+                    selectedItem = (Item) listView.getExpandableListAdapter().getGroup(group);
+                }
+
+                String message = null;
+                switch (item.getItemId()) {
+                    case R.id.contextMenuItem_itemlistEnqueue:
+                        service.addItem(getSelectedPlayer(), selectedItem);
+                        message = "Added to playlist.";
+                        break;
+                    case R.id.contextMenuItem_itemlistPlay:
+                        service.playItem(getSelectedPlayer(), selectedItem);
+                        message = "Now playing.";
+                        break;
+                    case R.id.contextMenuItem_itemlistPlayNext:
+                        service.playItemNext(getSelectedPlayer(), selectedItem);
+                        message = "Playing next.";
+                        break;
+                    case R.id.contextMenuItem_itemlistDownload:
+                        addDownloadsForItem(selectedItem);
+                        break;
+
+                }
+                if (message != null) {
+                    //I hate java...
+                    final String messageForClosure = message;
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
+        });
 
-            String message = null;
-            switch (item.getItemId()) {
-                case R.id.contextMenuItem_itemlistEnqueue:
-                    service.addItem(getSelectedPlayer(), selectedItem);
-                    message = "Added to playlist.";
-                    break;
-                case R.id.contextMenuItem_itemlistPlay:
-                    service.playItem(getSelectedPlayer(), selectedItem);
-                    message = "Now playing.";
-                    break;
-                case R.id.contextMenuItem_itemlistPlayNext:
-                    service.playItemNext(getSelectedPlayer(), selectedItem);
-                    message = "Playing next.";
-                    break;
-                case R.id.contextMenuItem_itemlistDownload:
-                    addDownloadsForItem(selectedItem);
-                    break;
-                default:
-                    handled = false;
-                    break;
-            }
-            if (message != null) {
-                //I hate java...
-                final String messageForClosure = message;
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, messageForClosure, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-        }
-        return handled;
+        return true;
     }
 
     @Override
@@ -133,17 +139,13 @@ public class BrowseArtistsActivity extends SqueezedroidActivitySupport {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean handled = true;
-        SqueezeService service = getService();
-        if (service != null) {
-
-            switch (item.getItemId()) {
-                case R.id.menuItem_itemlistDone:
-                    setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
-                    finish();
-                    break;
-                default:
-                    handled = false;
-            }
+        switch (item.getItemId()) {
+            case R.id.menuItem_itemlistDone:
+                setResult(SqueezeDroidConstants.ResultCodes.RESULT_DONE);
+                finish();
+                break;
+            default:
+                handled = false;
         }
         if (!handled) {
             handled = super.onOptionsItemSelected(item);

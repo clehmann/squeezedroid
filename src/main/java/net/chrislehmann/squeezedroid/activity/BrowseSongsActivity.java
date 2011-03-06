@@ -17,12 +17,10 @@ public class BrowseSongsActivity extends ItemListActivity {
    @Override
    public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
-     runWithService( new SqueezeServiceAwareThread()
-     {
-        public void runWithService(SqueezeService service)
-        {
-           getListView().setAdapter( new SongListAdapter( service, context, getParentItem()  ) );
-        }
+     runWithService(new SqueezeServiceAwareThread() {
+         public void runWithService(SqueezeService service) {
+             getListView().setAdapter(new SongListAdapter(service, context, getParentItem()));
+         }
      });
    }
 
