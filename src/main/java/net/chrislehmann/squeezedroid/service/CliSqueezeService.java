@@ -648,7 +648,7 @@ public class CliSqueezeService implements SqueezeService {
     }
 
     public Player getPlayer(String playerId) {
-        List<Player> players = getPlayers();
+        List<Player> players = getPlayers(true);
         return (Player) CollectionUtils.find(players, new PlayerIdEqualsPredicate(playerId));
     }
 

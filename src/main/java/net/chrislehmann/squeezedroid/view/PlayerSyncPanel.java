@@ -60,12 +60,13 @@ public class PlayerSyncPanel extends LinearLayout {
         for (String id : syncronizations.keySet()) {
             removeSyncronization(id);
         }
+        syncronizations.clear();
     }
 
     private void removeSyncronization(final String playerId) {
         parent.runWithService(new ServiceConnectionManager.SqueezeServiceAwareThread() {
+            final Syncronization sync = syncronizations.get(playerId);
             public void runWithService(SqueezeService service) {
-                final Syncronization sync = syncronizations.get(playerId);
                 service.unsubscribeAll(sync.syncHandler);
                 service.unsubscribeAll(sync.volumeHandler);
                 parent.runOnUiThread(new Runnable() {
@@ -101,32 +102,35 @@ public class PlayerSyncPanel extends LinearLayout {
     }
 
     private void addSynchronization(SqueezeService service, Player syncedPlayer, boolean isPrimary) {
+        if (!syncronizations.containsKey(syncedPlayer.getId())) {
 
-        PlayerStatus status = service.getPlayerStatus(syncedPlayer.getId());
+            PlayerStatus status = service.getPlayerStatus(syncedPlayer.getId());
 
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.player_sync_control_layout, null);
-        SeekBar volumeSeekBar = (SeekBar) view.findViewById(R.id.volume_seek_bar);
-        volumeSeekBar.setProgress(status.getVolume());
-        volumeSeekBar.setOnSeekBarChangeListener(new OnVolumeChangedListener(syncedPlayer.getId()));
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.player_sync_control_layout, null);
+            SeekBar volumeSeekBar = (SeekBar) view.findViewById(R.id.volume_seek_bar);
+            volumeSeekBar.setProgress(status.getVolume());
+            volumeSeekBar.setOnSeekBarChangeListener(new OnVolumeChangedListener(syncedPlayer.getId()));
 
-        ImageButton unsyncButton = (ImageButton) view.findViewById(R.id.unsync_button);
-        if (isPrimary) {
-            unsyncButton.setVisibility(view.INVISIBLE);
-        } else {
-            unsyncButton.setOnClickListener(new OnUnsyncButtonPressedListener(syncedPlayer));
+            ImageButton unsyncButton = (ImageButton) view.findViewById(R.id.unsync_button);
+            if (isPrimary) {
+                unsyncButton.setVisibility(view.INVISIBLE);
+            } else {
+                unsyncButton.setOnClickListener(new OnUnsyncButtonPressedListener(syncedPlayer));
+            }
+
+            PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler(volumeSeekBar);
+            service.subscribe(syncedPlayer.getId(), volumeHandler);
+
+            PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
+            syncronizations.put(syncedPlayer.getId(), new Syncronization(view, volumeHandler, syncHandler));
+            service.subscribe(syncedPlayer.getId(), syncHandler);
+
+            TextView playerNameLabel = (TextView) view.findViewById(R.id.player_name_text);
+            playerNameLabel.setText(syncedPlayer.getName());
+
+            this.addView(view);
         }
 
-        PlayerStatusHandler volumeHandler = new VolumeChangedStatusHandler(volumeSeekBar);
-        service.subscribe(syncedPlayer.getId(), volumeHandler);
-
-        PlayerStatusHandler syncHandler = new MainPlayerOnSyncHandler();
-        syncronizations.put(syncedPlayer.getId(), new Syncronization(view, volumeHandler, syncHandler));
-        service.subscribe(syncedPlayer.getId(), syncHandler);
-
-        TextView playerNameLabel = (TextView) view.findViewById(R.id.player_name_text);
-        playerNameLabel.setText(syncedPlayer.getName());
-
-        this.addView(view);
     }
 
     private class OnUnsyncButtonPressedListener implements OnClickListener {

@@ -116,6 +116,9 @@ public class MainActivity extends SqueezedroidActivitySupport {
         _shuffleButton.setOnClickListener(onShuffleButtonPressed);
         _repeatButton.setOnClickListener(onRepeatButtonPressed);
         _toggleSyncPanelButton.setOnClickListener(onToggleSyncPanelButtonPressed);
+
+        _volumePanel.addView(_syncPanel);
+
     }
 
     @Override
@@ -314,7 +317,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
                     } else {
                         service.unsynchronize(getSelectedPlayer());
                     }
-                    setSelectedPlayer(selectedPlayer);
+//                    setSelectedPlayer(selectedPlayer);
                     _syncPanel.setPlayer(selectedPlayer);
                 }
             });
@@ -345,10 +348,7 @@ public class MainActivity extends SqueezedroidActivitySupport {
                 final PlayerStatus status = service.getPlayerStatus(getSelectedPlayer());
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        _volumePanel.removeAllViews();
-//                        _syncPanel = new PlayerSyncPanel(context);
                         _syncPanel.setPlayer(getSelectedPlayer());
-                        _volumePanel.addView(_syncPanel);
 
                         service.unsubscribeAll(onPlayerStatusChanged);
                         service.subscribe(getSelectedPlayer(), onPlayerStatusChanged);
